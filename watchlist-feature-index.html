@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch List — Feature Index</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --panel:#161616;
+    --line:#2e2e2e;
+    --text:#f5f5f5;
+    --muted:#8a8a8a;
+    --accent:#e8241c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    line-height:1.5;
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:680px; margin:0 auto;}
+  header{margin-bottom:32px;}
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:700;
+  }
+  h1{
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    margin-top:4px;
+  }
+  .sub{color:var(--muted); font-size:14px; margin-top:6px;}
+  section{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 22px;
+    margin-bottom:16px;
+  }
+  section h2{
+    font-size:14px;
+    font-weight:700;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:12px;
+  }
+  ul{list-style:none;}
+  li{
+    position:relative;
+    padding-left:18px;
+    margin-bottom:10px;
+    font-size:14.5px;
+    color:var(--text);
+  }
+  li:last-child{margin-bottom:0;}
+  li::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:8px;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--accent);
+  }
+  li strong{color:#fff;}
+  code{
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:0.9em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    color:#f0c9c7;
+  }
+  section.warning{border-color:rgba(232,36,28,0.35);}
+  section.warning h2{color:#ff6b6b;}
+  section.reminders{border-color:rgba(255,255,255,0.15);}
+  section.reminders h2{color:var(--muted);}
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    margin-top:24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Reference</div>
+    <h1>Watch List — Feature Index</h1>
+    <div class="sub">A running summary of everything built into <code>watchlist.html</code> so far.</div>
+  </header>
+
+  <section>
+    <h2>Core list</h2>
+    <ul>
+      <li>Add titles with type, genre, platform, source, and where-seen tags</li>
+      <li>Tabs: All / To Watch / Watched / Deleted, with live counts and a sliding red pill indicator</li>
+      <li>Search (in the "⋮" menu) filters the current tab by title</li>
+      <li>Sort: Custom order / Newest added / A–Z / Platform (in the "⋮" menu)</li>
+      <li>Swipe left on an item → reveals bin, tap to confirm delete</li>
+      <li>Swipe right on an item → reveals pencil, tap to open the edit form</li>
+      <li>Deleted tab: swipe (either direction) → permanently deletes, no recovery</li>
+      <li>Undo toast after every delete</li>
+      <li>Duplicate title warning with "Add anyway" option</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Organizing</h2>
+    <ul>
+      <li>Drag handle (left dots) — tap and hold to reorder, with auto-scroll near screen edges</li>
+      <li>Long-press anywhere on an item → enters batch selection mode (bar at bottom: mark watched / delete / cancel)</li>
+      <li>Edge-swipe (from far left/right of screen) switches tabs, with a sliding page animation</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Movie/show lookup (TMDB)</h2>
+    <ul>
+      <li>Live autocomplete suggestions under the "Title you just saw..." field (3 visible, scrollable)</li>
+      <li>Tap a suggestion → fills title, type, poster, year</li>
+      <li>Auto-detects which streaming service it's on in Australia and fills the platform dropdown</li>
+      <li>Tap an item to expand: description, runtime/season count, dedicated <strong>"Watch Now"</strong> button (opens the native app if installed and it has a public URL scheme, else the web page/search)</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Fun extras</h2>
+    <ul>
+      <li>Shake the phone (5 genuine direction reversals, not just one jolt) → "Surprise me" vertical picker-wheel animation, lands on a random To Watch item</li>
+      <li>One-time popup after 1 minute in the app introducing the shake-to-pick feature, with a shaking popcorn icon</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Personalization</h2>
+    <ul>
+      <li>Splash screen: red "W" animation + sound, morphs into the pinned header</li>
+      <li>Red/white/black theme throughout</li>
+      <li>Landscape mode: list left, add-form right (form fixed, not independently scrollable)</li>
+      <li>Real app icon (red W on black) baked into the HTML — works properly with "Add to Home Screen"</li>
+      <li>Rating (👍/👎) and watched-date tracking, editable per item</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Data</h2>
+    <ul>
+      <li>Stored in <code>localStorage</code> — private to each device, not shared even if the link is shared</li>
+      <li>Export/Import as JSON backup (in the "⋮" menu)</li>
+    </ul>
+  </section>
+
+  <section class="warning">
+    <h2>Known limitations (platform, not fixable in code)</h2>
+    <ul>
+      <li>iOS Safari doesn't support the vibration/haptics API — none of the haptic calls in the code actually do anything on iPhone</li>
+      <li>Stan, Binge, Paramount+, Max, SBS On Demand have no public app URL scheme, so "Watch Now" opens those in the browser even if the app is installed</li>
+      <li>TMDB API key lives in plain text in the HTML file (fine for personal use, visible to anyone with the file)</li>
+    </ul>
+  </section>
+
+  <section class="reminders">
+    <h2>Setup reminders</h2>
+    <ul>
+      <li>TMDB API key is already filled in</li>
+      <li>Re-upload to tiiny.host after every change, and open a <strong>fresh tab</strong> (not cached) to see updates</li>
+    </ul>
+  </section>
+
+  <footer>Last updated alongside watchlist.html</footer>
+</div>
+</body>
+</html>
