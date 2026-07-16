@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Queue">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB+0lEQVR4nO2W3YoTMRTHf0knyVQLXcRF8UJhsShbF1GLvfZNfAqfwefwYezHgiJ4YfELFtSLXS3KSuejmfFi2pms205HEerF5CrJSXJ+538OhwggZYtDbtN5DVAD1AD/BYC3zvC43eLp7g6QdarOh0+cJkXPGt+4ynWVXf9mE/Y/fs5tbSmZ7F3L10+Opzz7/nOln7UKDGdhPhdAV+t8fcVr5M4BLjUke876jlFn3nruvFUZYBLFTG2Sr7vOo31fnzvfc/YOTDE/tpZ30fzPAVJgFBTkblQPfbMCwKw8O5hFa52XAgAMnctuVP2mySGXVdFrFnYXoEx+KClCgIFz+Zb28AQYIdhfOJhEMQ2goxW3taIlBXEKN9U/AngdRpwmKS0p0ELQUYpdT9JY2IezECUEHa2QwH1f88OmeCKzf7UJb6O4FKA0BRY4dOrgwKgz+R8FEeOgSFPPN7/lP9z42ShVALIoH13wAegancu/tDWFcAA0R3FR8ZvkrwhQRHjXqLwYj+I5X+YWgBObcLkheeBrdmQh6qACwMZW/CKMCNJMyH7TcFFmEQ8d6ZdpakvJvUU/mNqENxvyXwkgTlNeLpwJZ3/kRHfoqLQ8Mwg2578SAKyWcugU5zg4b6+S/78GOLEJ7532+iqMCdO09M66Iai/5TVADVADbHn8AsTbukGapl+JAAAAAElFTkSuQmCC">
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<title>Queue</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --panel:#161616;
+    --line:#2e2e2e;
+    --text:#f5f5f5;
+    --muted:#8a8a8a;
+    --accent:#e8241c;
+    --accent-dim:#4d1310;
+    --danger:#ff4d4d;
+  }
+  html{overflow-x:hidden; width:100%; height:100%;}
+  *{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  input, select{
+    -webkit-user-select:text;
+    user-select:text;
+    -webkit-touch-callout:default;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    height:calc(100% + 1px);
+    width:100%;
+    overflow-x:hidden;
+    position:relative;
+  }
+  #scrollArea{
+    height:100%;
+    overflow-y:auto;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:520px; margin:0 auto; padding:20px 16px 80px; opacity:0; transition:opacity 0.7s ease;}
+
+  header{margin-bottom:22px;}
+  .brand-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    opacity:0;
+    position:relative;
+    position:sticky;
+    top:0;
+    z-index:200;
+    width:100%;
+    background:rgba(10,10,10,0.55);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    margin-bottom:22px;
+    padding:calc(16px + env(safe-area-inset-top, 0px)) 12px 14px 16px;
+    box-shadow:0 10px 20px -14px rgba(0,0,0,0);
+    transition:box-shadow 0.25s ease, background 0.25s ease;
+  }
+  .brand-header.scrolled{
+    background:var(--bg);
+    box-shadow:0 10px 20px -14px rgba(0,0,0,0.65);
+  }
+  .brand-mark{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .brand-w{
+    font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
+    font-size:34px;
+    line-height:1;
+    color:var(--accent);
+  }
+  .brand-title{
+    font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
+    font-size:15px;
+    line-height:1;
+    color:#ffffff;
+    letter-spacing:0.28em;
+    padding-left:0.1em;
+  }
+  .menu-btn{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:22px;
+    line-height:1;
+    padding:8px 10px;
+    cursor:pointer;
+    touch-action:manipulation;
+    flex-shrink:0;
+  }
+  .menu-btn:active{color:var(--accent);}
+  .dropdown-menu{
+    position:absolute;
+    top:100%;
+    right:8px;
+    margin-top:6px;
+    min-width:190px;
+    background:#1b1b1b;
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 14px 34px rgba(0,0,0,0.55);
+    padding:6px;
+    opacity:0;
+    transform:translateY(-6px) scale(0.97);
+    pointer-events:none;
+    transition:opacity 0.16s ease, transform 0.16s ease;
+    z-index:300;
+  }
+  .dropdown-menu.open{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
+  }
+  .menu-item{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    color:var(--text);
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .menu-item:active{background:rgba(255,255,255,0.06);}
+  .menu-item.sort-item{
+    color:var(--muted);
+    padding-left:24px;
+    position:relative;
+  }
+  .menu-item.sort-item.active{
+    color:var(--accent);
+    font-weight:700;
+  }
+  .menu-item.sort-item.active::before{
+    content:"✓";
+    position:absolute;
+    left:9px;
+  }
+  .menu-label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--muted);
+    padding:8px 12px 2px;
+  }
+  .menu-divider{
+    height:1px;
+    background:var(--line);
+    margin:4px 4px;
+  }
+
+  .main-content{
+    display:flex;
+    flex-direction:column;
+  }
+  .list-panel{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    order:2;
+  }
+
+  .add-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:22px;
+    order:1;
+  }
+  .add-row{display:flex; gap:8px;}
+  .title-input-wrap{
+    position:relative;
+    flex:1;
+    min-width:0;
+  }
+  .title-input-wrap input[type=text]{
+    width:100%;
+  }
+  .title-suggestions{
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    margin-top:6px;
+    background:#1b1b1b;
+    border:1px solid var(--line);
+    border-radius:12px;
+    max-height:198px;
+    overflow-y:auto;
+    z-index:150;
+    display:none;
+    box-shadow:0 14px 34px rgba(0,0,0,0.5);
+  }
+  .title-suggestions.open{display:block;}
+  .suggestion-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    height:66px;
+    box-sizing:border-box;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .suggestion-row:last-child{border-bottom:none;}
+  .suggestion-row:active{background:rgba(255,255,255,0.06);}
+  .suggestion-row img{
+    width:36px;
+    height:50px;
+    object-fit:cover;
+    border-radius:5px;
+    flex-shrink:0;
+    background:#0e0c0a;
+    border:1px solid var(--line);
+  }
+  .suggestion-row .suggestion-fallback{
+    width:36px;
+    height:50px;
+    border-radius:5px;
+    flex-shrink:0;
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    font-size:9px;
+    text-align:center;
+  }
+  .suggestion-row .suggestion-text{
+    min-width:0;
+    flex:1;
+  }
+  .suggestion-row .suggestion-title{
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .suggestion-row .suggestion-meta{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .suggestion-status{
+    padding:12px;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+  }
+  input[type=text]{
+    flex:1;
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    border-radius:9px;
+    color:var(--text);
+    padding:12px 12px;
+    font-size:15px;
+    outline:none;
+  }
+  input[type=text]:focus{border-color:var(--accent);}
+  input[type=text]::placeholder{color:#5a544a;}
+
+  .meta-row{display:flex; gap:8px; margin-top:8px;}
+  select{
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    border-radius:9px;
+    color:var(--muted);
+    padding:8px 10px;
+    font-size:13px;
+    outline:none;
+    flex:1;
+  }
+  button.add-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:9px;
+    padding:0 18px;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  button.add-btn:active{transform:scale(0.97);}
+
+  .filters{
+    position:relative;
+    display:flex;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .tab-pill{
+    position:absolute;
+    top:0;
+    left:0;
+    height:100%;
+    background:var(--accent);
+    border-radius:20px;
+    transition:transform 0.32s cubic-bezier(.34,1.4,.4,1), width 0.32s cubic-bezier(.34,1.4,.4,1);
+    z-index:0;
+    pointer-events:none;
+  }
+  .filter-btn{
+    position:relative;
+    z-index:1;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    cursor:pointer;
+    transition:color 0.2s ease, border-color 0.2s ease;
+  }
+  .filter-btn.active{
+    border-color:transparent;
+    color:#ffffff;
+    font-weight:700;
+  }
+
+  .swipe-wrapper{
+    position:relative;
+    border-radius:12px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .swipe-bg{
+    position:absolute;
+    inset:0;
+    background:transparent;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    transition:background 0.15s ease;
+  }
+  .swipe-wrapper.reveal-left .swipe-bg,
+  .swipe-wrapper.reveal-right .swipe-bg{
+    background:var(--danger);
+  }
+  .swipe-wrapper.editable.reveal-right .swipe-bg{
+    background:#f0f0f0;
+  }
+  .swipe-bg .bin{
+    display:flex;
+    color:#ffffff;
+    opacity:0;
+    transform:scale(0.7);
+    pointer-events:none;
+    transition:opacity 0.15s ease, transform 0.15s ease;
+  }
+  .swipe-wrapper.editable .bin.bin-left{
+    color:#161616;
+  }
+  .swipe-bg .bin svg{
+    width:22px;
+    height:22px;
+  }
+  .bin-tap, .edit-tap{
+    cursor:pointer;
+    touch-action:manipulation;
+    padding:14px;
+    margin:-14px;
+  }
+  .swipe-wrapper.reveal-left .bin.bin-right{opacity:1; transform:scale(1); pointer-events:auto;}
+  .swipe-wrapper.reveal-right .bin.bin-left{opacity:1; transform:scale(1); pointer-events:auto;}
+
+  #list.no-drag .drag-handle{
+    display:none;
+  }
+  .drag-handle{
+    display:grid;
+    grid-template-columns:repeat(2, 4px);
+    grid-auto-rows:4px;
+    gap:3px;
+    align-items:center;
+    justify-content:center;
+    padding:6px 8px;
+    margin:-6px 0 -6px -4px;
+    touch-action:none;
+    flex-shrink:0;
+  }
+  .drag-handle span{
+    width:4px; height:4px;
+    border-radius:50%;
+    background:var(--muted);
+    display:block;
+  }
+  .swipe-wrapper.dragging{
+    z-index:100;
+    box-shadow:0 12px 28px -8px rgba(0,0,0,0.6);
+  }
+  .swipe-wrapper.dragging .item{
+    border-color:var(--accent);
+  }
+  .swipe-wrapper.shift-down{ transform:translateY(var(--shift-h)); transition:transform 0.18s ease; }
+  .swipe-wrapper.shift-up{ transform:translateY(calc(-1 * var(--shift-h))); transition:transform 0.18s ease; }
+
+  .item{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    touch-action:pan-y;
+    will-change:transform;
+  }
+  .item.watched{opacity:0.45;}
+  .check{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:2px solid var(--muted);
+    flex-shrink:0;
+    margin-top:2px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px;
+    color:transparent;
+  }
+  .item.watched .check{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .item-body{flex:1; min-width:0;}
+  .item-title{
+    font-size:16px;
+    font-weight:600;
+    word-break:break-word;
+  }
+  .item-year{
+    font-weight:400;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .item.watched .item-title{text-decoration:line-through;}
+  .item-tags{
+    display:flex;
+    gap:6px;
+    margin-top:6px;
+    flex-wrap:wrap;
+  }
+  .tag{
+    font-size:11px;
+    color:var(--muted);
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    padding:2px 8px;
+    border-radius:20px;
+  }
+  .platform-tag{
+    font-weight:700;
+    border:none;
+  }
+  .platform-link{
+    text-decoration:none;
+    display:inline-block;
+    touch-action:manipulation;
+  }
+  .del{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:18px;
+    cursor:pointer;
+    padding:2px 6px;
+    flex-shrink:0;
+  }
+  .del:active{color:var(--danger);}
+
+  .item-actions{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    flex-shrink:0;
+  }
+
+  .item.deleted{opacity:0.5;}
+  .restore-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .forever-btn{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .forever-btn:active{color:var(--danger); border-color:var(--danger);}
+
+  .edit-form{margin-bottom:10px;}
+  .edit-form input[type=text], .edit-form select{
+    width:100%;
+    margin-bottom:6px;
+  }
+  .edit-form select{width:auto; flex:1;}
+  .edit-form .meta-row{display:flex; gap:6px; margin-top:0; margin-bottom:6px;}
+  .edit-actions{display:flex; gap:8px; margin-top:8px;}
+  .save-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .cancel-btn{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:8px;
+    padding:8px 14px;
+    font-size:13px;
+    cursor:pointer;
+  }
+
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    padding:50px 20px;
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  .swipe-hint{
+    text-align:center;
+    color:var(--muted);
+    font-size:11px;
+    margin-bottom:10px;
+  }
+
+  .loading{text-align:center; color:var(--muted); padding:40px; font-size:13px;}
+
+  #splash{
+    position:fixed;
+    inset:0;
+    background:#000;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+    transition:opacity 0.5s ease;
+  }
+  #splash.fade-out{opacity:0; pointer-events:none;}
+  @keyframes wIntro{
+    0%{ transform:scale(0.3) rotateX(80deg); opacity:0; text-shadow:0 0 0 rgba(232,36,28,0); }
+    45%{ transform:scale(1.18) rotateX(0deg); opacity:1; text-shadow:0 0 70px rgba(232,36,28,0.9); }
+    65%{ transform:scale(0.94) rotateX(0deg); text-shadow:0 0 50px rgba(232,36,28,0.6); }
+    100%{ transform:scale(1) rotateX(0deg); text-shadow:0 0 40px rgba(232,36,28,0.45); }
+  }
+  @keyframes titleFadeIn{
+    0%{ opacity:0; transform:translateY(6px); letter-spacing:0.1em; }
+    100%{ opacity:1; transform:translateY(0); letter-spacing:0.35em; }
+  }
+  .splash-brand{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .splash-w{
+    font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
+    font-size:min(38vw, 190px);
+    line-height:1;
+    color:var(--accent);
+    perspective:600px;
+    transform-style:preserve-3d;
+    animation:wIntro 1.3s cubic-bezier(.25,.8,.3,1) both;
+  }
+  .splash-title{
+    font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
+    font-size:22px;
+    color:#ffffff;
+    margin-top:6px;
+    padding-left:0.35em;
+    opacity:0;
+    animation:titleFadeIn 0.7s ease 1.1s both;
+  }
+  .splash-footer{
+    position:absolute;
+    bottom:28px;
+    color:var(--muted);
+    font-size:11px;
+    letter-spacing:0.05em;
+  }
+
+  /* Landscape phone: list on the left, add-item form pinned on the right */
+  @media (orientation:landscape) and (max-height:520px){
+    .wrap{max-width:900px;}
+    .main-content{
+      flex-direction:row;
+      align-items:flex-start;
+      gap:18px;
+    }
+    .list-panel{
+      order:2;
+      flex:1;
+      min-width:0;
+    }
+    .add-box{
+      order:1;
+      flex:0 0 240px;
+      margin-bottom:0;
+      position:sticky;
+      top:76px;
+      padding:10px;
+    }
+    .add-box .add-row{gap:6px;}
+    .add-box .meta-row{margin-top:6px; gap:6px;}
+    .add-box input[type=text],
+    .add-box select{
+      padding:8px 8px;
+      font-size:13px;
+    }
+    .add-box button.add-btn{
+      padding:0 12px;
+      font-size:13px;
+    }
+    .swipe-hint{display:none;}
+  }
+
+  /* --- Toast --- */
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#1b1b1b;
+    border:1px solid var(--line);
+    color:#fff;
+    padding:11px 14px 11px 16px;
+    border-radius:10px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+    z-index:500;
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    max-width:calc(100vw - 32px);
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+    pointer-events:auto;
+  }
+  .toast button{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    white-space:nowrap;
+    touch-action:manipulation;
+  }
+
+  /* --- Search (collapsible, opened from the header menu) --- */
+  .search-row{
+    margin-bottom:12px;
+    display:none;
+  }
+  .search-row.open{display:block;}
+  .search-row input[type=text]{
+    width:100%;
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    border-radius:9px;
+    color:var(--text);
+    padding:10px 12px;
+    font-size:14px;
+    outline:none;
+  }
+  .search-row input[type=text]:focus{border-color:var(--accent);}
+  .search-row input[type=text]::placeholder{color:#5a544a;}
+
+  .add-more-wrap{
+    position:relative;
+    flex-shrink:0;
+  }
+  .add-more-btn{
+    background:none;
+    border:1px solid var(--line);
+    border-radius:9px;
+    color:var(--muted);
+    font-size:16px;
+    padding:0 12px;
+    height:100%;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .add-more-btn:active{border-color:var(--accent);}
+  .add-more-menu{
+    position:absolute;
+    top:100%;
+    right:0;
+    margin-top:6px;
+    min-width:190px;
+    background:#1b1b1b;
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 14px 34px rgba(0,0,0,0.55);
+    padding:6px;
+    opacity:0;
+    transform:translateY(-6px) scale(0.97);
+    pointer-events:none;
+    transition:opacity 0.16s ease, transform 0.16s ease;
+    z-index:120;
+  }
+  .add-more-menu.open{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
+  }
+
+  /* --- Modal (Surprise me / Stats) --- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.2s ease;
+  }
+  .modal-overlay.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .modal-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:22px;
+    max-width:340px;
+    width:100%;
+    max-height:80vh;
+    overflow-y:auto;
+    transform:scale(0.92);
+    transition:transform 0.2s ease;
+  }
+  .modal-overlay.open .modal-box{transform:scale(1);}
+  .modal-title{
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .modal-pick-title{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:10px;
+    line-height:1.25;
+  }
+
+  /* --- Vertical picker wheel (minimal) --- */
+  .wheel-viewport{
+    position:relative;
+    height:200px;
+    overflow:hidden;
+    margin:8px 0 16px;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 34%, black 66%, transparent 100%);
+    mask-image:linear-gradient(to bottom, transparent 0%, black 34%, black 66%, transparent 100%);
+  }
+  .wheel-highlight{
+    position:absolute;
+    top:80px;
+    left:8px;
+    right:8px;
+    height:40px;
+    border-top:1px solid rgba(232,36,28,0.35);
+    border-bottom:1px solid rgba(232,36,28,0.35);
+    pointer-events:none;
+    z-index:2;
+  }
+  .wheel-track{
+    transform:translateY(0);
+  }
+  .wheel-row{
+    height:40px;
+    line-height:40px;
+    text-align:center;
+    font-size:15px;
+    font-weight:400;
+    letter-spacing:0.01em;
+    color:var(--muted);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    padding:0 28px;
+    opacity:0.55;
+    transition:opacity 0.2s ease;
+  }
+  .wheel-row.wheel-landed{
+    color:var(--text);
+    font-weight:600;
+    font-size:17px;
+    opacity:1;
+    animation:wheelSettle 0.3s ease;
+  }
+  @keyframes wheelSettle{
+    0%{ opacity:0.4; transform:scale(0.96); }
+    100%{ opacity:1; transform:scale(1); }
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .modal-btn{
+    flex:1;
+    padding:11px;
+    border-radius:9px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+    border:1px solid var(--line);
+    background:none;
+    color:var(--text);
+  }
+  .modal-btn.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .stats-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+  }
+  .stats-row:last-of-type{border-bottom:none;}
+  .stats-row .stats-label{color:var(--muted);}
+  .stats-row .stats-value{font-weight:700;}
+
+  .item-poster{
+    width:36px;
+    height:54px;
+    object-fit:cover;
+    border-radius:6px;
+    flex-shrink:0;
+    border:1px solid var(--line);
+  }
+
+  /* --- Batch select mode --- */
+  .item.select-mode .drag-handle{display:none;}
+  .select-check{
+    display:none;
+    width:22px;
+    height:22px;
+    border-radius:6px;
+    border:2px solid var(--muted);
+    flex-shrink:0;
+    margin-top:2px;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    color:transparent;
+  }
+  .item.select-mode .select-check{display:flex;}
+  .item.select-mode .check{display:none;}
+  .item.select-mode .drag-handle{display:none;}
+  .item .select-check.checked{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .selection-bar{
+    position:fixed;
+    left:16px;
+    right:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+    background:#1b1b1b;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    box-shadow:0 14px 34px rgba(0,0,0,0.55);
+    z-index:400;
+    transform:translateY(calc(100% + 40px));
+    transition:transform 0.25s ease;
+  }
+  .selection-bar.open{transform:translateY(0);}
+  .selection-bar span{font-size:13px; color:var(--muted); white-space:nowrap;}
+  .selection-actions{display:flex; gap:8px;}
+  .selection-actions button{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:8px 12px;
+    border-radius:8px;
+    font-size:12px;
+    cursor:pointer;
+    touch-action:manipulation;
+    white-space:nowrap;
+  }
+  .selection-actions button.danger-action{
+    color:var(--danger);
+    border-color:var(--danger);
+  }
+
+  /* --- Rating (thumbs) --- */
+  .rating-tag{
+    font-size:13px;
+  }
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="splash-brand" id="splashBrand">
+    <div class="splash-w">W</div>
+    <div class="splash-title">WATCH LIST</div>
+  </div>
+  <div class="splash-footer">Created by Rahul Kapadia</div>
+</div>
+<div id="scrollArea">
+<header class="brand-header" id="brandHeader">
+  <div class="brand-mark">
+    <span class="brand-w" id="headerW">W</span>
+    <span class="brand-title" id="headerTitle">WATCH LIST</span>
+  </div>
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">⋮</button>
+  <div class="dropdown-menu" id="dropdownMenu">
+    <button class="menu-item" id="searchMenuItem">Search</button>
+    <div class="menu-divider"></div>
+    <div class="menu-label">Sort by</div>
+    <button class="menu-item sort-item active" data-sort="manual">Custom order</button>
+    <button class="menu-item sort-item" data-sort="newest">Newest added</button>
+    <button class="menu-item sort-item" data-sort="alpha">A–Z</button>
+    <button class="menu-item sort-item" data-sort="platform">Platform</button>
+    <div class="menu-divider"></div>
+    <button class="menu-item" id="statsMenuItem">Stats</button>
+    <button class="menu-item" id="shareListMenuItem">Share list</button>
+    <div class="menu-divider"></div>
+    <button class="menu-item" id="exportMenuItem">Export</button>
+    <button class="menu-item" id="importMenuItem">Import</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none;">
+  </div>
+</header>
+<div class="wrap">
+  <div class="main-content">
+    <div class="add-box">
+      <div class="add-row">
+        <div class="title-input-wrap">
+          <input type="text" id="titleInput" placeholder="Title you just saw..." autocomplete="off">
+          <div class="title-suggestions" id="titleSuggestions"></div>
+        </div>
+        <div class="add-more-wrap">
+          <button class="add-more-btn" id="addMoreBtn" aria-label="More options">⋯</button>
+          <div class="add-more-menu" id="addMoreMenu">
+            <button class="menu-item" id="pasteMenuItem">Paste from clipboard</button>
+          </div>
+        </div>
+        <button class="add-btn" id="addBtn">Add</button>
+      </div>
+      <div class="meta-row">
+        <select id="sourceInput">
+          <option value="">Where seen?</option>
+          <option value="Instagram">Instagram</option>
+          <option value="TikTok">TikTok</option>
+          <option value="YouTube">YouTube</option>
+          <option value="Reddit">Reddit</option>
+          <option value="Friend">Friend</option>
+          <option value="Other">Other</option>
+        </select>
+        <select id="typeInput">
+          <option value="">Type?</option>
+          <option value="Movie">Movie</option>
+          <option value="Show">TV Show</option>
+          <option value="Doc">Documentary</option>
+        </select>
+      </div>
+      <div class="meta-row">
+        <select id="platformInput">
+          <option value="">Where to watch?</option>
+          <option value="Netflix">Netflix</option>
+          <option value="Prime Video">Prime Video</option>
+          <option value="Disney+">Disney+</option>
+          <option value="Binge">Binge</option>
+          <option value="Stan">Stan</option>
+          <option value="Apple TV+">Apple TV+</option>
+          <option value="Paramount+">Paramount+</option>
+          <option value="Max">Max</option>
+          <option value="SBS On Demand">SBS On Demand</option>
+          <option value="YouTube">YouTube</option>
+          <option value="Cinema">Cinema</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="meta-row">
+        <select id="genreInput">
+          <option value="">Genre?</option>
+          <option value="Action">Action</option>
+          <option value="Comedy">Comedy</option>
+          <option value="Drama">Drama</option>
+          <option value="Horror">Horror</option>
+          <option value="Thriller">Thriller</option>
+          <option value="Sci-Fi">Sci-Fi</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="Romance">Romance</option>
+          <option value="Crime">Crime</option>
+          <option value="Animation">Animation</option>
+          <option value="Documentary">Documentary</option>
+          <option value="True Crime">True Crime</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="list-panel">
+      <div class="search-row" id="searchRow">
+        <input type="text" id="searchInput" placeholder="Search your list..." autocomplete="off">
+      </div>
+
+      <div class="filters" id="filtersBar">
+        <div class="tab-pill" id="tabPill"></div>
+        <button class="filter-btn active" data-filter="all" data-label="All">All</button>
+        <button class="filter-btn" data-filter="pending" data-label="To watch">To watch</button>
+        <button class="filter-btn" data-filter="watched" data-label="Watched">Watched</button>
+        <button class="filter-btn" data-filter="deleted" data-label="Deleted">Deleted</button>
+      </div>
+
+      <div class="swipe-hint" id="swipeHint">Swipe an item left or right to delete it</div>
+      <div id="list"></div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<div class="selection-bar" id="selectionBar">
+  <span id="selectionCount">0 selected</span>
+  <div class="selection-actions">
+    <button id="selectMarkWatchedBtn">Mark watched</button>
+    <button id="selectDeleteBtn" class="danger-action">Delete</button>
+    <button id="selectCancelBtn">Cancel</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ============================================================
+// Poster search (TMDB) — to enable, get a free API key at
+// https://www.themoviedb.org/settings/api and paste it below.
+// Without a key, "Find poster" will show a message instead of results.
+// ============================================================
+const TMDB_API_KEY = '9bf48a005959ad4e4c5aba043f5c1099';
+const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/w200';
+const WATCH_REGION = 'AU';
+// TMDB/JustWatch provider names don't always exactly match our platform
+// list — normalize the common ones so the dropdown auto-fills correctly.
+const PROVIDER_NAME_MAP = {
+  'Netflix': 'Netflix',
+  'Amazon Prime Video': 'Prime Video',
+  'Prime Video': 'Prime Video',
+  'Disney Plus': 'Disney+',
+  'Disney+': 'Disney+',
+  'Stan': 'Stan',
+  'Binge': 'Binge',
+  'Apple TV Plus': 'Apple TV+',
+  'Apple TV+': 'Apple TV+',
+  'Paramount Plus': 'Paramount+',
+  'Paramount+': 'Paramount+',
+  'Max': 'Max',
+  'HBO Max': 'Max',
+  'SBS On Demand': 'SBS On Demand',
+  'YouTube': 'YouTube'
+};
+// Fallback search links, used when we don't have an exact per-title link
+const PLATFORM_URLS = {
+  'Netflix': 'https://www.netflix.com/search?q=',
+  'Prime Video': 'https://www.amazon.com.au/s?k=',
+  'Disney+': 'https://www.disneyplus.com/search?q=',
+  'Binge': 'https://binge.com.au/search?q=',
+  'Stan': 'https://www.stan.com.au/search?q=',
+  'Apple TV+': 'https://tv.apple.com/search?term=',
+  'Paramount+': 'https://www.paramountplus.com/search/?q=',
+  'Max': 'https://www.max.com/search?q=',
+  'SBS On Demand': 'https://www.sbs.com.au/ondemand/search?query=',
+  'YouTube': 'https://www.youtube.com/results?search_query='
+};
+// iOS custom URL schemes for opening the native app instead of Safari.
+// Only services with a documented, stable public scheme are listed —
+// Stan, Binge, Paramount+, Max and SBS don't publish one, so those
+// still open in the browser (there's no reliable way around that).
+const APP_SCHEMES = {
+  'Netflix': 'nflx://',
+  'YouTube': 'youtube://',
+  'Disney+': 'disneyplus://',
+  'Prime Video': 'aiv://',
+  'Apple TV+': 'videos://'
+};
+
+const PLATFORM_STYLES = {
+  'Netflix':        { bg:'#E50914', fg:'#ffffff' },
+  'Prime Video':    { bg:'#00A8E1', fg:'#0d1a2b' },
+  'Disney+':        { bg:'#113CCF', fg:'#ffffff' },
+  'Binge':          { bg:'#FFDE00', fg:'#1a1a1a' },
+  'Stan':           { bg:'#2148FF', fg:'#ffffff' },
+  'Apple TV+':      { bg:'#000000', fg:'#ffffff', border:'#3d3d3d' },
+  'Paramount+':     { bg:'#0064FF', fg:'#ffffff' },
+  'Max':            { bg:'#002BE7', fg:'#ffffff' },
+  'SBS On Demand':  { bg:'#FF5C00', fg:'#ffffff' },
+  'YouTube':        { bg:'#FF0000', fg:'#ffffff' },
+  'Cinema':         { bg:'#3a3a3a', fg:'#f5f5f5' },
+  'Other':          { bg:'#3a3a3a', fg:'#f5f5f5' }
+};
+
+function platformBadge(platform, watchLink, titleForSearch){
+  if(!platform) return '';
+  const s = PLATFORM_STYLES[platform] || PLATFORM_STYLES['Other'];
+  const border = s.border ? `border:1px solid ${s.border};` : '';
+
+  let url = watchLink;
+  if(!url && titleForSearch && PLATFORM_URLS[platform]){
+    url = PLATFORM_URLS[platform] + encodeURIComponent(titleForSearch);
+  }
+  if(!url) return `<span class="tag platform-tag" style="background:${s.bg};color:${s.fg};${border}">${escapeHtml(platform)}</span>`;
+
+  const scheme = APP_SCHEMES[platform] || '';
+  return `<span class="tag platform-tag platform-link" data-app-scheme="${escapeHtml(scheme)}" data-web-url="${escapeHtml(url)}" style="background:${s.bg};color:${s.fg};${border}">${escapeHtml(platform)}</span>`;
+}
+
+const list = document.getElementById('list');
+const titleInput = document.getElementById('titleInput');
+const sourceInput = document.getElementById('sourceInput');
+const typeInput = document.getElementById('typeInput');
+const platformInput = document.getElementById('platformInput');
+const genreInput = document.getElementById('genreInput');
+const addBtn = document.getElementById('addBtn');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const searchInput = document.getElementById('searchInput');
+const searchRow = document.getElementById('searchRow');
+const menuBtn = document.getElementById('menuBtn');
+const dropdownMenu = document.getElementById('dropdownMenu');
+
+const BIN_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
+const EDIT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>`;
+
+const SOURCES = ['Instagram','TikTok','YouTube','Reddit','Friend','Other'];
+const TYPES = ['Movie','Show','Doc'];
+const PLATFORMS = ['Netflix','Prime Video','Disney+','Binge','Stan','Apple TV+','Paramount+','Max','SBS On Demand','YouTube','Cinema','Other'];
+const GENRES = ['Action','Comedy','Drama','Horror','Thriller','Sci-Fi','Fantasy','Romance','Crime','Animation','Documentary','True Crime'];
+
+let items = [];
+let currentFilter = 'all';
+let editingId = null;
+let searchQuery = '';
+let currentSort = 'manual';
+let selectionMode = false;
+let pendingPoster = null;
+let pendingYear = null;
+let pendingWatchLink = null;
+let selectedIds = new Set();
+const STORE_KEY = 'queue-items';
+
+// --- Toast ---
+let toastTimeout = null;
+function showToast(message, actionLabel, actionFn, duration){
+  const toast = document.getElementById('toast');
+  if(!toast) return;
+  toast.innerHTML = `<span>${escapeHtml(message)}</span>` +
+    (actionLabel ? `<button id="toastAction">${escapeHtml(actionLabel)}</button>` : '');
+  toast.classList.add('show');
+  if(toastTimeout) clearTimeout(toastTimeout);
+  if(actionLabel && actionFn){
+    document.getElementById('toastAction').onclick = () => {
+      actionFn();
+      hideToast();
+    };
+  }
+  toastTimeout = setTimeout(hideToast, duration || 4000);
+}
+function hideToast(){
+  const toast = document.getElementById('toast');
+  if(toast) toast.classList.remove('show');
+}
+
+async function loadItems(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    items = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    items = [];
+  }
+  render();
+}
+
+function saveItems(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify(items));
+  }catch(e){
+    console.error('Save failed', e);
+  }
+}
+
+function addItemForce(title){
+  items.unshift({
+    id: Date.now().toString(),
+    title,
+    source: sourceInput.value,
+    type: typeInput.value,
+    platform: platformInput.value,
+    genre: genreInput.value,
+    poster: pendingPoster || null,
+    year: pendingYear || null,
+    watchLink: pendingWatchLink || null,
+    watched: false,
+    deleted: false,
+    addedAt: new Date().toISOString()
+  });
+  titleInput.value = '';
+  sourceInput.value = '';
+  typeInput.value = '';
+  platformInput.value = '';
+  genreInput.value = '';
+  pendingPoster = null;
+  pendingYear = null;
+  pendingWatchLink = null;
+  if(navigator.vibrate) navigator.vibrate(10);
+  saveItems();
+  render();
+  titleInput.focus();
+}
+
+function addItem(){
+  const title = titleInput.value.trim();
+  if(!title) return;
+  const normalized = title.toLowerCase();
+  const dup = items.find(it => !it.deleted && it.title.trim().toLowerCase() === normalized);
+  if(dup){
+    showToast('Already on your list', 'Add anyway', () => addItemForce(title));
+    return;
+  }
+  addItemForce(title);
+}
+
+function toggleWatched(id){
+  const it = items.find(i => i.id === id);
+  if(it){
+    it.watched = !it.watched;
+    it.watchedAt = it.watched ? new Date().toISOString() : null;
+  }
+  if(navigator.vibrate) navigator.vibrate(10);
+  saveItems();
+  render();
+}
+
+function setRating(id, rating){
+  const it = items.find(i => i.id === id);
+  if(it) it.rating = it.rating === rating ? null : rating;
+  saveItems();
+  render();
+}
+
+function deleteItem(id){
+  const it = items.find(i => i.id === id);
+  if(it) it.deleted = true;
+  saveItems();
+  render();
+  showToast('Removed from list', 'Undo', () => restoreItem(id));
+}
+
+function restoreItem(id){
+  const it = items.find(i => i.id === id);
+  if(it) it.deleted = false;
+  if(navigator.vibrate) navigator.vibrate(10);
+  saveItems();
+  render();
+}
+
+function permanentDelete(id){
+  items = items.filter(i => i.id !== id);
+  if(navigator.vibrate) navigator.vibrate(20);
+  saveItems();
+  render();
+}
+
+function editItem(id){
+  editingId = id;
+  render();
+}
+
+function cancelEdit(){
+  editingId = null;
+  render();
+}
+
+function saveEdit(id){
+  const it = items.find(i => i.id === id);
+  if(!it) return;
+  const title = document.getElementById(`edit-title-${id}`).value.trim();
+  if(!title) return;
+  it.title = title;
+  it.source = document.getElementById(`edit-source-${id}`).value;
+  it.type = document.getElementById(`edit-type-${id}`).value;
+  it.platform = document.getElementById(`edit-platform-${id}`).value;
+  it.genre = document.getElementById(`edit-genre-${id}`).value;
+  editingId = null;
+  if(navigator.vibrate) navigator.vibrate(10);
+  saveItems();
+  render();
+}
+
+function buildOptions(options, selected, placeholder){
+  let html = `<option value="">${placeholder}</option>`;
+  options.forEach(o => {
+    html += `<option value="${o}" ${o === selected ? 'selected' : ''}>${o}</option>`;
+  });
+  return html;
+}
+
+function render(){
+  openWrapper = null;
+
+  // Tab count badges
+  const allCount = items.filter(i => !i.deleted).length;
+  const pendingCount = items.filter(i => !i.deleted && !i.watched).length;
+  const watchedCount = items.filter(i => !i.deleted && i.watched).length;
+  const deletedCount = items.filter(i => i.deleted).length;
+  const counts = { all: allCount, pending: pendingCount, watched: watchedCount, deleted: deletedCount };
+  filterBtns.forEach(btn => {
+    const label = btn.dataset.label || btn.textContent;
+    btn.textContent = `${label} (${counts[btn.dataset.filter]})`;
+  });
+  updateTabPill();
+
+  const hint = document.getElementById('swipeHint');
+  if(hint){
+    hint.textContent = currentFilter === 'deleted'
+      ? 'Swipe, then tap the bin to delete forever'
+      : 'Swipe left to delete, swipe right to edit';
+  }
+  let filtered = items.filter(i => !i.deleted);
+  if(currentFilter === 'pending') filtered = filtered.filter(i => !i.watched);
+  if(currentFilter === 'watched') filtered = filtered.filter(i => i.watched);
+  if(currentFilter === 'deleted') filtered = items.filter(i => i.deleted);
+
+  if(searchQuery.trim()){
+    const q = searchQuery.trim().toLowerCase();
+    filtered = filtered.filter(it => it.title.toLowerCase().includes(q));
+  }
+
+  if(currentFilter !== 'deleted'){
+    if(currentSort === 'newest'){
+      filtered = filtered.slice().sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+    } else if(currentSort === 'alpha'){
+      filtered = filtered.slice().sort((a, b) => a.title.localeCompare(b.title));
+    } else if(currentSort === 'platform'){
+      filtered = filtered.slice().sort((a, b) => (a.platform || '').localeCompare(b.platform || ''));
+    }
+  }
+  list.classList.toggle('no-drag', currentSort !== 'manual' || !!searchQuery.trim());
+
+  if(filtered.length === 0){
+    let msg = 'Nothing here yet.<br>Add the next thing you see scrolling.';
+    if(searchQuery.trim()) msg = 'No matches for that search.';
+    else if(currentFilter === 'pending') msg = 'Queue is clear.<br>Nothing left to watch.';
+    else if(currentFilter === 'watched') msg = 'Nothing marked watched yet.';
+    else if(currentFilter === 'deleted') msg = 'Nothing in the bin.';
+    list.innerHTML = `<div class="empty">${msg}</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(it => {
+    if(editingId === it.id) return renderEditForm(it);
+    if(it.deleted) return renderDeletedItem(it);
+    return renderItem(it);
+  }).join('');
+}
+
+function renderItem(it){
+  const isSelected = selectedIds.has(it.id);
+  const watchedDate = it.watched && it.watchedAt
+    ? new Date(it.watchedAt).toLocaleDateString(undefined, { month:'short', day:'numeric' })
+    : '';
+  const ratingTag = it.rating === 'up' ? '<span class="tag rating-tag">👍</span>'
+    : it.rating === 'down' ? '<span class="tag rating-tag">👎</span>' : '';
+  return `
+    <div class="swipe-wrapper editable">
+      <div class="swipe-bg">
+        <span class="bin bin-left edit-tap">${EDIT_ICON}</span>
+        <span class="bin bin-right bin-tap">${BIN_ICON}</span>
+      </div>
+      <div class="item ${it.watched ? 'watched' : ''} ${selectionMode ? 'select-mode' : ''}" data-id="${it.id}" data-mode="active">
+        <div class="drag-handle" data-drag-id="${it.id}">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="check" onclick="toggleWatched('${it.id}')">${it.watched ? '✓' : ''}</div>
+        <div class="select-check ${isSelected ? 'checked' : ''}" data-select-id="${it.id}">${isSelected ? '✓' : ''}</div>
+        ${it.poster ? `<img class="item-poster" src="${it.poster}" alt="" loading="lazy">` : ''}
+        <div class="item-body">
+          <div class="item-title">${escapeHtml(it.title)}${it.year ? ` <span class="item-year">(${escapeHtml(it.year)})</span>` : ''}</div>
+          <div class="item-tags">
+            ${it.type ? `<span class="tag">${escapeHtml(it.type)}</span>` : ''}
+            ${it.genre ? `<span class="tag">${escapeHtml(it.genre)}</span>` : ''}
+            ${platformBadge(it.platform, it.watchLink, it.title)}
+            ${it.source ? `<span class="tag">via ${escapeHtml(it.source)}</span>` : ''}
+            ${watchedDate ? `<span class="tag">Watched ${watchedDate}</span>` : ''}
+            ${ratingTag}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDeletedItem(it){
+  return `
+    <div class="swipe-wrapper">
+      <div class="swipe-bg">
+        <span class="bin bin-left bin-tap">${BIN_ICON}</span>
+        <span class="bin bin-right bin-tap">${BIN_ICON}</span>
+      </div>
+      <div class="item deleted" data-id="${it.id}" data-mode="trash">
+        <div class="item-body">
+          <div class="item-title">${escapeHtml(it.title)}</div>
+          <div class="item-tags">
+            ${it.type ? `<span class="tag">${escapeHtml(it.type)}</span>` : ''}
+            ${it.genre ? `<span class="tag">${escapeHtml(it.genre)}</span>` : ''}
+            ${platformBadge(it.platform)}
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="restore-btn" onclick="restoreItem('${it.id}')">Restore</button>
+          <button class="forever-btn" onclick="permanentDelete('${it.id}')">Delete forever</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderEditForm(it){
+  return `
+    <div class="item edit-form">
+      <div class="item-body" style="width:100%">
+        <input type="text" id="edit-title-${it.id}" value="${escapeHtml(it.title)}" placeholder="Title">
+        <div class="meta-row">
+          <select id="edit-source-${it.id}">${buildOptions(SOURCES, it.source, 'Where seen?')}</select>
+          <select id="edit-type-${it.id}">${buildOptions(TYPES, it.type, 'Type?')}</select>
+        </div>
+        <div class="meta-row">
+          <select id="edit-platform-${it.id}">${buildOptions(PLATFORMS, it.platform, 'Where to watch?')}</select>
+          <select id="edit-genre-${it.id}">${buildOptions(GENRES, it.genre, 'Genre?')}</select>
+        </div>
+        <div class="meta-row">
+          <button class="cancel-btn" onclick="setRating('${it.id}','up')" style="${it.rating === 'up' ? 'border-color:var(--accent);color:var(--accent);' : ''}">👍 Liked</button>
+          <button class="cancel-btn" onclick="setRating('${it.id}','down')" style="${it.rating === 'down' ? 'border-color:var(--accent);color:var(--accent);' : ''}">👎 Not for me</button>
+        </div>
+        <div class="edit-actions">
+          <button class="save-btn" onclick="saveEdit('${it.id}')">Save</button>
+          <button class="cancel-btn" onclick="shareItem('${it.id}')">Share</button>
+          <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+addBtn.addEventListener('click', addItem);
+titleInput.addEventListener('keydown', e => { if(e.key === 'Enter') addItem(); });
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const newFilter = btn.dataset.filter;
+    const oldIdx = TAB_ORDER.indexOf(currentFilter);
+    const newIdx = TAB_ORDER.indexOf(newFilter);
+    animateTabChange(newFilter, newIdx > oldIdx ? 1 : -1);
+  });
+});
+
+// --- Swipe to reveal bin, tap bin to confirm, swipe back to abort ---
+let swipe = { el:null, wrapper:null, id:null, mode:null, startX:0, startY:0, dx:0, baseX:0, locked:false };
+const OPEN_OFFSET = 92;   // px the item pins at once opened
+const OPEN_THRESHOLD = 46; // drag distance needed to count as "opening" it
+let openWrapper = null;
+
+function closeSwipeItem(wrapper, animate){
+  if(!wrapper) return;
+  const itemEl = wrapper.querySelector('.item[data-id]');
+  if(itemEl){
+    itemEl.style.transition = animate === false ? 'none' : 'transform 0.2s ease';
+    itemEl.style.transform = 'translateX(0)';
+  }
+  wrapper.classList.remove('reveal-left', 'reveal-right');
+  wrapper.dataset.open = '';
+  if(openWrapper === wrapper) openWrapper = null;
+}
+
+list.addEventListener('touchstart', e => {
+  if(selectionMode) return;
+  if(e.target.closest('.drag-handle') || e.target.closest('.bin-tap')) return;
+  const itemEl = e.target.closest('.item[data-id]');
+  if(!itemEl) return;
+  const wrapperEl = itemEl.closest('.swipe-wrapper');
+
+  // Only one item stays open at a time
+  if(openWrapper && openWrapper !== wrapperEl) closeSwipeItem(openWrapper);
+
+  const isOpen = wrapperEl.dataset.open === 'pos' || wrapperEl.dataset.open === 'neg';
+  const baseX = wrapperEl.dataset.open === 'pos' ? OPEN_OFFSET : wrapperEl.dataset.open === 'neg' ? -OPEN_OFFSET : 0;
+
+  swipe = {
+    el: itemEl,
+    wrapper: wrapperEl,
+    id: itemEl.dataset.id,
+    mode: itemEl.dataset.mode,
+    startX: e.touches[0].clientX,
+    startY: e.touches[0].clientY,
+    dx: 0,
+    baseX,
+    locked: isOpen ? true : false
+  };
+  itemEl.style.transition = 'none';
+}, { passive:true });
+
+// Long-press an item (not the drag handle) to enter batch-select mode
+let selectLongPressTimer = null;
+list.addEventListener('touchstart', e => {
+  if(selectionMode) return;
+  if(e.target.closest('.drag-handle')) return;
+  const itemEl = e.target.closest('.item[data-id]');
+  if(!itemEl || itemEl.dataset.mode !== 'active') return;
+  const startX = e.touches[0].clientX;
+  const startY = e.touches[0].clientY;
+  let cancelled = false;
+
+  function cleanup(){
+    clearTimeout(selectLongPressTimer);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+  }
+  function onMove(ev){
+    const t = ev.touches[0];
+    if(Math.abs(t.clientX - startX) > 10 || Math.abs(t.clientY - startY) > 10){
+      cancelled = true;
+      cleanup();
+    }
+  }
+  function onEnd(){
+    cancelled = true;
+    cleanup();
+  }
+  document.addEventListener('touchmove', onMove, { passive:true });
+  document.addEventListener('touchend', onEnd, { passive:true });
+
+  selectLongPressTimer = setTimeout(() => {
+    cleanup();
+    if(!cancelled){
+      swipe.el = null; // neutralize the in-progress swipe gesture for this touch
+      enterSelectionMode(itemEl.dataset.id);
+    }
+  }, 500);
+}, { passive:true });
+
+list.addEventListener('touchmove', e => {
+  if(!swipe.el) return;
+  const dx = e.touches[0].clientX - swipe.startX;
+  const dy = e.touches[0].clientY - swipe.startY;
+  if(!swipe.locked){
+    if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    swipe.locked = Math.abs(dx) > Math.abs(dy);
+    if(!swipe.locked) { swipe.el = null; return; }
+  }
+  e.preventDefault();
+  swipe.dx = dx;
+  const total = swipe.baseX + dx;
+  swipe.el.style.transform = `translateX(${total}px)`;
+  if(swipe.wrapper){
+    swipe.wrapper.classList.toggle('reveal-right', total > 12);
+    swipe.wrapper.classList.toggle('reveal-left', total < -12);
+  }
+}, { passive:false });
+
+list.addEventListener('touchend', () => {
+  if(!swipe.el) return;
+  const { el, wrapper, dx, baseX } = swipe;
+  const total = baseX + dx;
+
+  el.style.transition = 'transform 0.2s ease';
+  if(Math.abs(total) > OPEN_THRESHOLD){
+    const dir = total > 0 ? 1 : -1;
+    el.style.transform = `translateX(${dir * OPEN_OFFSET}px)`;
+    wrapper.classList.toggle('reveal-right', dir > 0);
+    wrapper.classList.toggle('reveal-left', dir < 0);
+    wrapper.dataset.open = dir > 0 ? 'pos' : 'neg';
+    openWrapper = wrapper;
+  } else {
+    closeSwipeItem(wrapper);
+  }
+  swipe = { el:null };
+});
+
+// Tap the revealed edit icon to open the edit form; tap the bin to confirm delete
+list.addEventListener('click', e => {
+  const editBtn = e.target.closest('.edit-tap');
+  if(editBtn){
+    const wrapper = editBtn.closest('.swipe-wrapper');
+    const itemEl = wrapper && wrapper.querySelector('.item[data-id]');
+    if(!itemEl) return;
+    if(openWrapper === wrapper) openWrapper = null;
+    editItem(itemEl.dataset.id);
+    return;
+  }
+
+  const bin = e.target.closest('.bin-tap');
+  if(!bin) return;
+  const wrapper = bin.closest('.swipe-wrapper');
+  const itemEl = wrapper && wrapper.querySelector('.item[data-id]');
+  if(!itemEl) return;
+  const id = itemEl.dataset.id;
+  const mode = itemEl.dataset.mode;
+  const dir = wrapper.dataset.open === 'pos' ? 1 : -1;
+
+  if(navigator.vibrate) navigator.vibrate(15);
+  itemEl.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+  itemEl.style.transform = `translateX(${dir * 420}px)`;
+  itemEl.style.opacity = '0';
+  if(openWrapper === wrapper) openWrapper = null;
+  setTimeout(() => {
+    if(mode === 'trash') permanentDelete(id);
+    else if(mode === 'active') deleteItem(id);
+  }, 180);
+});
+
+// --- Drag handle: tap and hold to reorder ---
+let longPressTimer = null;
+let drag = null;
+
+function reorderItems(newVisibleOrderIds){
+  const idToItem = {};
+  items.forEach(it => { idToItem[it.id] = it; });
+  const positions = [];
+  items.forEach((it, idx) => { if(newVisibleOrderIds.includes(it.id)) positions.push(idx); });
+  const newSubItems = newVisibleOrderIds.map(id => idToItem[id]);
+  positions.forEach((pos, i) => { items[pos] = newSubItems[i]; });
+}
+
+function endDrag(commit){
+  if(!drag) return;
+  const { wrapper, wrappers, order, insertionIndex, draggedIndex } = drag;
+
+  wrappers.forEach(w => {
+    w.style.transition = '';
+    w.style.transform = '';
+    w.classList.remove('shift-down', 'shift-up');
+  });
+  wrapper.classList.remove('dragging');
+  wrapper.style.zIndex = '';
+  wrapper.style.transition = '';
+  wrapper.style.transform = '';
+
+  if(commit && insertionIndex !== draggedIndex){
+    const newOrder = order.slice();
+    const [moved] = newOrder.splice(draggedIndex, 1);
+    newOrder.splice(insertionIndex, 0, moved);
+    reorderItems(newOrder);
+    saveItems();
+  }
+  render();
+  drag = null;
+}
+
+function beginDrag(itemEl, wrapperEl, startY){
+  const wrappers = Array.from(list.querySelectorAll('.swipe-wrapper'));
+  const order = wrappers.map(w => w.querySelector('.item').dataset.id);
+  const draggedIndex = wrappers.indexOf(wrapperEl);
+  const rect = wrapperEl.getBoundingClientRect();
+  const stepH = rect.height + 10; // item height + margin-bottom gap
+
+  wrapperEl.classList.add('dragging');
+  wrapperEl.style.zIndex = '100';
+  wrapperEl.style.transition = 'none';
+  if(navigator.vibrate) navigator.vibrate(12);
+
+  drag = { wrapper: wrapperEl, wrappers, order, draggedIndex, insertionIndex: draggedIndex, startY, stepH, scrollOffset:0, lastClientY: startY };
+
+  const EDGE_ZONE_PX = 80;
+  const MAX_SCROLL_SPEED_PX_S = 700;
+  const scrollAreaEl = document.getElementById('scrollArea');
+  let scrollRAF = null;
+  let lastTickTime = null;
+
+  function applyTransform(){
+    const dy = (drag.lastClientY - drag.startY) + drag.scrollOffset;
+    drag.wrapper.style.transform = `translateY(${dy}px)`;
+
+    const rawIndex = drag.draggedIndex + Math.round(dy / drag.stepH);
+    const newIndex = Math.max(0, Math.min(drag.wrappers.length - 1, rawIndex));
+    if(newIndex !== drag.insertionIndex){
+      drag.wrappers.forEach((w, i) => {
+        if(w === drag.wrapper) return;
+        const shouldShiftUp = i > drag.draggedIndex && i <= newIndex;
+        const shouldShiftDown = i < drag.draggedIndex && i >= newIndex;
+        w.style.setProperty('--shift-h', `${drag.stepH}px`);
+        w.classList.toggle('shift-up', shouldShiftUp);
+        w.classList.toggle('shift-down', shouldShiftDown);
+      });
+      drag.insertionIndex = newIndex;
+    }
+  }
+
+  function autoScrollTick(ts){
+    if(!drag){ scrollRAF = null; lastTickTime = null; return; }
+    if(lastTickTime === null) lastTickTime = ts;
+    const dt = Math.min((ts - lastTickTime) / 1000, 0.05);
+    lastTickTime = ts;
+
+    const y = drag.lastClientY;
+    const vh = window.innerHeight;
+    let intensity = 0;
+    if(y < EDGE_ZONE_PX){
+      intensity = -((EDGE_ZONE_PX - y) / EDGE_ZONE_PX);
+    } else if(y > vh - EDGE_ZONE_PX){
+      intensity = (y - (vh - EDGE_ZONE_PX)) / EDGE_ZONE_PX;
+    }
+    intensity = Math.max(-1, Math.min(1, intensity));
+    const eased = intensity * Math.abs(intensity); // smooth quadratic ramp near the edge
+    const speed = eased * MAX_SCROLL_SPEED_PX_S * dt;
+
+    if(speed !== 0 && scrollAreaEl){
+      const before = scrollAreaEl.scrollTop;
+      scrollAreaEl.scrollTop = before + speed;
+      const actualScrolled = scrollAreaEl.scrollTop - before;
+      if(actualScrolled !== 0){
+        drag.scrollOffset += actualScrolled;
+        applyTransform();
+      }
+    }
+    scrollRAF = requestAnimationFrame(autoScrollTick);
+  }
+  scrollRAF = requestAnimationFrame(autoScrollTick);
+
+  function onMove(ev){
+    if(!drag) return;
+    drag.lastClientY = ev.touches[0].clientY;
+    applyTransform();
+  }
+  function onEnd(){
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+    document.removeEventListener('touchcancel', onEnd);
+    if(scrollRAF) cancelAnimationFrame(scrollRAF);
+    endDrag(true);
+  }
+  document.addEventListener('touchmove', onMove, { passive:true });
+  document.addEventListener('touchend', onEnd, { passive:true });
+  document.addEventListener('touchcancel', onEnd, { passive:true });
+}
+
+list.addEventListener('touchstart', e => {
+  const handle = e.target.closest('.drag-handle');
+  if(!handle) return;
+  if(currentSort !== 'manual' || searchQuery.trim()) return;
+  const itemEl = handle.closest('.item[data-id]');
+  if(!itemEl || itemEl.dataset.mode !== 'active') return;
+  e.preventDefault();
+  const wrapperEl = itemEl.closest('.swipe-wrapper');
+  const startY = e.touches[0].clientY;
+  const startX = e.touches[0].clientX;
+  let cancelled = false;
+
+  function cleanupPending(){
+    clearTimeout(longPressTimer);
+    document.removeEventListener('touchmove', onPendingMove);
+    document.removeEventListener('touchend', onPendingEnd);
+  }
+  function onPendingMove(ev){
+    const t = ev.touches[0];
+    if(Math.abs(t.clientY - startY) > 10 || Math.abs(t.clientX - startX) > 10){
+      cancelled = true;
+      cleanupPending();
+    }
+  }
+  function onPendingEnd(){
+    cancelled = true;
+    cleanupPending();
+  }
+  document.addEventListener('touchmove', onPendingMove, { passive:true });
+  document.addEventListener('touchend', onPendingEnd, { passive:true });
+
+  longPressTimer = setTimeout(() => {
+    cleanupPending();
+    if(!cancelled) beginDrag(itemEl, wrapperEl, startY);
+  }, 320);
+}, { passive:false });
+
+// --- Edge swipe: switch tabs from the far left/right of the screen ---
+const TAB_ORDER = ['all', 'pending', 'watched', 'deleted'];
+const EDGE_ZONE = 24;
+let edgeSwipe = { active:false, startX:0, startY:0 };
+let tabAnimating = false;
+
+function updateTabPill(){
+  const pill = document.getElementById('tabPill');
+  const activeBtn = document.querySelector('.filter-btn.active');
+  if(!pill || !activeBtn) return;
+  pill.style.width = `${activeBtn.offsetWidth}px`;
+  pill.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+}
+
+function animateTabChange(newFilter, direction){
+  if(tabAnimating || newFilter === currentFilter) return;
+  tabAnimating = true;
+  const outX = direction > 0 ? -36 : 36;
+
+  filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === newFilter));
+  updateTabPill();
+
+  list.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+  list.style.transform = `translateX(${outX}px)`;
+  list.style.opacity = '0';
+
+  setTimeout(() => {
+    currentFilter = newFilter;
+    render();
+
+    list.style.transition = 'none';
+    list.style.transform = `translateX(${-outX}px)`;
+    void list.offsetWidth; // force reflow so the next transition actually plays
+    list.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+    list.style.transform = 'translateX(0)';
+    list.style.opacity = '1';
+
+    setTimeout(() => { tabAnimating = false; }, 230);
+  }, 180);
+}
+
+function switchTab(direction){
+  const idx = TAB_ORDER.indexOf(currentFilter);
+  const newIdx = Math.max(0, Math.min(TAB_ORDER.length - 1, idx + direction));
+  if(TAB_ORDER[newIdx] === currentFilter) return;
+  animateTabChange(TAB_ORDER[newIdx], direction);
+}
+
+document.addEventListener('touchstart', e => {
+  const x = e.touches[0].clientX;
+  const w = window.innerWidth;
+  edgeSwipe = {
+    active: x <= EDGE_ZONE || x >= w - EDGE_ZONE,
+    startX: x,
+    startY: e.touches[0].clientY
+  };
+}, { passive:true });
+
+document.addEventListener('touchend', e => {
+  if(!edgeSwipe.active) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - edgeSwipe.startX;
+  const dy = t.clientY - edgeSwipe.startY;
+  if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5){
+    if(dx < 0) switchTab(1);
+    else switchTab(-1);
+  }
+  edgeSwipe.active = false;
+}, { passive:true });
+
+function fireIntroTone(ctx){
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(170, now);
+  osc.frequency.exponentialRampToValueAtTime(55, now + 0.65);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.55, now + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 1.3);
+
+  const osc2 = ctx.createOscillator();
+  const gain2 = ctx.createGain();
+  osc2.type = 'triangle';
+  osc2.frequency.setValueAtTime(950, now + 0.04);
+  osc2.frequency.exponentialRampToValueAtTime(1400, now + 0.5);
+  gain2.gain.setValueAtTime(0.0001, now + 0.04);
+  gain2.gain.exponentialRampToValueAtTime(0.12, now + 0.14);
+  gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.95);
+  osc2.connect(gain2).connect(ctx.destination);
+  osc2.start(now + 0.04);
+  osc2.stop(now + 1.0);
+}
+
+let soundFired = false;
+
+function playIntro(){
+  if(soundFired) return;
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    fireIntroTone(ctx);
+    ctx.resume();
+    soundFired = true;
+  }catch(e){
+    console.log('Audio unavailable', e);
+  }
+}
+
+// Silent, invisible fallback: if autoplay was blocked, the very first
+// tap anywhere on the page (no visible prompt) unlocks and fires it once.
+document.addEventListener('touchstart', playIntro, { once:true, passive:true });
+document.addEventListener('pointerdown', playIntro, { once:true });
+
+function morphSplashIntoHeader(){
+  const splash = document.getElementById('splash');
+  const splashW = document.querySelector('.splash-w');
+  const splashTitle = document.querySelector('.splash-title');
+  const splashFooter = document.querySelector('.splash-footer');
+  const headerW = document.getElementById('headerW');
+  const headerTitle = document.getElementById('headerTitle');
+  const brandHeader = document.getElementById('brandHeader');
+
+  const wStart = splashW.getBoundingClientRect();
+  const wEnd = headerW.getBoundingClientRect();
+  const tStart = splashTitle.getBoundingClientRect();
+  const tEnd = headerTitle.getBoundingClientRect();
+
+  const wScale = wEnd.height / wStart.height;
+  const tScale = tEnd.height / tStart.height;
+
+  const wDX = (wEnd.left + wEnd.width / 2) - (wStart.left + wStart.width / 2);
+  const wDY = (wEnd.top + wEnd.height / 2) - (wStart.top + wStart.height / 2);
+  const tDX = (tEnd.left + tEnd.width / 2) - (tStart.left + tStart.width / 2);
+  const tDY = (tEnd.top + tEnd.height / 2) - (tStart.top + tStart.height / 2);
+
+  splash.style.pointerEvents = 'none';
+
+  // Detach the now-finished keyframe animations so our new inline
+  // transform actually takes effect instead of being overridden by them.
+  splashW.style.animation = 'none';
+  splashTitle.style.animation = 'none';
+  // Force a reflow so the browser commits the reset state before we
+  // apply the new transition — otherwise the changes get batched
+  // together and the transition never visibly plays.
+  void splashW.offsetWidth;
+  void splashTitle.offsetWidth;
+
+  const ease = 'transform 0.65s cubic-bezier(.4,0,.2,1)';
+  splashW.style.transition = ease;
+  splashW.style.transform = `translate(${wDX}px, ${wDY}px) scale(${wScale})`;
+
+  splashTitle.style.transition = `${ease}, opacity 0.5s ease`;
+  splashTitle.style.transform = `translate(${tDX}px, ${tDY}px) scale(${tScale})`;
+  splashTitle.style.letterSpacing = '0.1em';
+
+  splashFooter.style.transition = 'opacity 0.25s ease';
+  splashFooter.style.opacity = '0';
+
+  splash.style.transition = 'background 0.55s ease';
+  splash.style.background = 'transparent';
+
+  // Fade the main app UI in as the splash dissolves away
+  const wrap = document.querySelector('.wrap');
+  if(wrap) wrap.style.opacity = '1';
+
+  setTimeout(() => {
+    splash.style.display = 'none';
+    brandHeader.style.opacity = '1';
+  }, 650);
+}
+
+window.addEventListener('load', () => {
+  // Fire the sound in sync with the "W" animation's impact point (~0.5s in)
+  setTimeout(playIntro, 480);
+  // Hold the splash briefly, then morph the W + title seamlessly into the header
+  setTimeout(morphSplashIntoHeader, 2350);
+});
+
+document.getElementById('scrollArea').addEventListener('scroll', (e) => {
+  const header = document.getElementById('brandHeader');
+  if(!header) return;
+  header.classList.toggle('scrolled', e.target.scrollTop > 4);
+}, { passive:true });
+
+// Nudge Safari to collapse its toolbar (best-effort — Safari decides this
+// itself and doesn't always cooperate). Works only in a regular Safari tab;
+// has no effect when launched from the Home Screen icon, since standalone
+// mode has no toolbar to hide in the first place.
+function hideSafariToolbar(){
+  window.scrollTo(0, 1);
+}
+window.addEventListener('load', hideSafariToolbar);
+window.addEventListener('orientationchange', () => setTimeout(hideSafariToolbar, 200));
+
+// --- Modal (Surprise me / Stats) ---
+function showModal(html){
+  const overlay = document.getElementById('modalOverlay');
+  const box = document.getElementById('modalBox');
+  box.innerHTML = html;
+  overlay.classList.add('open');
+}
+function hideModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'modalOverlay') hideModal();
+});
+
+// --- Poster suggestions: inline autocomplete under the title field ---
+let posterSearchDebounce = null;
+let posterSearchToken = 0;
+const titleSuggestions = document.getElementById('titleSuggestions');
+
+function closeSuggestions(){
+  titleSuggestions.classList.remove('open');
+  titleSuggestions.innerHTML = '';
+}
+
+titleInput.addEventListener('input', () => {
+  const query = titleInput.value.trim();
+  pendingPoster = null; // typing manually invalidates any previously picked poster
+  clearTimeout(posterSearchDebounce);
+  if(!query){
+    closeSuggestions();
+    return;
+  }
+  posterSearchDebounce = setTimeout(() => runPosterSearch(query), 350);
+});
+
+titleInput.addEventListener('focus', () => {
+  if(titleInput.value.trim() && titleSuggestions.innerHTML) titleSuggestions.classList.add('open');
+});
+
+document.addEventListener('click', (e) => {
+  if(e.target === titleInput || e.target.closest('#titleSuggestions')) return;
+  closeSuggestions();
+});
+
+function runPosterSearch(query){
+  if(!TMDB_API_KEY){
+    titleSuggestions.innerHTML = `<div class="suggestion-status">Add a TMDB API key in the code to enable suggestions</div>`;
+    titleSuggestions.classList.add('open');
+    return;
+  }
+
+  const myToken = ++posterSearchToken;
+  titleSuggestions.innerHTML = `<div class="suggestion-status">Searching...</div>`;
+  titleSuggestions.classList.add('open');
+
+  const url = `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false`;
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if(myToken !== posterSearchToken) return; // superseded by a newer keystroke
+      const results = (data.results || []).filter(r => r.media_type === 'movie' || r.media_type === 'tv').slice(0, 10);
+      if(results.length === 0){
+        titleSuggestions.innerHTML = `<div class="suggestion-status">No matches — you can still add it manually</div>`;
+        return;
+      }
+      titleSuggestions.innerHTML = results.map(r => {
+        const title = r.title || r.name || 'Untitled';
+        const year = (r.release_date || r.first_air_date || '').slice(0, 4);
+        const posterUrl = r.poster_path ? `${TMDB_IMG_BASE}${r.poster_path}` : '';
+        const mediaType = r.media_type === 'tv' ? 'Show' : 'Movie';
+        return `
+          <div class="suggestion-row" data-title="${escapeHtml(title)}" data-poster="${escapeHtml(posterUrl)}" data-media-type="${escapeHtml(mediaType)}" data-year="${escapeHtml(year)}" data-tmdb-id="${r.id}" data-tmdb-kind="${r.media_type}">
+            ${posterUrl
+              ? `<img src="${posterUrl}" alt="" loading="lazy">`
+              : `<div class="suggestion-fallback">No image</div>`}
+            <div class="suggestion-text">
+              <div class="suggestion-title">${escapeHtml(title)}</div>
+              <div class="suggestion-meta">${mediaType}${year ? ` · ${year}` : ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    })
+    .catch(() => {
+      if(myToken !== posterSearchToken) return;
+      titleSuggestions.innerHTML = `<div class="suggestion-status">Couldn't reach TMDB — check your connection</div>`;
+    });
+}
+
+titleSuggestions.addEventListener('click', (e) => {
+  const row = e.target.closest('.suggestion-row');
+  if(!row) return;
+  titleInput.value = row.dataset.title;
+  pendingPoster = row.dataset.poster || null;
+  pendingYear = row.dataset.year || null;
+  pendingWatchLink = null;
+  if(row.dataset.mediaType === 'Movie') typeInput.value = 'Movie';
+  else if(row.dataset.mediaType === 'Show') typeInput.value = 'Show';
+  closeSuggestions();
+  titleInput.focus();
+
+  const tmdbId = row.dataset.tmdbId;
+  const tmdbKind = row.dataset.tmdbKind; // 'movie' or 'tv'
+  if(tmdbId && tmdbKind) lookupWatchProvider(tmdbId, tmdbKind);
+});
+
+// --- Open the streaming app if installed, fall back to the browser ---
+function openInAppOrWeb(scheme, webUrl){
+  if(!scheme){
+    window.open(webUrl, '_blank', 'noopener');
+    return;
+  }
+  let appOpened = false;
+  const onHide = () => { appOpened = true; };
+  document.addEventListener('visibilitychange', onHide, { once: true });
+  window.location.href = scheme;
+  setTimeout(() => {
+    document.removeEventListener('visibilitychange', onHide);
+    if(!appOpened){
+      window.open(webUrl, '_blank', 'noopener');
+    }
+  }, 1200);
+}
+function handlePlatformLinkClick(e){
+  const badge = e.target.closest('.platform-link');
+  if(!badge) return;
+  e.stopPropagation(); // don't let this also trigger item selection / other item taps
+  openInAppOrWeb(badge.dataset.appScheme, badge.dataset.webUrl);
+}
+list.addEventListener('click', handlePlatformLinkClick);
+document.getElementById('modalBox').addEventListener('click', handlePlatformLinkClick);
+
+// --- Watch provider lookup: find which service it's streaming on in AU ---
+function lookupWatchProvider(tmdbId, tmdbKind){
+  const url = `https://api.themoviedb.org/3/${tmdbKind}/${tmdbId}/watch/providers?api_key=${TMDB_API_KEY}`;
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const regionData = data.results && data.results[WATCH_REGION];
+      if(!regionData) return;
+      const providerList = regionData.flatrate || regionData.ads || regionData.free || [];
+      if(providerList.length === 0) return;
+      const rawName = providerList[0].provider_name;
+      const matched = PROVIDER_NAME_MAP[rawName];
+      pendingWatchLink = regionData.link || null;
+      if(matched){
+        platformInput.value = matched;
+        showToast(`Found on ${matched} (${WATCH_REGION})`);
+      } else {
+        showToast(`Found on ${rawName} (${WATCH_REGION}) — not in your platform list`);
+      }
+    })
+    .catch(() => { /* silent — poster/title still filled in fine without this */ });
+}
+
+// --- Surprise me (slot-machine style spin) ---
+function pickSurprise(){
+  const pool = items.filter(i => !i.deleted && !i.watched);
+  if(pool.length === 0){
+    showModal(`
+      <div class="modal-title">Surprise me</div>
+      <div class="modal-pick-title">Nothing left to watch!</div>
+      <div class="modal-actions">
+        <button class="modal-btn primary" onclick="hideModal()">Close</button>
+      </div>
+    `);
+    return;
+  }
+
+  const ROW_H = 40;
+  const CENTER_INDEX = 2; // 5 visible rows, 0-4 — index 2 sits in the highlight band
+  const SPIN_ROWS = 20;
+  const PAD_ROWS = 2;
+
+  const wheelItems = [];
+  for(let i = 0; i < SPIN_ROWS; i++) wheelItems.push(pool[Math.floor(Math.random() * pool.length)]);
+  const finalPick = pool[Math.floor(Math.random() * pool.length)];
+  const finalIndex = wheelItems.length;
+  wheelItems.push(finalPick);
+  for(let i = 0; i < PAD_ROWS; i++) wheelItems.push(pool[Math.floor(Math.random() * pool.length)]);
+
+  showModal(`
+    <div class="modal-title">Spinning</div>
+    <div class="wheel-viewport">
+      <div class="wheel-highlight"></div>
+      <div class="wheel-track" id="wheelTrack">
+        ${wheelItems.map((it, i) => `<div class="wheel-row" data-i="${i}">${escapeHtml(it.title)}</div>`).join('')}
+      </div>
+    </div>
+    <div class="item-tags" id="slotTags"></div>
+    <div class="modal-actions" id="slotActions"></div>
+  `);
+
+  const track = document.getElementById('wheelTrack');
+  const targetY = -(finalIndex - CENTER_INDEX) * ROW_H;
+
+  // Force a reflow before transitioning so the browser has a committed
+  // starting frame (0) to animate from.
+  void track.offsetHeight;
+  track.style.transition = 'transform 2.4s cubic-bezier(0.1, 0.7, 0.1, 1)';
+  track.style.transform = `translateY(${targetY}px)`;
+
+  // Haptic ticks timed to feel like the wheel clicking past each row,
+  // slowing down toward the end (no-op on iOS Safari — see note above).
+  if(navigator.vibrate){
+    let t = 0;
+    for(let i = 0; i < 16; i++){
+      t += 40 + i * i * 3.2;
+      setTimeout(() => navigator.vibrate(6), t);
+    }
+  }
+
+  setTimeout(() => {
+    const landedRow = track.querySelector(`.wheel-row[data-i="${finalIndex}"]`);
+    if(landedRow) landedRow.classList.add('wheel-landed');
+    document.getElementById('slotTags').innerHTML = `
+      ${finalPick.type ? `<span class="tag">${escapeHtml(finalPick.type)}</span>` : ''}
+      ${finalPick.genre ? `<span class="tag">${escapeHtml(finalPick.genre)}</span>` : ''}
+      ${platformBadge(finalPick.platform, finalPick.watchLink, finalPick.title)}
+    `;
+    document.getElementById('slotActions').innerHTML = `
+      <button class="modal-btn" onclick="pickSurprise()">Spin again</button>
+      <button class="modal-btn primary" onclick="toggleWatched('${finalPick.id}'); hideModal();">Mark watched</button>
+    `;
+    if(navigator.vibrate) navigator.vibrate([15, 30, 15]);
+  }, 2450);
+}
+
+// --- Shake to trigger surprise me (like a slot machine) ---
+let lastShakeTrigger = 0;
+let lastMotion = null;
+let lastDelta = null;
+let directionChanges = 0;
+let lastChangeTime = 0;
+const SHAKE_THRESHOLD = 32;        // minimum jolt strength to count at all
+const DIRECTION_CHANGES_NEEDED = 5; // real shakes reverse direction repeatedly
+const SHAKE_WINDOW_MS = 1500;       // all reversals must land within this window
+const SHAKE_COOLDOWN_MS = 4000;     // minimum gap between triggers
+
+function handleShakeMotion(event){
+  const acc = event.accelerationIncludingGravity || event.acceleration;
+  if(!acc || acc.x === null) return;
+  const now = Date.now();
+  if(lastMotion){
+    const dt = now - lastMotion.t;
+    if(dt < 60) return; // throttle sampling
+    const dx = acc.x - lastMotion.x;
+    const dy = acc.y - lastMotion.y;
+    const dz = acc.z - lastMotion.z;
+    const mag = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+    if(mag > SHAKE_THRESHOLD){
+      if(lastDelta){
+        // A real shake reverses direction each swing — a single jolt,
+        // pickup, or drop doesn't. Only count actual reversals.
+        const dot = dx * lastDelta.x + dy * lastDelta.y + dz * lastDelta.z;
+        if(dot < 0){
+          if(now - lastChangeTime > SHAKE_WINDOW_MS) directionChanges = 0;
+          directionChanges++;
+          lastChangeTime = now;
+          if(directionChanges >= DIRECTION_CHANGES_NEEDED && now - lastShakeTrigger > SHAKE_COOLDOWN_MS){
+            lastShakeTrigger = now;
+            directionChanges = 0;
+            pickSurprise();
+          }
+        }
+      }
+      lastDelta = { x: dx, y: dy, z: dz };
+    }
+  }
+  lastMotion = { x: acc.x, y: acc.y, z: acc.z, t: now };
+}
+
+function enableShakeDetection(){
+  window.addEventListener('devicemotion', handleShakeMotion);
+}
+
+function requestShakePermissionIfNeeded(){
+  if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+    DeviceMotionEvent.requestPermission().then(state => {
+      if(state === 'granted') enableShakeDetection();
+    }).catch(() => {});
+  } else if(typeof DeviceMotionEvent !== 'undefined'){
+    enableShakeDetection();
+  }
+}
+// iOS requires this to be requested from a real user gesture — piggyback on the first tap anywhere
+document.addEventListener('touchstart', requestShakePermissionIfNeeded, { once:true });
+document.addEventListener('click', requestShakePermissionIfNeeded, { once:true });
+
+// --- Stats ---
+document.getElementById('statsMenuItem').addEventListener('click', () => {
+  closeMenu();
+  const active = items.filter(i => !i.deleted);
+  const watchedCount = active.filter(i => i.watched).length;
+  const toWatchCount = active.length - watchedCount;
+  const platformCounts = {};
+  const genreCounts = {};
+  active.forEach(i => {
+    if(i.platform) platformCounts[i.platform] = (platformCounts[i.platform] || 0) + 1;
+    if(i.genre) genreCounts[i.genre] = (genreCounts[i.genre] || 0) + 1;
+  });
+  const topPlatform = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])[0];
+  const topGenre = Object.entries(genreCounts).sort((a, b) => b[1] - a[1])[0];
+  showModal(`
+    <div class="modal-title">Your stats</div>
+    <div class="stats-row"><span class="stats-label">Total on list</span><span class="stats-value">${active.length}</span></div>
+    <div class="stats-row"><span class="stats-label">Watched</span><span class="stats-value">${watchedCount}</span></div>
+    <div class="stats-row"><span class="stats-label">To watch</span><span class="stats-value">${toWatchCount}</span></div>
+    <div class="stats-row"><span class="stats-label">Top platform</span><span class="stats-value">${topPlatform ? escapeHtml(topPlatform[0]) : '—'}</span></div>
+    <div class="stats-row"><span class="stats-label">Top genre</span><span class="stats-value">${topGenre ? escapeHtml(topGenre[0]) : '—'}</span></div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="hideModal()">Close</button>
+    </div>
+  `);
+});
+
+// --- Share ---
+function shareItem(id){
+  const it = items.find(i => i.id === id);
+  if(!it) return;
+  const text = `${it.title}${it.platform ? ' — ' + it.platform : ''}`;
+  if(navigator.share){
+    navigator.share({ title: it.title, text }).catch(() => {});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+  }
+}
+document.getElementById('shareListMenuItem').addEventListener('click', () => {
+  closeMenu();
+  const toWatch = items.filter(i => !i.deleted && !i.watched);
+  if(toWatch.length === 0){
+    showToast('Nothing to share yet');
+    return;
+  }
+  const text = 'My watchlist:\n' + toWatch.map(i => `• ${i.title}`).join('\n');
+  if(navigator.share){
+    navigator.share({ title: 'My Watchlist', text }).catch(() => {});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(() => showToast('List copied to clipboard'));
+  }
+});
+
+// --- Batch select mode ---
+function updateSelectionBar(){
+  const bar = document.getElementById('selectionBar');
+  const count = selectedIds.size;
+  document.getElementById('selectionCount').textContent = `${count} selected`;
+  bar.classList.toggle('open', selectionMode);
+}
+function enterSelectionMode(firstId){
+  selectionMode = true;
+  selectedIds.clear();
+  if(firstId) selectedIds.add(firstId);
+  if(navigator.vibrate) navigator.vibrate(15);
+  updateSelectionBar();
+  render();
+}
+document.getElementById('selectCancelBtn').addEventListener('click', () => {
+  selectionMode = false;
+  selectedIds.clear();
+  updateSelectionBar();
+  render();
+});
+document.getElementById('selectMarkWatchedBtn').addEventListener('click', () => {
+  selectedIds.forEach(id => {
+    const it = items.find(i => i.id === id);
+    if(it && !it.watched){ it.watched = true; it.watchedAt = new Date().toISOString(); }
+  });
+  if(navigator.vibrate) navigator.vibrate(15);
+  saveItems();
+  selectionMode = false;
+  selectedIds.clear();
+  updateSelectionBar();
+  render();
+  showToast('Marked as watched');
+});
+document.getElementById('selectDeleteBtn').addEventListener('click', () => {
+  selectedIds.forEach(id => {
+    const it = items.find(i => i.id === id);
+    if(it) it.deleted = true;
+  });
+  if(navigator.vibrate) navigator.vibrate(20);
+  saveItems();
+  const count = selectedIds.size;
+  selectionMode = false;
+  selectedIds.clear();
+  updateSelectionBar();
+  render();
+  showToast(`${count} item${count === 1 ? '' : 's'} removed`);
+});
+list.addEventListener('click', e => {
+  if(!selectionMode) return;
+  const itemEl = e.target.closest('.item[data-id]');
+  if(!itemEl || itemEl.dataset.mode !== 'active') return;
+  const id = itemEl.dataset.id;
+  if(selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  if(navigator.vibrate) navigator.vibrate(8);
+  updateSelectionBar();
+  render();
+});
+
+// --- "..." dropdown next to the add field ---
+const addMoreBtn = document.getElementById('addMoreBtn');
+const addMoreMenu = document.getElementById('addMoreMenu');
+addMoreBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  addMoreMenu.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if(!addMoreMenu.classList.contains('open')) return;
+  if(e.target.closest('#addMoreMenu') || e.target.closest('#addMoreBtn')) return;
+  addMoreMenu.classList.remove('open');
+});
+
+// --- Clipboard quick-add ---
+document.getElementById('pasteMenuItem').addEventListener('click', () => {
+  addMoreMenu.classList.remove('open');
+  if(!navigator.clipboard || !navigator.clipboard.readText){
+    showToast('Clipboard access not available');
+    return;
+  }
+  navigator.clipboard.readText().then(text => {
+    if(text && text.trim()){
+      titleInput.value = text.trim();
+      titleInput.focus();
+    } else {
+      showToast('Clipboard is empty');
+    }
+  }).catch(() => showToast("Couldn't read clipboard"));
+});
+
+// --- Dropdown menu (⋮ in header) ---
+function closeMenu(){
+  dropdownMenu.classList.remove('open');
+}
+function toggleMenu(){
+  dropdownMenu.classList.toggle('open');
+}
+menuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleMenu();
+});
+document.addEventListener('click', (e) => {
+  if(!dropdownMenu.classList.contains('open')) return;
+  if(e.target.closest('#dropdownMenu') || e.target.closest('#menuBtn')) return;
+  closeMenu();
+});
+
+// --- Search: menu item toggles the field ---
+document.getElementById('searchMenuItem').addEventListener('click', () => {
+  const isOpen = searchRow.classList.toggle('open');
+  closeMenu();
+  if(isOpen){
+    searchInput.focus();
+  } else {
+    searchInput.value = '';
+    searchQuery = '';
+    render();
+  }
+});
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value;
+  render();
+});
+
+// --- Sort: pick a mode from the menu ---
+document.querySelectorAll('.sort-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentSort = btn.dataset.sort;
+    document.querySelectorAll('.sort-item').forEach(b => {
+      b.classList.toggle('active', b.dataset.sort === currentSort);
+    });
+    closeMenu();
+    render();
+  });
+});
+
+// --- Export / Import backup ---
+function exportItems(){
+  const dataStr = JSON.stringify(items, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `watchlist-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup file downloaded');
+}
+
+function importItemsFromFile(file){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!Array.isArray(parsed)) throw new Error('Invalid format');
+      items = parsed;
+      if(navigator.vibrate) navigator.vibrate([10, 20, 10]);
+      saveItems();
+      render();
+      showToast(`Imported ${items.length} item${items.length === 1 ? '' : 's'}`);
+    }catch(err){
+      showToast("Couldn't read that file");
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('exportMenuItem').addEventListener('click', () => {
+  closeMenu();
+  exportItems();
+});
+document.getElementById('importMenuItem').addEventListener('click', () => {
+  closeMenu();
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file) importItemsFromFile(file);
+  e.target.value = '';
+});
+
+loadItems();
+updateTabPill();
+window.addEventListener('resize', updateTabPill);
+</script>
+</body>
+</html>
