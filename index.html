@@ -84,17 +84,18 @@
     gap:8px;
   }
   .brand-w{
-    height:50px;
+    height:clamp(38px, 12vw, 52px);
     width:auto;
     display:block;
   }
   .brand-title{
     font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
-    font-size:23px;
+    font-size:clamp(17px, 5.8vw, 25px);
     line-height:1;
     color:#ffffff;
-    letter-spacing:0.24em;
+    letter-spacing:0.22em;
     padding-left:0.1em;
+    white-space:nowrap;
   }
   .menu-btn{
     background:none;
@@ -632,7 +633,7 @@
   }
   .splash-title{
     font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
-    font-size:22px;
+    font-size:clamp(18px, 5.5vw, 25px);
     color:#ffffff;
     margin-top:6px;
     padding-left:0.35em;
@@ -849,7 +850,7 @@
     border-bottom:1px solid var(--line);
   }
   .detail-poster{
-    width:110px;
+    width:clamp(90px, 26vw, 130px);
     height:100%;
     object-fit:cover;
     border-radius:10px;
@@ -874,7 +875,7 @@
     min-width:0;
   }
   .detail-title{
-    font-size:19px;
+    font-size:clamp(16px, 4.6vw, 21px);
     font-weight:700;
     line-height:1.25;
     word-break:break-word;
