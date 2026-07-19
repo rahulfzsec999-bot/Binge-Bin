@@ -24,7 +24,7 @@
     --accent-dim:#4d1310;
     --danger:#ff4d4d;
   }
-  html{overflow-x:hidden; width:100%; height:100%;}
+  html{overflow-x:hidden; width:100%; height:100%; height:100dvh;}
   *{
     box-sizing:border-box;
     margin:0;
@@ -44,16 +44,18 @@
     color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     height:calc(100% + 1px);
+    height:calc(100dvh + 1px);
     width:100%;
     overflow-x:hidden;
     position:relative;
   }
   #scrollArea{
     height:100%;
+    height:100dvh;
     overflow-y:auto;
     overflow-x:hidden;
   }
-  .wrap{max-width:520px; margin:0 auto; padding:20px 16px 80px; opacity:0; transition:opacity 0.7s ease;}
+  .wrap{max-width:520px; margin:0 auto; padding:20px 16px calc(80px + env(safe-area-inset-bottom, 0px)); opacity:0; transition:opacity 0.7s ease;}
 
   header{margin-bottom:22px;}
   .brand-header{
@@ -790,6 +792,7 @@
     align-items:center;
     justify-content:center;
     padding:24px;
+    padding:calc(24px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) calc(24px + env(safe-area-inset-left, 0px));
     z-index:600;
     opacity:0;
     pointer-events:none;
@@ -807,24 +810,48 @@
     max-width:340px;
     width:100%;
     max-height:80vh;
+    max-height:80dvh;
     overflow-y:auto;
     transform:scale(0.92);
     transition:transform 0.2s ease;
   }
   .modal-overlay.open .modal-box{transform:scale(1);}
 
-  /* --- Full-screen item detail view (90% of screen, rest blurred) --- */
+  /* --- Full-screen item detail view: bottom sheet starting below the header --- */
   .modal-box.detail-modal{
-    width:90vw;
-    height:90vh;
-    max-width:90vw;
-    max-height:90vh;
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    top:auto;
+    width:100%;
+    max-width:100%;
+    height:auto;
+    max-height:none;
     padding:0;
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+    margin:0;
     display:flex;
     flex-direction:column;
     overflow:hidden;
-    position:relative;
-    border-radius:20px;
+    border-radius:20px 20px 0 0;
+    transform:translateY(100%);
+    transition:transform 0.28s cubic-bezier(.2,.8,.2,1);
+  }
+  .modal-overlay.open .modal-box.detail-modal{transform:translateY(0);}
+  .sheet-grab{
+    display:flex;
+    justify-content:center;
+    padding:10px 0 4px;
+    flex-shrink:0;
+    touch-action:none;
+  }
+  .sheet-grab::after{
+    content:"";
+    width:36px;
+    height:4px;
+    border-radius:3px;
+    background:var(--line);
   }
   .detail-close{
     position:absolute;
@@ -844,8 +871,7 @@
   .detail-hero{
     display:flex;
     gap:14px;
-    padding:18px 16px;
-    height:33%;
+    padding:8px 16px 18px;
     flex-shrink:0;
     border-bottom:1px solid var(--line);
   }
@@ -1061,66 +1087,6 @@
     border:1px solid var(--line);
   }
 
-  /* --- Batch select mode --- */
-  .item.select-mode .drag-handle{display:none;}
-  .select-check{
-    display:none;
-    width:22px;
-    height:22px;
-    border-radius:6px;
-    border:2px solid var(--muted);
-    flex-shrink:0;
-    margin-top:2px;
-    align-items:center;
-    justify-content:center;
-    font-size:13px;
-    color:transparent;
-  }
-  .item.select-mode .select-check{display:flex;}
-  .item.select-mode .check{display:none;}
-  .item.select-mode .drag-handle{display:none;}
-  .item .select-check.checked{
-    background:var(--accent);
-    border-color:var(--accent);
-    color:#fff;
-  }
-  .selection-bar{
-    position:fixed;
-    left:16px;
-    right:16px;
-    bottom:calc(16px + env(safe-area-inset-bottom, 0px));
-    background:#1b1b1b;
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:12px 14px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    box-shadow:0 14px 34px rgba(0,0,0,0.55);
-    z-index:400;
-    transform:translateY(calc(100% + 40px));
-    transition:transform 0.25s ease;
-  }
-  .selection-bar.open{transform:translateY(0);}
-  .selection-bar span{font-size:13px; color:var(--muted); white-space:nowrap;}
-  .selection-actions{display:flex; gap:8px;}
-  .selection-actions button{
-    background:none;
-    border:1px solid var(--line);
-    color:var(--text);
-    padding:8px 12px;
-    border-radius:8px;
-    font-size:12px;
-    cursor:pointer;
-    touch-action:manipulation;
-    white-space:nowrap;
-  }
-  .selection-actions button.danger-action{
-    color:var(--danger);
-    border-color:var(--danger);
-  }
-
   /* --- Rating (thumbs) --- */
   .rating-tag{
     font-size:13px;
@@ -1162,7 +1128,7 @@
     <div class="menu-divider"></div>
     <button class="menu-item" id="exportMenuItem">Export</button>
     <button class="menu-item" id="importMenuItem">Import</button>
-    <input type="file" id="importFile" accept="application/json,.json,text/plain" style="display:none;">
+    <input type="file" id="importFile" accept=".json,application/json,text/plain,text/*" style="display:none;">
   </div>
 </header>
 <div class="wrap">
@@ -1256,15 +1222,6 @@
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box" id="modalBox"></div>
-</div>
-
-<div class="selection-bar" id="selectionBar">
-  <span id="selectionCount">0 selected</span>
-  <div class="selection-actions">
-    <button id="selectMarkWatchedBtn">Mark watched</button>
-    <button id="selectDeleteBtn" class="danger-action">Delete</button>
-    <button id="selectCancelBtn">Cancel</button>
-  </div>
 </div>
 </div>
 
@@ -1369,14 +1326,12 @@ let currentFilter = 'all';
 let editingId = null;
 let searchQuery = '';
 let currentSort = 'manual';
-let selectionMode = false;
 let pendingPoster = null;
 let pendingYear = null;
 let pendingWatchLink = null;
 let pendingTmdbId = null;
 let pendingTmdbKind = null;
 let expandedId = null;
-let selectedIds = new Set();
 const STORE_KEY = 'queue-items';
 
 // --- Toast ---
@@ -1599,7 +1554,6 @@ function render(){
 }
 
 function renderItem(it){
-  const isSelected = selectedIds.has(it.id);
   const watchedDate = it.watched && it.watchedAt
     ? new Date(it.watchedAt).toLocaleDateString(undefined, { month:'short', day:'numeric' })
     : '';
@@ -1611,12 +1565,11 @@ function renderItem(it){
         <span class="bin bin-left edit-tap">${EDIT_ICON}</span>
         <span class="bin bin-right bin-tap">${BIN_ICON}</span>
       </div>
-      <div class="item ${it.watched ? 'watched' : ''} ${selectionMode ? 'select-mode' : ''}" data-id="${it.id}" data-mode="active">
+      <div class="item ${it.watched ? 'watched' : ''}" data-id="${it.id}" data-mode="active">
         <div class="drag-handle" data-drag-id="${it.id}">
           <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
         <div class="check" onclick="toggleWatched('${it.id}')">${it.watched ? '✓' : ''}</div>
-        <div class="select-check ${isSelected ? 'checked' : ''}" data-select-id="${it.id}">${isSelected ? '✓' : ''}</div>
         ${it.poster ? `<img class="item-poster" src="${it.poster}" alt="" loading="lazy">` : ''}
         <div class="item-body" data-expand-id="${it.id}">
           <div class="item-title">${escapeHtml(it.title)}${it.year ? ` <span class="item-year">(${escapeHtml(it.year)})</span>` : ''}</div>
@@ -1723,7 +1676,6 @@ function closeSwipeItem(wrapper, animate){
 }
 
 list.addEventListener('touchstart', e => {
-  if(selectionMode) return;
   if(e.target.closest('.drag-handle') || e.target.closest('.bin-tap')) return;
   const itemEl = e.target.closest('.item[data-id]');
   if(!itemEl) return;
@@ -1749,10 +1701,9 @@ list.addEventListener('touchstart', e => {
   itemEl.style.transition = 'none';
 }, { passive:true });
 
-// Long-press an item (not the drag handle) to enter batch-select mode
-let selectLongPressTimer = null;
+// Long-press an item (not the drag handle) to open its detail view
+let detailLongPressTimer = null;
 list.addEventListener('touchstart', e => {
-  if(selectionMode) return;
   if(e.target.closest('.drag-handle')) return;
   const itemEl = e.target.closest('.item[data-id]');
   if(!itemEl || itemEl.dataset.mode !== 'active') return;
@@ -1761,7 +1712,7 @@ list.addEventListener('touchstart', e => {
   let cancelled = false;
 
   function cleanup(){
-    clearTimeout(selectLongPressTimer);
+    clearTimeout(detailLongPressTimer);
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('touchend', onEnd);
   }
@@ -1779,11 +1730,11 @@ list.addEventListener('touchstart', e => {
   document.addEventListener('touchmove', onMove, { passive:true });
   document.addEventListener('touchend', onEnd, { passive:true });
 
-  selectLongPressTimer = setTimeout(() => {
+  detailLongPressTimer = setTimeout(() => {
     cleanup();
     if(!cancelled){
       swipe.el = null; // neutralize the in-progress swipe gesture for this touch
-      enterSelectionMode(itemEl.dataset.id);
+      toggleExpand(itemEl.dataset.id);
     }
   }, 500);
 }, { passive:true });
@@ -2223,17 +2174,71 @@ window.addEventListener('orientationchange', () => setTimeout(hideSafariToolbar,
 function showModal(html, opts){
   const overlay = document.getElementById('modalOverlay');
   const box = document.getElementById('modalBox');
+  const wasOpen = overlay.classList.contains('open');
   box.innerHTML = html;
-  box.classList.toggle('detail-modal', !!(opts && opts.big));
+  const isBig = !!(opts && opts.big);
+  box.classList.toggle('detail-modal', isBig);
+  if(!wasOpen){
+    box.style.transform = '';
+  }
   overlay.classList.add('open');
+  if(isBig){
+    requestAnimationFrame(() => {
+      const header = document.getElementById('brandHeader');
+      const scrollArea = document.getElementById('scrollArea');
+      const headerH = header ? header.getBoundingClientRect().height : 80;
+      const viewportH = scrollArea ? scrollArea.clientHeight : window.innerHeight;
+      box.style.maxHeight = Math.max(240, viewportH - headerH - 10) + 'px';
+      attachSheetSwipeToClose(box);
+    });
+  }
 }
 function hideModal(){
   document.getElementById('modalOverlay').classList.remove('open');
+  const box = document.getElementById('modalBox');
+  box.style.transform = '';
+  box.style.transition = '';
   expandedId = null;
 }
 document.getElementById('modalOverlay').addEventListener('click', (e) => {
   if(e.target.id === 'modalOverlay') hideModal();
 });
+
+// Swipe down on the sheet's grab handle or hero area to dismiss
+function attachSheetSwipeToClose(sheetEl){
+  const grip = sheetEl.querySelector('#sheetGrab');
+  const hero = sheetEl.querySelector('.detail-hero');
+  const zones = [grip, hero].filter(Boolean);
+  let startY = 0, dy = 0, dragging = false;
+
+  function onStart(e){
+    startY = e.touches[0].clientY;
+    dy = 0;
+    dragging = true;
+    sheetEl.style.transition = 'none';
+  }
+  function onMove(e){
+    if(!dragging) return;
+    dy = Math.max(0, e.touches[0].clientY - startY);
+    sheetEl.style.transform = `translateY(${dy}px)`;
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging = false;
+    sheetEl.style.transition = 'transform 0.28s cubic-bezier(.2,.8,.2,1)';
+    if(dy > 110){
+      sheetEl.style.transform = `translateY(100%)`;
+      setTimeout(hideModal, 220);
+    } else {
+      sheetEl.style.transform = 'translateY(0)';
+    }
+  }
+  zones.forEach(zone => {
+    zone.addEventListener('touchstart', onStart, { passive:true });
+    zone.addEventListener('touchmove', onMove, { passive:true });
+    zone.addEventListener('touchend', onEnd, { passive:true });
+  });
+}
 
 // --- Poster suggestions: inline autocomplete under the title field ---
 let posterSearchDebounce = null;
@@ -2355,14 +2360,6 @@ function handleWatchNowClick(e){
 list.addEventListener('click', handleWatchNowClick);
 document.getElementById('modalBox').addEventListener('click', handleWatchNowClick);
 
-list.addEventListener('click', (e) => {
-  if(selectionMode) return;
-  if(e.target.closest('.watch-now-btn')) return;
-  const body = e.target.closest('.item-body[data-expand-id]');
-  if(!body) return;
-  toggleExpand(body.dataset.expandId);
-});
-
 // --- Tap an item: open a near-fullscreen detail view ---
 function toggleExpand(id){
   if(expandedId === id){
@@ -2432,6 +2429,7 @@ function renderDetailModal(it){
   const scheme = it.platform ? (APP_SCHEMES[it.platform] || '') : '';
 
   return `
+    <div class="sheet-grab" id="sheetGrab"></div>
     <button class="detail-close" onclick="hideModal()">✕</button>
     <div class="detail-hero">
       ${it.poster
@@ -2666,66 +2664,6 @@ document.getElementById('shareListMenuItem').addEventListener('click', () => {
   }
 });
 
-// --- Batch select mode ---
-function updateSelectionBar(){
-  const bar = document.getElementById('selectionBar');
-  const count = selectedIds.size;
-  document.getElementById('selectionCount').textContent = `${count} selected`;
-  bar.classList.toggle('open', selectionMode);
-}
-function enterSelectionMode(firstId){
-  selectionMode = true;
-  selectedIds.clear();
-  if(firstId) selectedIds.add(firstId);
-  if(navigator.vibrate) navigator.vibrate(15);
-  updateSelectionBar();
-  render();
-}
-document.getElementById('selectCancelBtn').addEventListener('click', () => {
-  selectionMode = false;
-  selectedIds.clear();
-  updateSelectionBar();
-  render();
-});
-document.getElementById('selectMarkWatchedBtn').addEventListener('click', () => {
-  selectedIds.forEach(id => {
-    const it = items.find(i => i.id === id);
-    if(it && !it.watched){ it.watched = true; it.watchedAt = new Date().toISOString(); }
-  });
-  if(navigator.vibrate) navigator.vibrate(15);
-  saveItems();
-  selectionMode = false;
-  selectedIds.clear();
-  updateSelectionBar();
-  render();
-  showToast('Marked as watched');
-});
-document.getElementById('selectDeleteBtn').addEventListener('click', () => {
-  selectedIds.forEach(id => {
-    const it = items.find(i => i.id === id);
-    if(it) it.deleted = true;
-  });
-  if(navigator.vibrate) navigator.vibrate(20);
-  saveItems();
-  const count = selectedIds.size;
-  selectionMode = false;
-  selectedIds.clear();
-  updateSelectionBar();
-  render();
-  showToast(`${count} item${count === 1 ? '' : 's'} removed`);
-});
-list.addEventListener('click', e => {
-  if(!selectionMode) return;
-  const itemEl = e.target.closest('.item[data-id]');
-  if(!itemEl || itemEl.dataset.mode !== 'active') return;
-  const id = itemEl.dataset.id;
-  if(selectedIds.has(id)) selectedIds.delete(id);
-  else selectedIds.add(id);
-  if(navigator.vibrate) navigator.vibrate(8);
-  updateSelectionBar();
-  render();
-});
-
 // --- "..." dropdown next to the add field ---
 const addMoreBtn = document.getElementById('addMoreBtn');
 const addMoreMenu = document.getElementById('addMoreMenu');
@@ -2847,8 +2785,11 @@ function importItemsFromFile(file){
       render();
       showToast(`Imported ${items.length} item${items.length === 1 ? '' : 's'}`);
     }catch(err){
-      showToast("Couldn't read that file");
+      showToast("That doesn't look like a Binge Bin backup file");
     }
+  };
+  reader.onerror = () => {
+    showToast("Couldn't read that file — try again");
   };
   reader.readAsText(file);
 }
