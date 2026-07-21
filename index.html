@@ -976,54 +976,68 @@
     line-height:1.25;
   }
 
-  /* --- Vertical picker wheel (minimal) --- */
-  .wheel-viewport{
+  /* --- Shake the bin: bucket wiggles, pops, then reveals the pick --- */
+  .shake-stage{
     position:relative;
-    height:200px;
-    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:170px;
     margin:8px 0 16px;
-    -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 34%, black 66%, transparent 100%);
-    mask-image:linear-gradient(to bottom, transparent 0%, black 34%, black 66%, transparent 100%);
   }
-  .wheel-highlight{
-    position:absolute;
-    top:80px;
-    left:8px;
-    right:8px;
-    height:40px;
-    border-top:1px solid rgba(232,36,28,0.35);
-    border-bottom:1px solid rgba(232,36,28,0.35);
-    pointer-events:none;
-    z-index:2;
+  .shake-bucket{
+    height:140px;
+    width:auto;
+    display:block;
+    transform-origin:50% 85%;
   }
-  .wheel-track{
-    transform:translateY(0);
+  @keyframes bucketShake{
+    0%,100%{ transform:rotate(0deg) translateX(0); }
+    15%{ transform:rotate(-9deg) translateX(-6px); }
+    30%{ transform:rotate(8deg) translateX(5px); }
+    45%{ transform:rotate(-7deg) translateX(-4px); }
+    60%{ transform:rotate(6deg) translateX(3px); }
+    75%{ transform:rotate(-3deg) translateX(-2px); }
+    90%{ transform:rotate(2deg) translateX(1px); }
   }
-  .wheel-row{
-    height:40px;
-    line-height:40px;
+  @keyframes bucketShakeBig{
+    0%{ transform:rotate(0deg) scale(1); opacity:1; }
+    12%{ transform:rotate(-12deg) scale(1.05); }
+    26%{ transform:rotate(11deg) scale(1.05); }
+    40%{ transform:rotate(-10deg) scale(1.08); }
+    55%{ transform:rotate(9deg) scale(1.08); }
+    70%{ transform:rotate(-5deg) scale(1.05); }
+    85%{ transform:rotate(3deg) scale(1.02); opacity:1; }
+    100%{ transform:rotate(0deg) scale(0.7); opacity:0; }
+  }
+  .shake-bucket.shaking{ animation:bucketShake 0.55s ease-in-out; }
+  .shake-bucket.shaking-big{ animation:bucketShakeBig 0.6s cubic-bezier(.3,.2,.3,1) both; }
+  .shake-bucket.shaking-loop{ animation:bucketShake 1.3s ease-in-out infinite; }
+  @keyframes revealPop{
+    0%{ opacity:0; transform:scale(0.5); }
+    60%{ opacity:1; transform:scale(1.08); }
+    100%{ transform:scale(1); }
+  }
+  .reveal-poster{
+    height:160px;
+    width:auto;
+    max-width:100%;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid var(--line);
+    animation:revealPop 0.4s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .reveal-namecard{
+    max-width:260px;
+    padding:22px 20px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:12px;
     text-align:center;
-    font-size:15px;
-    font-weight:400;
-    letter-spacing:0.01em;
-    color:var(--muted);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    padding:0 28px;
-    opacity:0.55;
-    transition:opacity 0.2s ease;
-  }
-  .wheel-row.wheel-landed{
-    color:var(--text);
-    font-weight:600;
-    font-size:17px;
-    opacity:1;
-    animation:wheelSettle 0.3s ease;
-  }
-  @keyframes wheelSettle{
-    0%{ opacity:0.4; transform:scale(0.96); }
-    100%{ opacity:1; transform:scale(1); }
+    font-size:18px;
+    font-weight:700;
+    line-height:1.3;
+    animation:revealPop 0.4s cubic-bezier(.2,.8,.2,1) both;
   }
   .modal-actions{
     display:flex;
@@ -1058,19 +1072,6 @@
   .stats-row .stats-label{color:var(--muted);}
   .stats-row .stats-value{font-weight:700;}
 
-  .shake-tip-icon{
-    font-size:48px;
-    text-align:center;
-    margin:10px 0;
-    animation:popcornShake 0.5s ease-in-out 3;
-  }
-  @keyframes popcornShake{
-    0%, 100%{ transform:rotate(0deg) translateX(0); }
-    20%{ transform:rotate(-10deg) translateX(-5px); }
-    40%{ transform:rotate(10deg) translateX(5px); }
-    60%{ transform:rotate(-7deg) translateX(-3px); }
-    80%{ transform:rotate(7deg) translateX(3px); }
-  }
   .shake-tip-text{
     text-align:center;
     font-size:15px;
@@ -2401,6 +2402,15 @@ function fetchItemDetails(it){
     });
 }
 
+function getWatchLinkInfo(it){
+  let url = it.watchLink;
+  if(!url && it.platform && PLATFORM_URLS[it.platform]){
+    url = PLATFORM_URLS[it.platform] + encodeURIComponent(it.title);
+  }
+  const scheme = it.platform ? (APP_SCHEMES[it.platform] || '') : '';
+  return { url, scheme };
+}
+
 function renderDetailModal(it){
   const meta = [];
   if(it.year) meta.push(it.year);
@@ -2422,11 +2432,7 @@ function renderDetailModal(it){
     ? `<div class="detail-cast"><span class="detail-cast-label">Cast</span>${escapeHtml(it.cast.join(', '))}</div>`
     : '';
 
-  let watchUrl = it.watchLink;
-  if(!watchUrl && it.platform && PLATFORM_URLS[it.platform]){
-    watchUrl = PLATFORM_URLS[it.platform] + encodeURIComponent(it.title);
-  }
-  const scheme = it.platform ? (APP_SCHEMES[it.platform] || '') : '';
+  const { url: watchUrl, scheme } = getWatchLinkInfo(it);
 
   return `
     <div class="sheet-grab" id="sheetGrab"></div>
@@ -2490,63 +2496,78 @@ function pickSurprise(){
     return;
   }
 
-  const ROW_H = 40;
-  const CENTER_INDEX = 2; // 5 visible rows, 0-4 — index 2 sits in the highlight band
-  const SPIN_ROWS = 20;
-  const PAD_ROWS = 2;
-
-  const wheelItems = [];
-  for(let i = 0; i < SPIN_ROWS; i++) wheelItems.push(pool[Math.floor(Math.random() * pool.length)]);
-  const finalPick = pool[Math.floor(Math.random() * pool.length)];
-  const finalIndex = wheelItems.length;
-  wheelItems.push(finalPick);
-  for(let i = 0; i < PAD_ROWS; i++) wheelItems.push(pool[Math.floor(Math.random() * pool.length)]);
+  const bucketSrc = document.getElementById('headerW').src;
 
   showModal(`
-    <div class="modal-title">Spinning</div>
-    <div class="wheel-viewport">
-      <div class="wheel-highlight"></div>
-      <div class="wheel-track" id="wheelTrack">
-        ${wheelItems.map((it, i) => `<div class="wheel-row" data-i="${i}">${escapeHtml(it.title)}</div>`).join('')}
-      </div>
+    <div class="modal-title" id="shakeTitle">Shaking the bin...</div>
+    <div class="shake-stage" id="shakeStage">
+      <img class="shake-bucket" id="shakeBucket" src="${bucketSrc}" alt="">
     </div>
-    <div class="item-tags" id="slotTags"></div>
-    <div class="modal-actions" id="slotActions"></div>
+    <div class="modal-actions" id="shakeActions">
+      <button class="modal-btn" onclick="hideModal()">Cancel</button>
+    </div>
   `);
 
-  const track = document.getElementById('wheelTrack');
-  const targetY = -(finalIndex - CENTER_INDEX) * ROW_H;
+  const bucket = document.getElementById('shakeBucket');
+  const stage = document.getElementById('shakeStage');
 
-  // Force a reflow before transitioning so the browser has a committed
-  // starting frame (0) to animate from.
-  void track.offsetHeight;
-  track.style.transition = 'transform 2.4s cubic-bezier(0.1, 0.7, 0.1, 1)';
-  track.style.transform = `translateY(${targetY}px)`;
-
-  // Haptic ticks timed to feel like the wheel clicking past each row,
-  // slowing down toward the end (no-op on iOS Safari — see note above).
-  if(navigator.vibrate){
-    let t = 0;
-    for(let i = 0; i < 16; i++){
-      t += 40 + i * i * 3.2;
-      setTimeout(() => navigator.vibrate(6), t);
-    }
+  function shakePulse(kernelCount){
+    bucket.classList.remove('shaking');
+    void bucket.offsetWidth; // force reflow so the animation restarts cleanly
+    bucket.classList.add('shaking');
+    spawnKernels(stage, kernelCount);
+    if(navigator.vibrate) navigator.vibrate(15);
   }
 
+  // Two teasing shakes with a little popcorn escaping each time...
+  shakePulse(3);
   setTimeout(() => {
-    const landedRow = track.querySelector(`.wheel-row[data-i="${finalIndex}"]`);
-    if(landedRow) landedRow.classList.add('wheel-landed');
-    document.getElementById('slotTags').innerHTML = `
-      ${finalPick.type ? `<span class="tag">${escapeHtml(finalPick.type)}</span>` : ''}
-      ${finalPick.genre ? `<span class="tag">${escapeHtml(finalPick.genre)}</span>` : ''}
-      ${platformBadge(finalPick.platform)}
-    `;
-    document.getElementById('slotActions').innerHTML = `
-      <button class="modal-btn" onclick="pickSurprise()">Spin again</button>
-      <button class="modal-btn primary" onclick="toggleWatched('${finalPick.id}'); hideModal();">Mark watched</button>
-    `;
-    if(navigator.vibrate) navigator.vibrate([15, 30, 15]);
-  }, 2450);
+    shakePulse(3);
+    setTimeout(() => {
+      // ...then the third shake bursts the bucket open and reveals the pick
+      bucket.classList.remove('shaking');
+      void bucket.offsetWidth;
+      bucket.classList.add('shaking-big');
+      spawnKernels(stage, 10);
+      if(navigator.vibrate) navigator.vibrate([20, 30, 20, 30, 45]);
+      setTimeout(() => revealPick(pool), 560);
+    }, 780);
+  }, 780);
+}
+
+function spawnKernels(container, count){
+  for(let i = 0; i < count; i++){
+    const el = document.createElement('span');
+    el.className = 'pop-kernel';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 55 + Math.random() * 75;
+    el.style.setProperty('--kx', `${Math.cos(angle) * dist}px`);
+    el.style.setProperty('--ky', `${Math.sin(angle) * dist - 20}px`);
+    el.style.animationDelay = `${Math.random() * 0.12}s`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  }
+}
+
+function revealPick(pool){
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  const stage = document.getElementById('shakeStage');
+  const title = document.getElementById('shakeTitle');
+  if(!stage || !title) return; // modal was closed mid-animation
+  title.textContent = "Tonight's pick";
+
+  stage.innerHTML = pick.poster
+    ? `<img class="reveal-poster" src="${pick.poster}" alt="">`
+    : `<div class="reveal-namecard">${escapeHtml(pick.title)}</div>`;
+
+  const { url: watchUrl, scheme } = getWatchLinkInfo(pick);
+  document.getElementById('shakeActions').innerHTML = `
+    <button class="modal-btn" onclick="pickSurprise()">Shake again</button>
+    ${watchUrl
+      ? `<button class="modal-btn primary watch-now-btn" data-app-scheme="${escapeHtml(scheme)}" data-web-url="${escapeHtml(watchUrl)}">▶ Watch Now</button>`
+      : `<button class="modal-btn primary" onclick="toggleWatched('${pick.id}'); hideModal();">Mark watched</button>`}
+  `;
+  if(navigator.vibrate) navigator.vibrate([15, 30, 15]);
 }
 
 // --- Shake to trigger surprise me (like a slot machine) ---
@@ -2814,9 +2835,12 @@ function maybeShowShakeTip(){
   setTimeout(() => {
     if(localStorage.getItem('shakeTipShown')) return;
     localStorage.setItem('shakeTipShown', '1');
+    const bucketSrc = document.getElementById('headerW').src;
     showModal(`
       <div class="modal-title">Did you know?</div>
-      <div class="shake-tip-icon">🍿</div>
+      <div class="shake-stage">
+        <img class="shake-bucket shaking-loop" src="${bucketSrc}" alt="">
+      </div>
       <div class="shake-tip-text">Shake your phone to get a random pick from your To Watch list</div>
       <div class="modal-actions">
         <button class="modal-btn primary" onclick="hideModal()">Got it</button>
