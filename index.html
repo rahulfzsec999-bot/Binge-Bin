@@ -486,6 +486,52 @@
     will-change:transform;
   }
   .item.watched{opacity:0.45;}
+
+  /* --- AdSense cards (match item card chrome) --- */
+  .ad-card{
+    position:relative;
+    border-radius:12px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .ad-card .ad-item{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+    min-height:90px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .ad-card .ad-label{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    align-self:flex-start;
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    padding:2px 8px;
+    border-radius:20px;
+  }
+  .ad-card ins.adsbygoogle{
+    display:block;
+    width:100%;
+    max-width:100%;
+    min-height:72px;
+    background:transparent;
+    overflow:hidden;
+  }
+  .bottom-ad{
+    margin-top:8px;
+    margin-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .bottom-ad .ad-item{
+    min-height:100px;
+  }
   .check{
     width:22px; height:22px;
     border-radius:50%;
@@ -831,9 +877,8 @@
   .modal-overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.6);
-    backdrop-filter:blur(6px);
-    -webkit-backdrop-filter:blur(6px);
+    background:rgba(0,0,0,0.62);
+    /* no backdrop-filter — blur is a major source of jank during sheet animation */
     display:flex;
     align-items:center;
     justify-content:center;
@@ -842,7 +887,7 @@
     z-index:600;
     opacity:0;
     pointer-events:none;
-    transition:opacity 0.2s ease;
+    transition:opacity 0.3s ease;
   }
   .modal-overlay.open{
     opacity:1;
@@ -858,12 +903,16 @@
     max-height:80vh;
     max-height:80dvh;
     overflow-y:auto;
-    transform:scale(0.92);
-    transition:transform 0.2s ease;
+    transform:scale(0.96) translateY(8px);
+    opacity:0.92;
+    transition:transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.28s ease;
   }
-  .modal-overlay.open .modal-box{transform:scale(1);}
+  .modal-overlay.open .modal-box{
+    transform:scale(1) translateY(0);
+    opacity:1;
+  }
 
-  /* --- Full-screen item detail view: bottom sheet starting below the header --- */
+  /* --- Item detail: clean bottom sheet --- */
   .modal-box.detail-modal{
     position:fixed;
     left:0;
@@ -873,18 +922,28 @@
     width:100%;
     max-width:100%;
     height:auto;
-    max-height:none;
+    max-height:calc(100dvh - env(safe-area-inset-top, 0px) - 64px);
     padding:0;
     padding-bottom:env(safe-area-inset-bottom, 0px);
     margin:0;
     display:flex;
     flex-direction:column;
     overflow:hidden;
-    border-radius:20px 20px 0 0;
-    transform:translateY(100%);
-    transition:transform 0.28s cubic-bezier(.2,.8,.2,1);
+    border-radius:18px 18px 0 0;
+    border-left:none;
+    border-right:none;
+    border-bottom:none;
+    opacity:1;
+    transform:translate3d(0, 100%, 0);
+    transition:transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change:transform;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
   }
-  .modal-overlay.open .modal-box.detail-modal{transform:translateY(0);}
+  .modal-overlay.open .modal-box.detail-modal{
+    transform:translate3d(0, 0, 0);
+    opacity:1;
+  }
   .sheet-grab{
     display:flex;
     justify-content:center;
@@ -1161,6 +1220,9 @@
     font-size:13px;
   }
 </style>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4716433342416575"
+     crossorigin="anonymous"></script>
 </head>
 <body>
 <div id="splash">
@@ -1284,6 +1346,17 @@
 
       <div class="swipe-hint" id="swipeHint">Swipe an item left or right to delete it</div>
       <div id="list"></div>
+      <div class="ad-card bottom-ad" id="bottomAd">
+        <div class="ad-item">
+          <div class="ad-label">Ad</div>
+          <ins class="adsbygoogle"
+               style="display:block;width:100%"
+               data-ad-format="fluid"
+               data-ad-layout-key="-fb+5w+4e-db+86"
+               data-ad-client="ca-pub-4716433342416575"
+               data-ad-slot="3169217647"></ins>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1301,6 +1374,14 @@
 // Without a key, "Find poster" will show a message instead of results.
 // ============================================================
 const TMDB_API_KEY = '9bf48a005959ad4e4c5aba043f5c1099';
+
+// --- AdSense (replace placeholders with your real IDs from adsense.google.com) ---
+const ADSENSE_CLIENT = 'ca-pub-4716433342416575';
+const ADSENSE_SLOT_INFEED = '3169217647';  // official fluid unit
+const ADSENSE_SLOT_BOTTOM = '3169217647';  // same official unit for bottom slot
+const ADSENSE_LAYOUT_KEY = '-fb+5w+4e-db+86';
+const ADS_EVERY_N = 3;                     // show an in-feed ad after every N items
+
 const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/w200';
 const WATCH_REGION = 'AU';
 // TMDB/JustWatch provider names don't always exactly match our platform
@@ -1474,14 +1555,16 @@ function addItemForce(title){
   pendingTmdbKind = null;
   if(typeof closeSuggestions === 'function') closeSuggestions();
   if(navigator.vibrate) navigator.vibrate(10);
-  saveItems();
-  render();
+  // Dismiss keyboard immediately so it doesn't fight the sheet animation
   titleInput.blur();
-  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
-  // Open the item's info/detail page after adding
-  requestAnimationFrame(() => {
-    toggleExpand(newId);
-  });
+  if(document.activeElement && typeof document.activeElement.blur === 'function'){
+    document.activeElement.blur();
+  }
+  // Persist in background — don't block the open animation
+  try{ saveItems(); }catch(e){}
+  // Open the info sheet first (cheap), re-render the list after the slide starts
+  toggleExpand(newId);
+  setTimeout(() => { render(); }, 60);
 }
 
 function addItem(){
@@ -1620,14 +1703,56 @@ function render(){
     else if(currentFilter === 'watched') msg = 'Nothing marked watched yet.';
     else if(currentFilter === 'deleted') msg = 'Nothing in the bin.';
     list.innerHTML = `<div class="empty">${msg}</div>`;
+    // Keep bottom ad visible even on empty list
+    pushPendingAds();
     return;
   }
 
-  list.innerHTML = filtered.map(it => {
-    if(editingId === it.id) return renderEditForm(it);
-    if(it.deleted) return renderDeletedItem(it);
-    return renderItem(it);
-  }).join('');
+  const showInfeedAds = currentFilter !== 'deleted' && !searchQuery.trim();
+  const parts = [];
+  let visibleCount = 0;
+  filtered.forEach((it) => {
+    if(editingId === it.id) parts.push(renderEditForm(it));
+    else if(it.deleted) parts.push(renderDeletedItem(it));
+    else parts.push(renderItem(it));
+
+    visibleCount++;
+    if(showInfeedAds && visibleCount % ADS_EVERY_N === 0){
+      parts.push(renderAdCard(`infeed-${visibleCount / ADS_EVERY_N}`));
+    }
+  });
+  list.innerHTML = parts.join('');
+  pushPendingAds();
+}
+
+function renderAdCard(key){
+  // Card chrome matches list items; labelled so it's clearly an ad
+  return `
+    <div class="ad-card" data-ad-key="${escapeHtml(String(key))}">
+      <div class="ad-item">
+        <div class="ad-label">Ad</div>
+        <ins class="adsbygoogle"
+             style="display:block;width:100%"
+             data-ad-format="fluid"
+             data-ad-layout-key="${ADSENSE_LAYOUT_KEY}"
+             data-ad-client="${ADSENSE_CLIENT}"
+             data-ad-slot="${ADSENSE_SLOT_INFEED}"></ins>
+      </div>
+    </div>
+  `;
+}
+
+function pushPendingAds(){
+  // Fill any AdSense units that haven't been initialized yet
+  const nodes = document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status])');
+  if(!nodes.length) return;
+  try{
+    nodes.forEach(() => {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    });
+  }catch(e){
+    console.log('AdSense push skipped', e);
+  }
 }
 
 function renderItem(it){
@@ -1795,43 +1920,6 @@ list.addEventListener('touchstart', e => {
   itemEl.style.transition = 'none';
 }, { passive:true });
 
-// Long-press an item (not the drag handle) to open its detail view
-let detailLongPressTimer = null;
-list.addEventListener('touchstart', e => {
-  if(e.target.closest('.drag-handle')) return;
-  const itemEl = e.target.closest('.item[data-id]');
-  if(!itemEl || itemEl.dataset.mode !== 'active') return;
-  const startX = e.touches[0].clientX;
-  const startY = e.touches[0].clientY;
-  let cancelled = false;
-
-  function cleanup(){
-    clearTimeout(detailLongPressTimer);
-    document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('touchend', onEnd);
-  }
-  function onMove(ev){
-    const t = ev.touches[0];
-    if(Math.abs(t.clientX - startX) > 10 || Math.abs(t.clientY - startY) > 10){
-      cancelled = true;
-      cleanup();
-    }
-  }
-  function onEnd(){
-    cancelled = true;
-    cleanup();
-  }
-  document.addEventListener('touchmove', onMove, { passive:true });
-  document.addEventListener('touchend', onEnd, { passive:true });
-
-  detailLongPressTimer = setTimeout(() => {
-    cleanup();
-    if(!cancelled){
-      swipe.el = null; // neutralize the in-progress swipe gesture for this touch
-      toggleExpand(itemEl.dataset.id);
-    }
-  }, 500);
-}, { passive:true });
 
 list.addEventListener('touchmove', e => {
   if(!swipe.el) return;
@@ -1871,7 +1959,7 @@ list.addEventListener('touchend', () => {
   swipe = { el:null };
 });
 
-// Tap the revealed edit icon to open the edit form; tap the bin to confirm delete
+// Tap item to open info; tap edit/bin when revealed for those actions
 list.addEventListener('click', e => {
   const editBtn = e.target.closest('.edit-tap');
   if(editBtn){
@@ -1884,7 +1972,7 @@ list.addEventListener('click', e => {
   }
 
   const bin = e.target.closest('.bin-tap');
-  if(!bin) return;
+  if(bin){
   const wrapper = bin.closest('.swipe-wrapper');
   const itemEl = wrapper && wrapper.querySelector('.item[data-id]');
   if(!itemEl) return;
@@ -1901,6 +1989,25 @@ list.addEventListener('click', e => {
     if(mode === 'trash') permanentDelete(id);
     else if(mode === 'active') deleteItem(id);
   }, 180);
+    return;
+  }
+
+  // Ignore controls that have their own actions
+  if(e.target.closest('.drag-handle')) return;
+  if(e.target.closest('.check')) return;
+  if(e.target.closest('.watch-now-btn')) return;
+
+  const itemEl = e.target.closest('.item[data-id]');
+  if(!itemEl || itemEl.dataset.mode !== 'active') return;
+
+  const wrapper = itemEl.closest('.swipe-wrapper');
+  // If swipe actions are open, a tap closes them instead of opening info
+  if(wrapper && (wrapper.dataset.open === 'pos' || wrapper.dataset.open === 'neg')){
+    closeSwipeItem(wrapper);
+    return;
+  }
+
+  toggleExpand(itemEl.dataset.id);
 });
 
 // --- Drag handle: tap and hold to reorder ---
@@ -2268,26 +2375,37 @@ window.addEventListener('orientationchange', () => setTimeout(hideSafariToolbar,
 function showModal(html, opts){
   const overlay = document.getElementById('modalOverlay');
   const box = document.getElementById('modalBox');
-  const wasOpen = overlay.classList.contains('open');
-  box.innerHTML = html;
   const isBig = !!(opts && opts.big);
+  const wasOpen = overlay.classList.contains('open');
+
+  box.innerHTML = html;
   box.classList.toggle('detail-modal', isBig);
-  if(!wasOpen){
-    box.style.transform = '';
-  }
-  overlay.classList.add('open');
+  // Clear any inline styles left over from swipe-to-dismiss
+  box.style.transform = '';
+  box.style.transition = '';
+  box.style.maxHeight = '';
+
   if(isBig){
-    requestAnimationFrame(() => {
-      const header = document.getElementById('brandHeader');
-      const scrollArea = document.getElementById('scrollArea');
-      const headerH = header ? header.getBoundingClientRect().height : 80;
-      const viewportH = scrollArea ? scrollArea.clientHeight : window.innerHeight;
-      box.style.maxHeight = Math.max(240, viewportH - headerH - 10) + 'px';
+    if(wasOpen){
+      overlay.classList.add('open');
       attachSheetSwipeToClose(box);
-    });
+    } else {
+      // CSS starts the sheet off-screen. Wait one paint, then open so the
+      // slide-up transition always runs (no forced synchronous reflow).
+      overlay.classList.remove('open');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          overlay.classList.add('open');
+          attachSheetSwipeToClose(box);
+        });
+      });
+    }
+  } else {
+    overlay.classList.add('open');
   }
 }
 function hideModal(){
+  const overlay = document.getElementById('modalOverlay');
   const box = document.getElementById('modalBox');
   if(modalReturnCallback){
     const cb = modalReturnCallback;
@@ -2298,9 +2416,24 @@ function hideModal(){
     cb();
     return;
   }
-  document.getElementById('modalOverlay').classList.remove('open');
-  box.style.transform = '';
-  box.style.transition = '';
+
+  if(box.classList.contains('detail-modal') && overlay.classList.contains('open')){
+    // Smooth slide-down, then clean up
+    box.style.transition = 'transform 0.34s cubic-bezier(0.32, 0.72, 0, 1)';
+    box.style.transform = 'translate3d(0, 100%, 0)';
+    overlay.classList.remove('open');
+    const done = () => {
+      box.style.transform = '';
+      box.style.transition = '';
+      box.removeEventListener('transitionend', done);
+    };
+    box.addEventListener('transitionend', done);
+    setTimeout(done, 380); // fallback if transitionend doesn't fire
+  } else {
+    overlay.classList.remove('open');
+    box.style.transform = '';
+    box.style.transition = '';
+  }
   expandedId = null;
 }
 document.getElementById('modalOverlay').addEventListener('click', (e) => {
@@ -2328,12 +2461,12 @@ function attachSheetSwipeToClose(sheetEl){
   function onEnd(){
     if(!dragging) return;
     dragging = false;
-    sheetEl.style.transition = 'transform 0.28s cubic-bezier(.2,.8,.2,1)';
+    sheetEl.style.transition = 'transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)';
     if(dy > 110){
-      sheetEl.style.transform = `translateY(100%)`;
-      setTimeout(hideModal, 220);
+      sheetEl.style.transform = 'translate3d(0, 100%, 0)';
+      setTimeout(hideModal, 300);
     } else {
-      sheetEl.style.transform = 'translateY(0)';
+      sheetEl.style.transform = 'translate3d(0, 0, 0)';
     }
   }
   zones.forEach(zone => {
@@ -2972,6 +3105,19 @@ maybeShowShakeTip();
 loadItems();
 updateTabPill();
 window.addEventListener('resize', updateTabPill);
+
+// Wire bottom ad with the same client/slot constants
+(function initBottomAd(){
+  const ins = document.querySelector('#bottomAd ins.adsbygoogle');
+  if(!ins) return;
+  ins.setAttribute('data-ad-client', ADSENSE_CLIENT);
+  ins.setAttribute('data-ad-slot', ADSENSE_SLOT_BOTTOM);
+  ins.setAttribute('data-ad-format', 'fluid');
+  ins.setAttribute('data-ad-layout-key', ADSENSE_LAYOUT_KEY);
+  ins.style.display = 'block';
+  ins.style.width = '100%';
+  pushPendingAds();
+})();
 </script>
 </body>
 </html>
