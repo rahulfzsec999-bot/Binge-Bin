@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Binge Bin">
@@ -321,7 +321,7 @@
     border-radius:9px;
     color:var(--text);
     padding:12px 12px;
-    font-size:16px; /* 16px+ prevents iOS Safari focus zoom */
+    font-size:16px;
     outline:none;
   }
   input[type=text]:focus{border-color:var(--accent);}
@@ -334,7 +334,7 @@
     border-radius:9px;
     color:var(--muted);
     padding:8px 10px;
-    font-size:16px; /* 16px+ prevents iOS Safari focus zoom */
+    font-size:16px;
     outline:none;
     flex:1 1 0;
     min-width:0;
@@ -721,7 +721,7 @@
     .add-box input[type=text],
     .add-box select{
       padding:8px 8px;
-      font-size:16px; /* keep >=16px even in landscape */
+      font-size:16px;
     }
     .add-box button.add-btn{
       padding:0 12px;
@@ -782,7 +782,7 @@
     border-radius:9px;
     color:var(--text);
     padding:10px 12px;
-    font-size:16px; /* 16px+ prevents iOS Safari focus zoom */
+    font-size:16px;
     outline:none;
   }
   .search-row input[type=text]:focus{border-color:var(--accent);}
@@ -1445,8 +1445,9 @@ function saveItems(){
 }
 
 function addItemForce(title){
+  const newId = Date.now().toString();
   items.unshift({
-    id: Date.now().toString(),
+    id: newId,
     title,
     source: sourceInput.value,
     type: typeInput.value,
@@ -1471,10 +1472,16 @@ function addItemForce(title){
   pendingWatchLink = null;
   pendingTmdbId = null;
   pendingTmdbKind = null;
+  if(typeof closeSuggestions === 'function') closeSuggestions();
   if(navigator.vibrate) navigator.vibrate(10);
   saveItems();
   render();
-  titleInput.focus();
+  titleInput.blur();
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  // Open the item's info/detail page after adding
+  requestAnimationFrame(() => {
+    toggleExpand(newId);
+  });
 }
 
 function addItem(){
@@ -1715,8 +1722,25 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
-addBtn.addEventListener('click', addItem);
-titleInput.addEventListener('keydown', e => { if(e.key === 'Enter') addItem(); });
+function dismissKeyboard(){
+  titleInput.blur();
+  sourceInput.blur();
+  typeInput.blur();
+  platformInput.blur();
+  genreInput.blur();
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+}
+
+addBtn.addEventListener('click', () => {
+  addItem();
+  dismissKeyboard();
+});
+titleInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    addItem();
+    dismissKeyboard();
+  }
+});
 
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
