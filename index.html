@@ -1066,6 +1066,147 @@
   }
   .auth-sheet{position:relative;}
 
+  /* --- Full-screen sign-in gate, shown after the splash if not signed in --- */
+  .gate-overlay{
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+    padding-top:calc(24px + env(safe-area-inset-top, 0px));
+    z-index:800;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.32s ease;
+  }
+  .gate-overlay.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .gate-sheet{
+    width:100%;
+    max-width:380px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    position:relative;
+    transform:translateY(10px);
+    transition:transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .gate-overlay.open .gate-sheet{
+    transform:translateY(0);
+  }
+  .gate-close{
+    position:absolute;
+    top:0;
+    left:0;
+    background:rgba(255,255,255,0.06);
+    border:1px solid var(--line);
+    color:var(--text);
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    touch-action:manipulation;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .gate-close:active{background:rgba(255,255,255,0.14);}
+  .gate-logo-img{
+    width:76px;
+    height:76px;
+    object-fit:contain;
+    margin:6px 0 16px;
+  }
+  .gate-title{
+    font-size:22px;
+    font-weight:800;
+    color:var(--text);
+    margin-bottom:8px;
+    letter-spacing:0.01em;
+  }
+  .gate-sub{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:28px;
+    line-height:1.5;
+  }
+  .gate-link{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    padding:0;
+    touch-action:manipulation;
+  }
+  .gate-btn{
+    width:100%;
+    border-radius:10px;
+    padding:13px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+    margin-bottom:12px;
+    border:1px solid transparent;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .gate-btn:active{transform:scale(0.98);}
+  .gate-btn:disabled{opacity:0.55; cursor:default;}
+  .gate-btn-google{
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    color:var(--text);
+  }
+  .gate-btn-google:active{background:rgba(255,255,255,0.04);}
+  .gate-btn-apple{
+    background:#000;
+    color:#fff;
+    border:1px solid #1a1a1a;
+  }
+  .gate-divider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    margin:6px 0 14px;
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  .gate-divider::before,
+  .gate-divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+  .gate-btn-email{
+    background:var(--accent);
+    color:#fff;
+    margin-bottom:0;
+  }
+  .gate-error{
+    color:var(--danger);
+    font-size:12px;
+    margin:0 0 14px;
+    min-height:0;
+    display:none;
+  }
+  .gate-error.show{display:block;}
+
   .modal-overlay{
     position:fixed;
     inset:0;
@@ -1605,6 +1746,28 @@
   </div>
 </div>
 
+<!-- Full-screen sign-in gate: shown once per session after the splash finishes, if no one is signed in -->
+<div class="gate-overlay" id="gateOverlay" aria-hidden="true">
+  <div class="gate-sheet" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <button type="button" class="gate-close" id="gateCloseBtn" aria-label="Close">✕</button>
+    <img class="gate-logo-img" src="/favicon-512.png" alt="Binge Bin" onerror="this.style.display='none'">
+    <div class="gate-title" id="gateTitle">Sign In</div>
+    <div class="gate-sub">Don't have an account? <button type="button" class="gate-link" id="gateCreateAccountBtn">Create an Account</button></div>
+    <p class="gate-error" id="gateError"></p>
+
+    <button type="button" class="gate-btn gate-btn-google" id="gateGoogleBtn">
+      <span>Continue with Google</span>
+    </button>
+    <button type="button" class="gate-btn gate-btn-apple" id="gateAppleBtn">
+      <span>Continue with Apple</span>
+    </button>
+
+    <div class="gate-divider">or</div>
+
+    <button type="button" class="gate-btn gate-btn-email" id="gateEmailBtn">Email</button>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -2105,6 +2268,103 @@ function closeAuthModal(){
   if(form) form.reset();
 }
 
+// --- Full-screen sign-in gate (shown after splash, once per session, if signed out) ---
+let splashFinished = false;
+let authStateResolved = false;
+const GATE_DISMISS_KEY = 'gateDismissedSession';
+
+function setGateError(msg){
+  const el = document.getElementById('gateError');
+  if(!el) return;
+  if(msg){ el.textContent = msg; el.classList.add('show'); }
+  else { el.textContent = ''; el.classList.remove('show'); }
+}
+
+function setGateBusy(busy){
+  const google = document.getElementById('gateGoogleBtn');
+  const apple = document.getElementById('gateAppleBtn');
+  const email = document.getElementById('gateEmailBtn');
+  [google, apple, email].forEach(btn => { if(btn) btn.disabled = !!busy; });
+}
+
+function openGate(){
+  const overlay = document.getElementById('gateOverlay');
+  if(!overlay) return;
+  setGateError('');
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeGate(){
+  const overlay = document.getElementById('gateOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+function dismissGate(){
+  try{ sessionStorage.setItem(GATE_DISMISS_KEY, '1'); }catch(e){}
+  closeGate();
+}
+
+function maybeOpenGate(){
+  if(!splashFinished || !authStateResolved) return;
+  if(currentUser) return;
+  if(!firebaseReady) return;
+  let dismissed = false;
+  try{ dismissed = sessionStorage.getItem(GATE_DISMISS_KEY) === '1'; }catch(e){}
+  if(dismissed) return;
+  openGate();
+}
+
+async function signInWithApple(){
+  if(!firebaseReady || !auth){
+    setGateError('Sign-in isn’t configured yet.');
+    showToast('Sign-in unavailable');
+    return;
+  }
+  setGateBusy(true);
+  setGateError('');
+  try{
+    lastSignInMethod = 'apple';
+    const provider = new firebase.auth.OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+    await auth.signInWithPopup(provider);
+    // onAuthStateChanged closes the gate + merges
+  }catch(e){
+    if(e && (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request')){
+      setGateBusy(false);
+      return;
+    }
+    console.error('Apple sign-in failed', e);
+    try{
+      lastSignInMethod = 'apple';
+      const provider = new firebase.auth.OAuthProvider('apple.com');
+      provider.addScope('email');
+      provider.addScope('name');
+      await auth.signInWithRedirect(provider);
+    }catch(e2){
+      console.error('Apple redirect failed', e2);
+      setGateError(friendlyAuthError(e2));
+      setGateBusy(false);
+    }
+  }
+}
+
+function setupGateUi(){
+  const closeBtn = document.getElementById('gateCloseBtn');
+  const googleBtn = document.getElementById('gateGoogleBtn');
+  const appleBtn = document.getElementById('gateAppleBtn');
+  const emailBtn = document.getElementById('gateEmailBtn');
+  const createBtn = document.getElementById('gateCreateAccountBtn');
+  if(closeBtn) closeBtn.addEventListener('click', dismissGate);
+  if(googleBtn) googleBtn.addEventListener('click', () => { setGateBusy(true); signInWithGoogle().finally(() => setGateBusy(false)); });
+  if(appleBtn) appleBtn.addEventListener('click', signInWithApple);
+  if(emailBtn) emailBtn.addEventListener('click', () => { closeGate(); openAuthModal('sign_in'); });
+  if(createBtn) createBtn.addEventListener('click', () => { closeGate(); openAuthModal('sign_up'); });
+}
+
 async function signInWithGoogle(){
   if(!firebaseReady || !auth){
     setAuthError('Firebase isn’t configured yet.');
@@ -2229,8 +2489,14 @@ function bindAuthListeners(){
         track('sign_in', { method: lastSignInMethod || 'unknown' });
       }
       closeAuthModal();
+      closeGate();
       await mergeLocalAndCloudOnLogin(user);
       setAuthBusy(false);
+      setGateBusy(false);
+    }
+    if(!authStateResolved){
+      authStateResolved = true;
+      maybeOpenGate();
     }
   });
 }
@@ -3106,6 +3372,8 @@ function morphSplashIntoHeader(){
   setTimeout(() => {
     splash.style.display = 'none';
     brandHeader.style.opacity = '1';
+    splashFinished = true;
+    maybeOpenGate();
   }, 650);
 }
 
@@ -3899,11 +4167,13 @@ updateTabPill();
 window.addEventListener('resize', updateTabPill);
 
 // Firebase: local storage always works; cloud sync only after config + sign-in
+setupGateUi();
 if(initFirebase()){
   setupAuthUi();
   bindAuthListeners();
 } else {
   setupAuthUi(); // still show Sign in — will toast if config missing
+  authStateResolved = true; // no Firebase, nothing to wait for — skip the gate
 }
 
 // Wire bottom ad with the same client/slot constants
