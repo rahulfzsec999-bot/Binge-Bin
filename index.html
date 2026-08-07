@@ -1257,6 +1257,14 @@
 <!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4716433342416575"
      crossorigin="anonymous"></script>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6EEBKL2QX4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-6EEBKL2QX4', { anonymize_ip: true });
+</script>
 </head>
 <body>
 <div id="splash">
@@ -1518,6 +1526,16 @@ let pendingTmdbKind = null;
 let expandedId = null;
 let modalReturnCallback = null;
 const STORE_KEY = 'queue-items';
+const GA_ID = 'G-6EEBKL2QX4';
+
+/** GA4 event helper — never send free-text titles or search queries. */
+function track(eventName, params){
+  try{
+    if(typeof gtag !== 'function') return;
+    gtag('event', eventName, params && typeof params === 'object' ? params : {});
+  }catch(e){ /* analytics must never break the app */ }
+}
+
 
 // --- Toast ---
 let toastTimeout = null;
@@ -1561,13 +1579,19 @@ function saveItems(){
 
 function addItemForce(title){
   const newId = Date.now().toString();
+  const source = sourceInput.value;
+  const type = typeInput.value;
+  const platform = platformInput.value;
+  const genre = genreInput.value;
+  const hasPoster = !!pendingPoster;
+  const fromTmdb = !!pendingTmdbId;
   items.unshift({
     id: newId,
     title,
-    source: sourceInput.value,
-    type: typeInput.value,
-    platform: platformInput.value,
-    genre: genreInput.value,
+    source,
+    type,
+    platform,
+    genre,
     poster: pendingPoster || null,
     year: pendingYear || null,
     watchLink: pendingWatchLink || null,
@@ -1589,15 +1613,20 @@ function addItemForce(title){
   pendingTmdbKind = null;
   if(typeof closeSuggestions === 'function') closeSuggestions();
   if(navigator.vibrate) navigator.vibrate(10);
-  // Dismiss keyboard immediately so it doesn't fight the sheet animation
   titleInput.blur();
   if(document.activeElement && typeof document.activeElement.blur === 'function'){
     document.activeElement.blur();
   }
-  // Persist in background — don't block the open animation
+  track('add_item', {
+    item_type: type || 'unspecified',
+    platform: platform || 'unspecified',
+    genre: genre || 'unspecified',
+    source: source || 'unspecified',
+    has_poster: hasPoster,
+    from_tmdb: fromTmdb
+  });
   try{ saveItems(); }catch(e){}
-  // Open the info sheet first (cheap), re-render the list after the slide starts
-  toggleExpand(newId);
+  toggleExpand(newId, 'after_add');
   setTimeout(() => { render(); }, 60);
 }
 
@@ -1607,6 +1636,7 @@ function addItem(){
   const normalized = title.toLowerCase();
   const dup = items.find(it => !it.deleted && it.title.trim().toLowerCase() === normalized);
   if(dup){
+    track('duplicate_add_attempt');
     showToast('Already on your list', 'Add anyway', () => addItemForce(title));
     return;
   }
@@ -1618,6 +1648,10 @@ function toggleWatched(id){
   if(it){
     it.watched = !it.watched;
     it.watchedAt = it.watched ? new Date().toISOString() : null;
+    track(it.watched ? 'mark_watched' : 'mark_unwatched', {
+      item_type: it.type || 'unspecified',
+      platform: it.platform || 'unspecified'
+    });
   }
   if(navigator.vibrate) navigator.vibrate(10);
   saveItems();
@@ -1626,7 +1660,10 @@ function toggleWatched(id){
 
 function setRating(id, rating){
   const it = items.find(i => i.id === id);
-  if(it) it.rating = it.rating === rating ? null : rating;
+  if(it){
+    it.rating = it.rating === rating ? null : rating;
+    track('rate_item', { rating: it.rating || 'cleared' });
+  }
   saveItems();
   render();
 }
@@ -1634,6 +1671,7 @@ function setRating(id, rating){
 function deleteItem(id){
   const it = items.find(i => i.id === id);
   if(it) it.deleted = true;
+  track('delete_item', { item_type: (it && it.type) || 'unspecified' });
   saveItems();
   render();
   showToast('Removed from list', 'Undo', () => restoreItem(id));
@@ -1649,6 +1687,7 @@ function restoreItem(id){
 
 function permanentDelete(id){
   items = items.filter(i => i.id !== id);
+  track('permanent_delete');
   if(navigator.vibrate) navigator.vibrate(20);
   saveItems();
   render();
@@ -1675,6 +1714,10 @@ function saveEdit(id){
   it.platform = document.getElementById(`edit-platform-${id}`).value;
   it.genre = document.getElementById(`edit-genre-${id}`).value;
   editingId = null;
+  track('edit_item', {
+    item_type: it.type || 'unspecified',
+    platform: it.platform || 'unspecified'
+  });
   if(navigator.vibrate) navigator.vibrate(10);
   saveItems();
   render();
@@ -2234,6 +2277,7 @@ function animateTabChange(newFilter, direction){
 
   setTimeout(() => {
     currentFilter = newFilter;
+    track('filter_tab', { tab: newFilter });
     hideModal();
     render();
 
@@ -2596,6 +2640,7 @@ titleSuggestions.addEventListener('click', (e) => {
   pendingTmdbKind = row.dataset.tmdbKind || null;
   if(row.dataset.mediaType === 'Movie') typeInput.value = 'Movie';
   else if(row.dataset.mediaType === 'Show') typeInput.value = 'Show';
+  track('tmdb_select', { media_type: row.dataset.mediaType || 'unknown' });
   closeSuggestions();
   titleInput.focus();
 
@@ -2625,13 +2670,17 @@ function handleWatchNowClick(e){
   const btn = e.target.closest('.watch-now-btn');
   if(!btn) return;
   e.stopPropagation(); // don't let this also trigger item selection / expand-collapse
+  track('watch_now', {
+    has_app_scheme: !!btn.dataset.appScheme,
+    has_web_url: !!btn.dataset.webUrl
+  });
   openInAppOrWeb(btn.dataset.appScheme, btn.dataset.webUrl);
 }
 list.addEventListener('click', handleWatchNowClick);
 document.getElementById('modalBox').addEventListener('click', handleWatchNowClick);
 
 // --- Tap an item: open a near-fullscreen detail view ---
-function toggleExpand(id){
+function toggleExpand(id, source){
   if(expandedId === id){
     hideModal();
     return;
@@ -2639,6 +2688,12 @@ function toggleExpand(id){
   expandedId = id;
   const it = items.find(i => i.id === id);
   if(!it) return;
+  track('open_detail', {
+    source: source || 'tap',
+    has_tmdb: !!it.tmdbId,
+    item_type: it.type || 'unspecified',
+    platform: it.platform || 'unspecified'
+  });
   showModal(renderDetailModal(it), { big: true });
   if(it.tmdbId && it.tmdbKind && !it.detailsFetched){
     fetchItemDetails(it);
@@ -2852,6 +2907,11 @@ function openInfoFromReveal(id){
 function revealPick(pool){
   if(!document.getElementById('modalOverlay').classList.contains('open')) return;
   const pick = pool[Math.floor(Math.random() * pool.length)];
+  track('surprise_pick', {
+    pool_size: pool.length,
+    item_type: pick.type || 'unspecified',
+    platform: pick.platform || 'unspecified'
+  });
   showModal(renderRevealModal(pick));
   if(navigator.vibrate) navigator.vibrate([15, 30, 15]);
 }
@@ -2950,6 +3010,7 @@ function shareItem(id){
   const it = items.find(i => i.id === id);
   if(!it) return;
   const text = `${it.title}${it.platform ? ' — ' + it.platform : ''}`;
+  track('share_item', { method: navigator.share ? 'share_sheet' : 'clipboard' });
   if(navigator.share){
     navigator.share({ title: it.title, text }).catch(() => {});
   } else if(navigator.clipboard){
@@ -2964,6 +3025,7 @@ document.getElementById('shareListMenuItem').addEventListener('click', () => {
     return;
   }
   const text = 'My Binge Bin:\n' + toWatch.map(i => `• ${i.title}`).join('\n');
+  track('share_list', { count: toWatch.length, method: navigator.share ? 'share_sheet' : 'clipboard' });
   if(navigator.share){
     navigator.share({ title: 'My Binge Bin', text }).catch(() => {});
   } else if(navigator.clipboard){
@@ -3030,9 +3092,18 @@ document.getElementById('searchMenuItem').addEventListener('click', () => {
     render();
   }
 });
+let searchTrackTimer = null;
 searchInput.addEventListener('input', () => {
   searchQuery = searchInput.value;
   render();
+  clearTimeout(searchTrackTimer);
+  searchTrackTimer = setTimeout(() => {
+    const q = searchQuery.trim();
+    if(!q) return;
+    // Do not send the raw query — only that a search happened and if it matched
+    const matches = items.filter(it => !it.deleted && it.title.toLowerCase().includes(q.toLowerCase()));
+    track('search', { has_results: matches.length > 0, result_count: matches.length });
+  }, 600);
 });
 
 // --- Sort: pick a mode from the menu ---
@@ -3042,6 +3113,7 @@ document.querySelectorAll('.sort-item').forEach(btn => {
     document.querySelectorAll('.sort-item').forEach(b => {
       b.classList.toggle('active', b.dataset.sort === currentSort);
     });
+    track('sort_change', { sort: currentSort });
     closeMenu();
     render();
   });
@@ -3060,6 +3132,7 @@ async function exportItems(){
     const file = new File([dataStr], filename, { type: 'application/json' });
     if(navigator.canShare && navigator.canShare({ files: [file] })){
       await navigator.share({ files: [file], title: 'Binge Bin Backup' });
+      track('export_backup', { method: 'share_sheet', item_count: items.length });
       showToast('Choose "Save to Files" to keep your backup');
       return;
     }
@@ -3077,6 +3150,7 @@ async function exportItems(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  track('export_backup', { method: 'download', item_count: items.length });
   showToast('Backup file downloaded');
 }
 
@@ -3087,6 +3161,7 @@ function importItemsFromFile(file){
       const parsed = JSON.parse(e.target.result);
       if(!Array.isArray(parsed)) throw new Error('Invalid format');
       items = parsed;
+      track('import_backup', { item_count: items.length });
       if(navigator.vibrate) navigator.vibrate([10, 20, 10]);
       saveItems();
       render();
