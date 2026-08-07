@@ -908,6 +908,164 @@
   }
 
   /* --- Modal (Surprise me / Stats) --- */
+  /* --- Auth modal (email / Google / reset) --- */
+  .auth-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    padding:calc(20px + env(safe-area-inset-top, 0px)) 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    z-index:700;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s ease;
+  }
+  .auth-overlay.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .auth-sheet{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:22px 20px 18px;
+    width:100%;
+    max-width:360px;
+    max-height:min(90dvh, 560px);
+    overflow-y:auto;
+    transform:translateY(12px) scale(0.98);
+    transition:transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .auth-overlay.open .auth-sheet{
+    transform:translateY(0) scale(1);
+  }
+  .auth-title{
+    font-size:18px;
+    font-weight:700;
+    color:var(--text);
+    margin-bottom:4px;
+  }
+  .auth-sub{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:16px;
+    line-height:1.4;
+  }
+  .auth-field{
+    margin-bottom:12px;
+  }
+  .auth-field label{
+    display:block;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .auth-field input{
+    width:100%;
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    border-radius:9px;
+    color:var(--text);
+    padding:12px;
+    font-size:16px;
+    outline:none;
+  }
+  .auth-field input:focus{border-color:var(--accent);}
+  .auth-error{
+    color:var(--danger);
+    font-size:12px;
+    margin:0 0 12px;
+    min-height:0;
+    display:none;
+  }
+  .auth-error.show{display:block;}
+  .auth-primary{
+    width:100%;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:12px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+    margin-bottom:10px;
+  }
+  .auth-primary:active{transform:scale(0.98);}
+  .auth-primary:disabled{opacity:0.55; cursor:default;}
+  .auth-google{
+    width:100%;
+    background:#0e0c0a;
+    color:var(--text);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    touch-action:manipulation;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .auth-google:active{background:rgba(255,255,255,0.04);}
+  .auth-divider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:4px 0 14px;
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  .auth-divider::before,
+  .auth-divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+  .auth-links{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    align-items:center;
+    margin-top:4px;
+  }
+  .auth-links button{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:13px;
+    cursor:pointer;
+    touch-action:manipulation;
+    padding:4px;
+  }
+  .auth-links button:active{color:var(--accent);}
+  .auth-close{
+    position:absolute;
+    top:10px;
+    right:12px;
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+    padding:6px;
+  }
+  .auth-sheet{position:relative;}
+
   .modal-overlay{
     position:fixed;
     inset:0;
@@ -1265,6 +1423,10 @@
   gtag('js', new Date());
   gtag('config', 'G-6EEBKL2QX4', { anonymize_ip: true });
 </script>
+<!-- Firebase (Auth + Firestore) — public web config only, no private keys -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div id="splash">
@@ -1295,6 +1457,10 @@
     <button class="menu-item sort-item" data-sort="newest">Newest added</button>
     <button class="menu-item sort-item" data-sort="alpha">A–Z</button>
     <button class="menu-item sort-item" data-sort="platform">Platform</button>
+    <div class="menu-divider"></div>
+    <div class="menu-label" id="accountMenuLabel">Account</div>
+    <button class="menu-item" id="signInMenuItem">Sign in to sync</button>
+    <button class="menu-item" id="signOutMenuItem" style="display:none">Sign out</button>
     <div class="menu-divider"></div>
     <button class="menu-item" id="statsMenuItem">Stats</button>
     <button class="menu-item" id="shareListMenuItem">Share list</button>
@@ -1402,6 +1568,43 @@
     </div>
   </div>
 </div>
+<!-- Auth modal: structure ready for a future welcome/onboarding screen to call the same helpers -->
+<div class="auth-overlay" id="authOverlay" aria-hidden="true">
+  <div class="auth-sheet" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button type="button" class="auth-close" id="authCloseBtn" aria-label="Close">✕</button>
+    <div class="auth-title" id="authTitle">Sign in</div>
+    <div class="auth-sub" id="authSub">Sync your bin across devices. This device keeps working offline.</div>
+
+    <button type="button" class="auth-google" id="authGoogleBtn">
+      <span>Continue with Google</span>
+    </button>
+    <div class="auth-divider" id="authDivider">or email</div>
+
+    <form id="authForm" autocomplete="on">
+      <div class="auth-field" id="authEmailField">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" name="email" inputmode="email" autocomplete="email" required placeholder="you@example.com">
+      </div>
+      <div class="auth-field" id="authPasswordField">
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" name="password" autocomplete="current-password" required placeholder="••••••••" minlength="6">
+      </div>
+      <div class="auth-field" id="authPassword2Field" style="display:none">
+        <label for="authPassword2">Confirm password</label>
+        <input type="password" id="authPassword2" name="password2" autocomplete="new-password" placeholder="••••••••" minlength="6">
+      </div>
+      <p class="auth-error" id="authError"></p>
+      <button type="submit" class="auth-primary" id="authSubmitBtn">Sign in</button>
+    </form>
+
+    <div class="auth-links" id="authLinks">
+      <button type="button" id="authGoRegister">Create an account</button>
+      <button type="button" id="authGoReset">Forgot password?</button>
+      <button type="button" id="authGoSignIn" style="display:none">Back to sign in</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -1559,6 +1762,123 @@ function hideToast(){
   if(toast) toast.classList.remove('show');
 }
 
+// ---------------------------------------------------------------------------
+// Firebase web config — paste YOUR public web app values from Firebase Console
+// Project settings → Your apps → Firebase SDK snippet → Config
+// Never put service-account private keys in this file.
+// ---------------------------------------------------------------------------
+const firebaseConfig = {
+  apiKey: 'AIzaSyCWS5wnMUixDE-cNI6JnyPCvi63QNlw9gg',
+  authDomain: 'bingebin-2026.firebaseapp.com',
+  projectId: 'bingebin-2026',
+  storageBucket: 'bingebin-2026.firebasestorage.app',
+  messagingSenderId: '584223496109',
+  appId: '1:584223496109:web:8f027c12ecf4f834f8b324',
+  measurementId: 'G-GMQ03KZTGJ'
+};
+
+let firebaseReady = false;
+let auth = null;
+let db = null;
+let currentUser = null;
+let cloudSyncTimer = null;
+let applyingRemote = false; // prevent feedback loop while applying cloud data
+const CLOUD_SYNC_DEBOUNCE_MS = 500;
+
+function isFirebaseConfigured(){
+  return firebaseConfig.apiKey && !String(firebaseConfig.apiKey).startsWith('PASTE_');
+}
+
+function initFirebase(){
+  if(!isFirebaseConfigured()){
+    console.info('Firebase: config placeholders still set — local-only mode');
+    return false;
+  }
+  if(typeof firebase === 'undefined'){
+    console.warn('Firebase SDK not loaded');
+    return false;
+  }
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    firebaseReady = true;
+    return true;
+  }catch(e){
+    console.error('Firebase init failed', e);
+    return false;
+  }
+}
+
+function libraryDocRef(uid){
+  return db.collection('users').doc(uid).collection('data').doc('library');
+}
+
+function normalizeTitleKey(title){
+  return String(title || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function itemIdentityKey(it){
+  if(it.tmdbId && it.tmdbKind) return `tmdb:${it.tmdbKind}:${it.tmdbId}`;
+  if(it.id) return `id:${it.id}`;
+  return `title:${normalizeTitleKey(it.title)}|${it.year || ''}`;
+}
+
+/** Prefer richer / more progressed fields when merging two copies of the same title */
+function mergeTwoItems(a, b){
+  const out = { ...a };
+  const pick = (key, preferTruthy) => {
+    const av = a[key], bv = b[key];
+    if(preferTruthy){
+      if(bv !== undefined && bv !== null && bv !== '' && bv !== false) out[key] = bv;
+      else if(av !== undefined) out[key] = av;
+      return;
+    }
+    if(bv !== undefined && bv !== null && bv !== '') out[key] = bv;
+    else if(av !== undefined && av !== null && av !== '') out[key] = av;
+  };
+  ['title','source','type','platform','genre','poster','year','watchLink','tmdbId','tmdbKind',
+   'overview','cast','runtime','seasons','episodes','watchedAt','rating','addedAt','updatedAt'
+  ].forEach(k => pick(k, false));
+
+  // Watched wins over unwatched
+  out.watched = !!(a.watched || b.watched);
+  if(out.watched){
+    out.watchedAt = a.watchedAt || b.watchedAt || out.watchedAt || null;
+  }
+  // Keep item if either side still has it (not both soft-deleted)
+  out.deleted = !!(a.deleted && b.deleted);
+  // Stable id: prefer existing non-empty
+  out.id = a.id || b.id || String(Date.now());
+  out.updatedAt = new Date().toISOString();
+  return out;
+}
+
+function mergeItemLists(localList, remoteList){
+  const map = new Map();
+  (remoteList || []).forEach(it => {
+    if(!it || !it.title) return;
+    map.set(itemIdentityKey(it), { ...it });
+  });
+  (localList || []).forEach(it => {
+    if(!it || !it.title) return;
+    const key = itemIdentityKey(it);
+    if(map.has(key)) map.set(key, mergeTwoItems(map.get(key), it));
+    else map.set(key, { ...it });
+  });
+  // Preserve a sensible order: by addedAt desc when available
+  return Array.from(map.values()).sort((a, b) => {
+    const ta = new Date(a.addedAt || 0).getTime();
+    const tb = new Date(b.addedAt || 0).getTime();
+    return tb - ta;
+  });
+}
+
+function touchUpdatedAtOnAll(){
+  const now = new Date().toISOString();
+  items.forEach(it => { if(!it.updatedAt) it.updatedAt = it.addedAt || now; });
+}
+
 async function loadItems(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
@@ -1570,11 +1890,374 @@ async function loadItems(){
 }
 
 function saveItems(){
+  // Always persist locally first — cloud never blocks local safety
   try{
     localStorage.setItem(STORE_KEY, JSON.stringify(items));
   }catch(e){
     console.error('Save failed', e);
   }
+  if(!applyingRemote) scheduleCloudSave();
+}
+
+function scheduleCloudSave(){
+  if(!firebaseReady || !currentUser || !db) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => { saveToCloud(); }, CLOUD_SYNC_DEBOUNCE_MS);
+}
+
+async function saveToCloud(){
+  if(!firebaseReady || !currentUser || !db) return;
+  try{
+    touchUpdatedAtOnAll();
+    await libraryDocRef(currentUser.uid).set({
+      items: items,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      itemCount: items.length,
+      clientUpdatedAt: new Date().toISOString()
+    }, { merge: true });
+  }catch(e){
+    console.error('Cloud save failed', e);
+    showToast('Saved on this device — cloud sync failed');
+  }
+}
+
+async function loadFromCloud(uid){
+  if(!db) return null;
+  try{
+    const snap = await libraryDocRef(uid).get();
+    if(!snap.exists) return null; // first-time user — not an error
+    const data = snap.data() || {};
+    return Array.isArray(data.items) ? data.items : [];
+  }catch(e){
+    console.error('Cloud load failed', e);
+    showToast("Couldn't reach cloud — using this device's list");
+    return undefined; // undefined = error (do not treat as empty library)
+  }
+}
+
+async function mergeLocalAndCloudOnLogin(user){
+  const localCopy = Array.isArray(items) ? items.slice() : [];
+  const remote = await loadFromCloud(user.uid);
+  if(remote === undefined){
+    // Network/permission error — keep local only
+    return;
+  }
+  const remoteList = remote || [];
+  const merged = mergeItemLists(localCopy, remoteList);
+  applyingRemote = true;
+  items = merged;
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(items)); }catch(e){}
+  applyingRemote = false;
+  render();
+  await saveToCloud();
+  const localN = localCopy.filter(i => !i.deleted).length;
+  const remoteN = remoteList.filter(i => !i.deleted).length;
+  const mergedN = merged.filter(i => !i.deleted).length;
+  if(remoteN === 0 && localN > 0){
+    showToast(`Synced ${localN} title${localN === 1 ? '' : 's'} to your account`);
+  } else if(localN === 0 && remoteN > 0){
+    showToast(`Restored ${remoteN} title${remoteN === 1 ? '' : 's'} from your account`);
+  } else if(localN > 0 || remoteN > 0){
+    showToast(`Library synced · ${mergedN} title${mergedN === 1 ? '' : 's'}`);
+  }
+  track('cloud_sync', { local_count: localN, remote_count: remoteN, merged_count: mergedN });
+}
+
+// --- Auth UI state (welcome/onboarding can call openAuthModal / these helpers later) ---
+let authMode = 'sign_in'; // sign_in | sign_up | reset
+let authBusy = false;
+let lastSignInMethod = 'unknown';
+
+function updateAuthMenu(){
+  const signInBtn = document.getElementById('signInMenuItem');
+  const signOutBtn = document.getElementById('signOutMenuItem');
+  const label = document.getElementById('accountMenuLabel');
+  if(!signInBtn || !signOutBtn) return;
+  if(currentUser){
+    signInBtn.style.display = 'none';
+    signOutBtn.style.display = 'block';
+    const who = currentUser.email || currentUser.displayName || 'account';
+    signOutBtn.textContent = `Sign out`;
+    if(label) label.textContent = who.length > 28 ? who.slice(0, 26) + '…' : who;
+  } else {
+    signInBtn.style.display = 'block';
+    signOutBtn.style.display = 'none';
+    if(label) label.textContent = 'Account';
+  }
+}
+
+function setAuthError(msg){
+  const el = document.getElementById('authError');
+  if(!el) return;
+  if(msg){
+    el.textContent = msg;
+    el.classList.add('show');
+  } else {
+    el.textContent = '';
+    el.classList.remove('show');
+  }
+}
+
+function setAuthBusy(busy){
+  authBusy = busy;
+  const submit = document.getElementById('authSubmitBtn');
+  const google = document.getElementById('authGoogleBtn');
+  if(submit) submit.disabled = !!busy;
+  if(google) google.disabled = !!busy;
+}
+
+function friendlyAuthError(err){
+  const code = err && err.code ? err.code : '';
+  const map = {
+    'auth/invalid-email': 'That email doesn’t look valid.',
+    'auth/user-disabled': 'This account has been disabled.',
+    'auth/user-not-found': 'No account with that email.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/invalid-credential': 'Email or password is incorrect.',
+    'auth/email-already-in-use': 'An account already exists with that email.',
+    'auth/weak-password': 'Password should be at least 6 characters.',
+    'auth/too-many-requests': 'Too many attempts — try again later.',
+    'auth/network-request-failed': 'Network error — check your connection.',
+    'auth/popup-closed-by-user': '',
+    'auth/cancelled-popup-request': '',
+    'auth/operation-not-allowed': 'This sign-in method is disabled in Firebase Console.',
+  };
+  if(code in map) return map[code];
+  return 'Something went wrong — try again.';
+}
+
+function setAuthMode(mode){
+  authMode = mode;
+  setAuthError('');
+  const title = document.getElementById('authTitle');
+  const sub = document.getElementById('authSub');
+  const submit = document.getElementById('authSubmitBtn');
+  const passField = document.getElementById('authPasswordField');
+  const pass2Field = document.getElementById('authPassword2Field');
+  const googleBtn = document.getElementById('authGoogleBtn');
+  const divider = document.getElementById('authDivider');
+  const goReg = document.getElementById('authGoRegister');
+  const goReset = document.getElementById('authGoReset');
+  const goSignIn = document.getElementById('authGoSignIn');
+  const passInput = document.getElementById('authPassword');
+  const pass2Input = document.getElementById('authPassword2');
+
+  if(mode === 'sign_in'){
+    if(title) title.textContent = 'Sign in';
+    if(sub) sub.textContent = 'Sync your bin across devices. This device keeps working offline.';
+    if(submit) submit.textContent = 'Sign in';
+    if(passField) passField.style.display = '';
+    if(pass2Field) pass2Field.style.display = 'none';
+    if(googleBtn) googleBtn.style.display = '';
+    if(divider) divider.style.display = '';
+    if(goReg) goReg.style.display = '';
+    if(goReset) goReset.style.display = '';
+    if(goSignIn) goSignIn.style.display = 'none';
+    if(passInput){ passInput.required = true; passInput.autocomplete = 'current-password'; }
+    if(pass2Input) pass2Input.required = false;
+  } else if(mode === 'sign_up'){
+    if(title) title.textContent = 'Create account';
+    if(sub) sub.textContent = 'Save your watchlist to the cloud and use it on any device.';
+    if(submit) submit.textContent = 'Create account';
+    if(passField) passField.style.display = '';
+    if(pass2Field) pass2Field.style.display = '';
+    if(googleBtn) googleBtn.style.display = '';
+    if(divider) divider.style.display = '';
+    if(goReg) goReg.style.display = 'none';
+    if(goReset) goReset.style.display = 'none';
+    if(goSignIn) goSignIn.style.display = '';
+    if(passInput){ passInput.required = true; passInput.autocomplete = 'new-password'; }
+    if(pass2Input) pass2Input.required = true;
+  } else {
+    if(title) title.textContent = 'Reset password';
+    if(sub) sub.textContent = 'We’ll email you a link to set a new password.';
+    if(submit) submit.textContent = 'Send reset link';
+    if(passField) passField.style.display = 'none';
+    if(pass2Field) pass2Field.style.display = 'none';
+    if(googleBtn) googleBtn.style.display = 'none';
+    if(divider) divider.style.display = 'none';
+    if(goReg) goReg.style.display = 'none';
+    if(goReset) goReset.style.display = 'none';
+    if(goSignIn) goSignIn.style.display = '';
+    if(passInput) passInput.required = false;
+    if(pass2Input) pass2Input.required = false;
+  }
+}
+
+function openAuthModal(mode){
+  setAuthMode(mode || 'sign_in');
+  const overlay = document.getElementById('authOverlay');
+  if(!overlay) return;
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  const email = document.getElementById('authEmail');
+  setTimeout(() => { if(email) email.focus(); }, 200);
+}
+
+function closeAuthModal(){
+  const overlay = document.getElementById('authOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  setAuthError('');
+  setAuthBusy(false);
+  const form = document.getElementById('authForm');
+  if(form) form.reset();
+}
+
+async function signInWithGoogle(){
+  if(!firebaseReady || !auth){
+    setAuthError('Firebase isn’t configured yet.');
+    showToast('Sign-in unavailable');
+    return;
+  }
+  setAuthBusy(true);
+  setAuthError('');
+  try{
+    lastSignInMethod = 'google';
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    // onAuthStateChanged closes modal + merges
+  }catch(e){
+    if(e && (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request')){
+      setAuthBusy(false);
+      return;
+    }
+    console.error('Google sign-in failed', e);
+    try{
+      lastSignInMethod = 'google';
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await auth.signInWithRedirect(provider);
+    }catch(e2){
+      console.error('Google redirect failed', e2);
+      setAuthError(friendlyAuthError(e2));
+      setAuthBusy(false);
+    }
+  }
+}
+
+async function signInWithEmail(email, password){
+  if(!firebaseReady || !auth) throw new Error('not-ready');
+  lastSignInMethod = 'email';
+  await auth.signInWithEmailAndPassword(email, password);
+}
+
+async function registerWithEmail(email, password){
+  if(!firebaseReady || !auth) throw new Error('not-ready');
+  lastSignInMethod = 'email';
+  await auth.createUserWithEmailAndPassword(email, password);
+}
+
+async function sendPasswordReset(email){
+  if(!firebaseReady || !auth) throw new Error('not-ready');
+  await auth.sendPasswordResetEmail(email);
+}
+
+async function signOutUser(){
+  if(!auth) return;
+  try{
+    await auth.signOut();
+    // Keep local list — do not clear movies
+    showToast('Signed out · list stays on this device');
+    track('sign_out');
+  }catch(e){
+    console.error('Sign-out failed', e);
+    showToast('Couldn’t sign out — try again');
+  }
+}
+
+async function handleAuthSubmit(e){
+  e.preventDefault();
+  if(authBusy) return;
+  const email = (document.getElementById('authEmail')?.value || '').trim();
+  const password = document.getElementById('authPassword')?.value || '';
+  const password2 = document.getElementById('authPassword2')?.value || '';
+  setAuthError('');
+
+  if(!email){
+    setAuthError('Enter your email.');
+    return;
+  }
+
+  setAuthBusy(true);
+  try{
+    if(authMode === 'reset'){
+      await sendPasswordReset(email);
+      track('password_reset_request');
+      showToast('Check your email for a reset link');
+      setAuthMode('sign_in');
+      setAuthBusy(false);
+      return;
+    }
+    if(authMode === 'sign_up'){
+      if(password.length < 6){
+        setAuthError('Password should be at least 6 characters.');
+        setAuthBusy(false);
+        return;
+      }
+      if(password !== password2){
+        setAuthError('Passwords don’t match.');
+        setAuthBusy(false);
+        return;
+      }
+      await registerWithEmail(email, password);
+      // onAuthStateChanged handles the rest
+      return;
+    }
+    // sign_in
+    if(!password){
+      setAuthError('Enter your password.');
+      setAuthBusy(false);
+      return;
+    }
+    await signInWithEmail(email, password);
+  }catch(err){
+    console.error('Auth submit failed', err);
+    setAuthError(friendlyAuthError(err));
+    setAuthBusy(false);
+  }
+}
+
+function bindAuthListeners(){
+  if(!firebaseReady || !auth) return;
+  auth.onAuthStateChanged(async (user) => {
+    const wasLoggedIn = !!currentUser;
+    currentUser = user;
+    updateAuthMenu();
+    if(user){
+      if(!wasLoggedIn){
+        track('sign_in', { method: lastSignInMethod || 'unknown' });
+      }
+      closeAuthModal();
+      await mergeLocalAndCloudOnLogin(user);
+      setAuthBusy(false);
+    }
+  });
+}
+
+function setupAuthUi(){
+  const signInBtn = document.getElementById('signInMenuItem');
+  const signOutBtn = document.getElementById('signOutMenuItem');
+  if(signInBtn) signInBtn.addEventListener('click', () => { closeMenu(); openAuthModal('sign_in'); });
+  if(signOutBtn) signOutBtn.addEventListener('click', () => { closeMenu(); signOutUser(); });
+
+  const overlay = document.getElementById('authOverlay');
+  const form = document.getElementById('authForm');
+  const closeBtn = document.getElementById('authCloseBtn');
+  const googleBtn = document.getElementById('authGoogleBtn');
+  if(closeBtn) closeBtn.addEventListener('click', closeAuthModal);
+  if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) closeAuthModal(); });
+  if(form) form.addEventListener('submit', handleAuthSubmit);
+  if(googleBtn) googleBtn.addEventListener('click', () => { signInWithGoogle(); });
+
+  const goReg = document.getElementById('authGoRegister');
+  const goReset = document.getElementById('authGoReset');
+  const goSignIn = document.getElementById('authGoSignIn');
+  if(goReg) goReg.addEventListener('click', () => setAuthMode('sign_up'));
+  if(goReset) goReset.addEventListener('click', () => setAuthMode('reset'));
+  if(goSignIn) goSignIn.addEventListener('click', () => setAuthMode('sign_in'));
+
+  updateAuthMenu();
 }
 
 function addItemForce(title){
@@ -3214,6 +3897,14 @@ maybeShowShakeTip();
 loadItems();
 updateTabPill();
 window.addEventListener('resize', updateTabPill);
+
+// Firebase: local storage always works; cloud sync only after config + sign-in
+if(initFirebase()){
+  setupAuthUi();
+  bindAuthListeners();
+} else {
+  setupAuthUi(); // still show Sign in — will toast if config missing
+}
 
 // Wire bottom ad with the same client/slot constants
 (function initBottomAd(){
