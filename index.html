@@ -1018,6 +1018,24 @@
     margin-bottom:14px;
   }
   .auth-google:active{background:rgba(255,255,255,0.04);}
+  .auth-apple{
+    width:100%;
+    background:#000;
+    color:#fff;
+    border:1px solid #1a1a1a;
+    border-radius:10px;
+    padding:12px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    touch-action:manipulation;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .auth-apple:active{background:#161616;}
   .auth-divider{
     display:flex;
     align-items:center;
@@ -1123,6 +1141,19 @@
     height:76px;
     object-fit:contain;
     margin:6px 0 16px;
+  }
+  .gate-content{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity 0.4s ease, transform 0.4s ease;
+  }
+  .gate-content.show{
+    opacity:1;
+    transform:translateY(0);
   }
   .gate-title{
     font-size:22px;
@@ -1719,6 +1750,9 @@
     <button type="button" class="auth-google" id="authGoogleBtn">
       <span>Continue with Google</span>
     </button>
+    <button type="button" class="auth-apple" id="authAppleBtn">
+      <span>Continue with Apple</span>
+    </button>
     <div class="auth-divider" id="authDivider">or email</div>
 
     <form id="authForm" autocomplete="on">
@@ -1750,21 +1784,23 @@
 <div class="gate-overlay" id="gateOverlay" aria-hidden="true">
   <div class="gate-sheet" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
     <button type="button" class="gate-close" id="gateCloseBtn" aria-label="Close">✕</button>
-    <img class="gate-logo-img" src="/favicon-512.png" alt="Binge Bin" onerror="this.style.display='none'">
-    <div class="gate-title" id="gateTitle">Sign In</div>
-    <div class="gate-sub">Don't have an account? <button type="button" class="gate-link" id="gateCreateAccountBtn">Create an Account</button></div>
-    <p class="gate-error" id="gateError"></p>
+    <img class="gate-logo-img" id="gateLogoImg" src="/favicon-512.png" alt="Binge Bin" onerror="this.style.display='none'">
+    <div class="gate-content" id="gateContent">
+      <div class="gate-title" id="gateTitle">Sign In</div>
+      <div class="gate-sub">Don't have an account? <button type="button" class="gate-link" id="gateCreateAccountBtn">Create an Account</button></div>
+      <p class="gate-error" id="gateError"></p>
 
-    <button type="button" class="gate-btn gate-btn-google" id="gateGoogleBtn">
-      <span>Continue with Google</span>
-    </button>
-    <button type="button" class="gate-btn gate-btn-apple" id="gateAppleBtn">
-      <span>Continue with Apple</span>
-    </button>
+      <button type="button" class="gate-btn gate-btn-google" id="gateGoogleBtn">
+        <span>Continue with Google</span>
+      </button>
+      <button type="button" class="gate-btn gate-btn-apple" id="gateAppleBtn">
+        <span>Continue with Apple</span>
+      </button>
 
-    <div class="gate-divider">or</div>
+      <div class="gate-divider">or</div>
 
-    <button type="button" class="gate-btn gate-btn-email" id="gateEmailBtn">Email</button>
+      <button type="button" class="gate-btn gate-btn-email" id="gateEmailBtn">Email</button>
+    </div>
   </div>
 </div>
 
@@ -2165,8 +2201,10 @@ function setAuthBusy(busy){
   authBusy = busy;
   const submit = document.getElementById('authSubmitBtn');
   const google = document.getElementById('authGoogleBtn');
+  const apple = document.getElementById('authAppleBtn');
   if(submit) submit.disabled = !!busy;
   if(google) google.disabled = !!busy;
+  if(apple) apple.disabled = !!busy;
 }
 
 function friendlyAuthError(err){
@@ -2198,6 +2236,7 @@ function setAuthMode(mode){
   const passField = document.getElementById('authPasswordField');
   const pass2Field = document.getElementById('authPassword2Field');
   const googleBtn = document.getElementById('authGoogleBtn');
+  const appleBtn = document.getElementById('authAppleBtn');
   const divider = document.getElementById('authDivider');
   const goReg = document.getElementById('authGoRegister');
   const goReset = document.getElementById('authGoReset');
@@ -2212,6 +2251,7 @@ function setAuthMode(mode){
     if(passField) passField.style.display = '';
     if(pass2Field) pass2Field.style.display = 'none';
     if(googleBtn) googleBtn.style.display = '';
+    if(appleBtn) appleBtn.style.display = '';
     if(divider) divider.style.display = '';
     if(goReg) goReg.style.display = '';
     if(goReset) goReset.style.display = '';
@@ -2225,6 +2265,7 @@ function setAuthMode(mode){
     if(passField) passField.style.display = '';
     if(pass2Field) pass2Field.style.display = '';
     if(googleBtn) googleBtn.style.display = '';
+    if(appleBtn) appleBtn.style.display = '';
     if(divider) divider.style.display = '';
     if(goReg) goReg.style.display = 'none';
     if(goReset) goReset.style.display = 'none';
@@ -2238,6 +2279,7 @@ function setAuthMode(mode){
     if(passField) passField.style.display = 'none';
     if(pass2Field) pass2Field.style.display = 'none';
     if(googleBtn) googleBtn.style.display = 'none';
+    if(appleBtn) appleBtn.style.display = 'none';
     if(divider) divider.style.display = 'none';
     if(goReg) goReg.style.display = 'none';
     if(goReset) goReset.style.display = 'none';
@@ -2269,8 +2311,13 @@ function closeAuthModal(){
 }
 
 // --- Full-screen sign-in gate (shown after splash, once per session, if signed out) ---
+// The splash logo morphs seamlessly into the gate's logo, and later from the
+// gate into the header logo, using the same FLIP transform technique as the
+// original splash -> header morph.
 let splashFinished = false;
 let authStateResolved = false;
+let revealTriggered = false;
+let gateIsShowing = false; // true once the gate has actually been morphed onto screen
 const GATE_DISMISS_KEY = 'gateDismissedSession';
 
 function setGateError(msg){
@@ -2287,12 +2334,19 @@ function setGateBusy(busy){
   [google, apple, email].forEach(btn => { if(btn) btn.disabled = !!busy; });
 }
 
+// Plain (non-morph) open/close — kept for edge cases where the gate needs to
+// appear without an animated logo handoff (shouldn't normally happen).
 function openGate(){
   const overlay = document.getElementById('gateOverlay');
+  const content = document.getElementById('gateContent');
+  const logo = document.getElementById('gateLogoImg');
   if(!overlay) return;
   setGateError('');
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
+  if(logo) logo.style.opacity = '1';
+  if(content) content.classList.add('show');
+  gateIsShowing = true;
 }
 
 function closeGate(){
@@ -2300,41 +2354,144 @@ function closeGate(){
   if(!overlay) return;
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
+  gateIsShowing = false;
 }
 
 function dismissGate(){
   try{ sessionStorage.setItem(GATE_DISMISS_KEY, '1'); }catch(e){}
-  closeGate();
+  leaveGate();
 }
 
-function maybeOpenGate(){
+// --- FLIP helper: animates `el` so it visually lands exactly on top of
+// `targetEl`'s current position/size, then returns the {promise} for when
+// the transition finishes. ---
+function flipTo(el, targetEl, duration){
+  return new Promise((resolve) => {
+    if(!el || !targetEl){ resolve(); return; }
+    const start = el.getBoundingClientRect();
+    const end = targetEl.getBoundingClientRect();
+    const scale = end.height / start.height;
+    const dx = (end.left + end.width / 2) - (start.left + start.width / 2);
+    const dy = (end.top + end.height / 2) - (start.top + start.height / 2);
+    el.style.transition = `transform ${duration}ms cubic-bezier(.4,0,.2,1)`;
+    void el.offsetWidth;
+    el.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+    setTimeout(resolve, duration);
+  });
+}
+
+// Splash logo morphs directly into the gate's logo; the rest of the gate
+// (title, buttons) fades in right after the logo lands, so there's no gap
+// or double-fade between the splash and the sign-in screen.
+function morphSplashIntoGate(){
+  const splash = document.getElementById('splash');
+  const splashW = document.querySelector('.splash-w');
+  const splashTitle = document.querySelector('.splash-title');
+  const splashFooter = document.querySelector('.splash-footer');
+  const overlay = document.getElementById('gateOverlay');
+  const gateLogo = document.getElementById('gateLogoImg');
+  const gateContent = document.getElementById('gateContent');
+  if(!splash || !splashW || !overlay || !gateLogo){ openGate(); return; }
+
+  splash.style.pointerEvents = 'none';
+  splashW.style.animation = 'none';
+  splashTitle.style.animation = 'none';
+  void splashW.offsetWidth;
+
+  // Reveal the gate underneath (opaque, interactive) while its own logo and
+  // content stay invisible until the animated splash logo lands on them.
+  gateLogo.style.opacity = '0';
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  setGateError('');
+
+  const wrap = document.querySelector('.wrap');
+  if(wrap) wrap.style.opacity = '1';
+
+  splashTitle.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+  splashTitle.style.opacity = '0';
+  splashTitle.style.transform = 'translateY(-8px) scale(0.92)';
+
+  splashFooter.style.transition = 'opacity 0.25s ease';
+  splashFooter.style.opacity = '0';
+
+  splash.style.transition = 'background 0.55s ease';
+  splash.style.background = 'transparent';
+
+  flipTo(splashW, gateLogo, 650).then(() => {
+    splash.style.display = 'none';
+    gateLogo.style.opacity = '1';
+    gateIsShowing = true;
+    requestAnimationFrame(() => {
+      if(gateContent) gateContent.classList.add('show');
+    });
+  });
+}
+
+// Gate logo morphs into the header logo (used both when someone signs in
+// and when they dismiss the gate to browse as a guest), so the header
+// appears to grow directly out of the sign-in screen.
+function leaveGate(){
+  if(!gateIsShowing){ closeGate(); return; }
+  const overlay = document.getElementById('gateOverlay');
+  const gateLogo = document.getElementById('gateLogoImg');
+  const gateContent = document.getElementById('gateContent');
+  const closeBtn = document.getElementById('gateCloseBtn');
+  const headerW = document.getElementById('headerW');
+  const brandHeader = document.getElementById('brandHeader');
+  if(!overlay || !gateLogo || !headerW){ closeGate(); return; }
+
+  gateIsShowing = false;
+  if(gateContent) gateContent.classList.remove('show');
+  if(closeBtn) closeBtn.style.transition = 'opacity 0.25s ease';
+  if(closeBtn) closeBtn.style.opacity = '0';
+
+  flipTo(gateLogo, headerW, 500).then(() => {
+    closeGate();
+    if(brandHeader) brandHeader.style.opacity = '1';
+    // Reset inline styles in case the gate is ever shown again this session
+    gateLogo.style.transition = 'none';
+    gateLogo.style.transform = 'none';
+    gateLogo.style.opacity = '1';
+    if(closeBtn){ closeBtn.style.transition = ''; closeBtn.style.opacity = ''; }
+  });
+}
+
+function attemptReveal(){
+  if(revealTriggered) return;
   if(!splashFinished || !authStateResolved) return;
-  if(currentUser) return;
-  if(!firebaseReady) return;
+  revealTriggered = true;
+  if(currentUser){
+    morphSplashIntoHeader();
+    return;
+  }
   let dismissed = false;
   try{ dismissed = sessionStorage.getItem(GATE_DISMISS_KEY) === '1'; }catch(e){}
-  if(dismissed) return;
-  openGate();
+  if(dismissed || !firebaseReady){
+    morphSplashIntoHeader();
+    return;
+  }
+  morphSplashIntoGate();
 }
 
 async function signInWithApple(){
   if(!firebaseReady || !auth){
-    setGateError('Sign-in isn’t configured yet.');
+    setAuthError('Firebase isn’t configured yet.');
     showToast('Sign-in unavailable');
     return;
   }
-  setGateBusy(true);
-  setGateError('');
+  setAuthBusy(true);
+  setAuthError('');
   try{
     lastSignInMethod = 'apple';
     const provider = new firebase.auth.OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');
     await auth.signInWithPopup(provider);
-    // onAuthStateChanged closes the gate + merges
+    // onAuthStateChanged closes modal/gate + merges
   }catch(e){
     if(e && (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request')){
-      setGateBusy(false);
+      setAuthBusy(false);
       return;
     }
     console.error('Apple sign-in failed', e);
@@ -2346,8 +2503,8 @@ async function signInWithApple(){
       await auth.signInWithRedirect(provider);
     }catch(e2){
       console.error('Apple redirect failed', e2);
-      setGateError(friendlyAuthError(e2));
-      setGateBusy(false);
+      setAuthError(friendlyAuthError(e2));
+      setAuthBusy(false);
     }
   }
 }
@@ -2360,7 +2517,7 @@ function setupGateUi(){
   const createBtn = document.getElementById('gateCreateAccountBtn');
   if(closeBtn) closeBtn.addEventListener('click', dismissGate);
   if(googleBtn) googleBtn.addEventListener('click', () => { setGateBusy(true); signInWithGoogle().finally(() => setGateBusy(false)); });
-  if(appleBtn) appleBtn.addEventListener('click', signInWithApple);
+  if(appleBtn) appleBtn.addEventListener('click', () => { setGateBusy(true); signInWithApple().finally(() => setGateBusy(false)); });
   if(emailBtn) emailBtn.addEventListener('click', () => { closeGate(); openAuthModal('sign_in'); });
   if(createBtn) createBtn.addEventListener('click', () => { closeGate(); openAuthModal('sign_up'); });
 }
@@ -2484,19 +2641,24 @@ function bindAuthListeners(){
     const wasLoggedIn = !!currentUser;
     currentUser = user;
     updateAuthMenu();
+    const firstResolution = !authStateResolved;
+    if(!authStateResolved) authStateResolved = true;
     if(user){
       if(!wasLoggedIn){
         track('sign_in', { method: lastSignInMethod || 'unknown' });
       }
       closeAuthModal();
-      closeGate();
+      if(gateIsShowing){
+        leaveGate();
+      } else {
+        closeGate();
+      }
       await mergeLocalAndCloudOnLogin(user);
       setAuthBusy(false);
       setGateBusy(false);
     }
-    if(!authStateResolved){
-      authStateResolved = true;
-      maybeOpenGate();
+    if(firstResolution){
+      attemptReveal();
     }
   });
 }
@@ -2511,10 +2673,12 @@ function setupAuthUi(){
   const form = document.getElementById('authForm');
   const closeBtn = document.getElementById('authCloseBtn');
   const googleBtn = document.getElementById('authGoogleBtn');
+  const appleBtn = document.getElementById('authAppleBtn');
   if(closeBtn) closeBtn.addEventListener('click', closeAuthModal);
   if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) closeAuthModal(); });
   if(form) form.addEventListener('submit', handleAuthSubmit);
   if(googleBtn) googleBtn.addEventListener('click', () => { signInWithGoogle(); });
+  if(appleBtn) appleBtn.addEventListener('click', () => { signInWithApple(); });
 
   const goReg = document.getElementById('authGoRegister');
   const goReset = document.getElementById('authGoReset');
@@ -3372,16 +3536,24 @@ function morphSplashIntoHeader(){
   setTimeout(() => {
     splash.style.display = 'none';
     brandHeader.style.opacity = '1';
-    splashFinished = true;
-    maybeOpenGate();
   }, 650);
 }
 
 window.addEventListener('load', () => {
   // Fire the sound in sync with the "W" animation's impact point (~0.5s in)
   setTimeout(playIntro, 480);
-  // Hold the splash briefly, then morph the W + title seamlessly into the header
-  setTimeout(morphSplashIntoHeader, 2350);
+  // Hold the splash briefly, then morph the W + title seamlessly into
+  // either the header (if already signed in) or the sign-in gate.
+  setTimeout(() => {
+    splashFinished = true;
+    attemptReveal();
+  }, 2350);
+  // Safety net: if auth somehow never resolves, don't leave the splash
+  // hanging forever — reveal as signed-out after a few extra seconds.
+  setTimeout(() => {
+    if(!authStateResolved) authStateResolved = true;
+    attemptReveal();
+  }, 2350 + 4000);
 });
 
 document.getElementById('scrollArea').addEventListener('scroll', (e) => {
