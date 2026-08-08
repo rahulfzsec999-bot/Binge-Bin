@@ -913,7 +913,7 @@
     position:fixed;
     inset:0;
     background:rgba(0,0,0,0.65);
-    display:flex;
+    display:none;
     align-items:center;
     justify-content:center;
     padding:20px;
@@ -2293,6 +2293,12 @@ function openAuthModal(mode){
   setAuthMode(mode || 'sign_in');
   const overlay = document.getElementById('authOverlay');
   if(!overlay) return;
+  // The form (with its password field) is display:none until the moment
+  // someone actually asks to sign in — kept out of the DOM's rendered
+  // layout so iOS/Safari doesn't proactively offer Face ID/AutoFill for it
+  // on every app launch. Bring it into layout first, then fade it in.
+  overlay.style.display = 'flex';
+  void overlay.offsetWidth; // force reflow so the fade-in transition plays
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   const email = document.getElementById('authEmail');
@@ -2308,6 +2314,13 @@ function closeAuthModal(){
   setAuthBusy(false);
   const form = document.getElementById('authForm');
   if(form) form.reset();
+  const email = document.getElementById('authEmail');
+  const pass = document.getElementById('authPassword');
+  if(email) email.blur();
+  if(pass) pass.blur();
+  // Pull the form back out of layout once the fade-out finishes so it
+  // can't be picked up by AutoFill scanning again until it's reopened.
+  setTimeout(() => { overlay.style.display = 'none'; }, 260);
 }
 
 // --- Full-screen sign-in gate (shown after splash, once per session, if signed out) ---
