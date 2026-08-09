@@ -2636,6 +2636,12 @@ function closeGate(){
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
   gateIsShowing = false;
+  // Safety net: whenever the gate closes through this plain (non-morph)
+  // path — e.g. tapping "Email" or "Create an Account", which cut straight
+  // to the auth modal instead of animating to the header — make sure the
+  // header is still revealed underneath instead of staying invisible.
+  const brandHeader = document.getElementById('brandHeader');
+  if(brandHeader) brandHeader.style.opacity = '1';
 }
 
 function dismissGate(){
