@@ -977,6 +977,31 @@
     outline:none;
   }
   .auth-field input:focus{border-color:var(--accent);}
+  .auth-field select{
+    width:100%;
+    background:#0e0c0a;
+    border:1px solid var(--line);
+    border-radius:9px;
+    color:var(--text);
+    padding:12px;
+    font-size:16px;
+    outline:none;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    background-size:16px;
+  }
+  .auth-field select:focus{border-color:var(--accent);}
+  .auth-field-row{
+    display:flex;
+    gap:10px;
+  }
+  .auth-field-row .auth-field-half{
+    flex:1;
+    min-width:0;
+  }
   .auth-error{
     color:var(--danger);
     font-size:12px;
@@ -1756,6 +1781,20 @@
     <div class="auth-divider" id="authDivider">or email</div>
 
     <form id="authForm" autocomplete="on">
+      <div class="auth-field-row" id="authNameRow" style="display:none">
+        <div class="auth-field auth-field-half">
+          <label for="authFirstName">First name</label>
+          <input type="text" id="authFirstName" name="firstName" autocomplete="given-name" placeholder="Jamie">
+        </div>
+        <div class="auth-field auth-field-half">
+          <label for="authLastName">Last name</label>
+          <input type="text" id="authLastName" name="lastName" autocomplete="family-name" placeholder="Rivera">
+        </div>
+      </div>
+      <div class="auth-field" id="authUsernameField" style="display:none">
+        <label for="authUsername">Username</label>
+        <input type="text" id="authUsername" name="username" autocomplete="username" placeholder="jamie_r">
+      </div>
       <div class="auth-field" id="authEmailField">
         <label for="authEmail">Email</label>
         <input type="email" id="authEmail" name="email" inputmode="email" autocomplete="email" required placeholder="you@example.com">
@@ -1768,6 +1807,33 @@
         <label for="authPassword2">Confirm password</label>
         <input type="password" id="authPassword2" name="password2" autocomplete="new-password" placeholder="••••••••" minlength="6">
       </div>
+      <div class="auth-field" id="authPhoneField" style="display:none">
+        <label for="authPhone">Phone number</label>
+        <input type="tel" id="authPhone" name="phone" inputmode="tel" autocomplete="tel" placeholder="+1 555 123 4567">
+      </div>
+      <div class="auth-field-row" id="authDobGenderRow" style="display:none">
+        <div class="auth-field auth-field-half">
+          <label for="authDob">Date of birth</label>
+          <input type="date" id="authDob" name="dob" autocomplete="bday">
+        </div>
+        <div class="auth-field auth-field-half">
+          <label for="authGender">Gender</label>
+          <select id="authGender" name="gender">
+            <option value="">Select…</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="nonbinary">Non-binary</option>
+            <option value="other">Other</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="auth-field" id="authCountryField" style="display:none">
+        <label for="authCountry">Country</label>
+        <select id="authCountry" name="country">
+          <option value="">Select…</option>
+        </select>
+      </div>
       <p class="auth-error" id="authError"></p>
       <button type="submit" class="auth-primary" id="authSubmitBtn">Sign in</button>
     </form>
@@ -1776,6 +1842,65 @@
       <button type="button" id="authGoRegister">Create an account</button>
       <button type="button" id="authGoReset">Forgot password?</button>
       <button type="button" id="authGoSignIn" style="display:none">Back to sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- Complete-profile modal: shown once after a first Google/Apple sign-in, to
+     collect the details those providers don't give us (username, phone, DOB,
+     gender, country). First/last name come pre-filled from the provider. -->
+<div class="auth-overlay" id="completeProfileOverlay" aria-hidden="true">
+  <div class="auth-sheet">
+    <button type="button" class="auth-close" id="completeProfileCloseBtn" aria-label="Close">✕</button>
+    <div class="auth-title">Finish setting up your account</div>
+    <div class="auth-sub">Just a couple more details — you can always edit these later.</div>
+    <form id="completeProfileForm" autocomplete="on">
+      <div class="auth-field-row">
+        <div class="auth-field auth-field-half">
+          <label for="cpFirstName">First name</label>
+          <input type="text" id="cpFirstName" name="firstName" autocomplete="given-name" placeholder="Jamie">
+        </div>
+        <div class="auth-field auth-field-half">
+          <label for="cpLastName">Last name</label>
+          <input type="text" id="cpLastName" name="lastName" autocomplete="family-name" placeholder="Rivera">
+        </div>
+      </div>
+      <div class="auth-field">
+        <label for="cpUsername">Username</label>
+        <input type="text" id="cpUsername" name="username" autocomplete="username" required placeholder="jamie_r">
+      </div>
+      <div class="auth-field">
+        <label for="cpPhone">Phone number</label>
+        <input type="tel" id="cpPhone" name="phone" inputmode="tel" autocomplete="tel" placeholder="+1 555 123 4567">
+      </div>
+      <div class="auth-field-row">
+        <div class="auth-field auth-field-half">
+          <label for="cpDob">Date of birth</label>
+          <input type="date" id="cpDob" name="dob" autocomplete="bday">
+        </div>
+        <div class="auth-field auth-field-half">
+          <label for="cpGender">Gender</label>
+          <select id="cpGender" name="gender">
+            <option value="">Select…</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="nonbinary">Non-binary</option>
+            <option value="other">Other</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="auth-field">
+        <label for="cpCountry">Country</label>
+        <select id="cpCountry" name="country">
+          <option value="">Select…</option>
+        </select>
+      </div>
+      <p class="auth-error" id="completeProfileError"></p>
+      <button type="submit" class="auth-primary" id="completeProfileSubmitBtn">Save profile</button>
+    </form>
+    <div class="auth-links">
+      <button type="button" id="completeProfileSkipBtn">Skip for now</button>
     </div>
   </div>
 </div>
@@ -2013,6 +2138,127 @@ function libraryDocRef(uid){
   return db.collection('users').doc(uid).collection('data').doc('library');
 }
 
+function userProfileDocRef(uid){
+  return db.collection('users').doc(uid);
+}
+
+const COUNTRY_LIST = [
+  'United States','United Kingdom','Canada','Australia','India','Ireland','New Zealand',
+  'Germany','France','Spain','Italy','Netherlands','Belgium','Switzerland','Austria',
+  'Sweden','Norway','Denmark','Finland','Portugal','Poland','Greece','Turkey',
+  'Mexico','Brazil','Argentina','Chile','Colombia','Peru',
+  'South Africa','Nigeria','Kenya','Egypt',
+  'Japan','South Korea','China','Singapore','Malaysia','Indonesia','Philippines','Thailand','Vietnam',
+  'United Arab Emirates','Saudi Arabia','Israel',
+  'Pakistan','Bangladesh','Sri Lanka',
+  'Russia','Ukraine',
+  'Other'
+];
+
+function populateCountrySelect(){
+  ['authCountry', 'cpCountry'].forEach(id => {
+    const select = document.getElementById(id);
+    if(!select || select.dataset.populated) return;
+    COUNTRY_LIST.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+    select.dataset.populated = '1';
+  });
+}
+
+// Splits a Google/Apple display name like "Jamie Rivera" into first/last.
+function splitDisplayName(displayName){
+  const parts = (displayName || '').trim().split(/\s+/).filter(Boolean);
+  if(parts.length === 0) return { firstName: '', lastName: '' };
+  if(parts.length === 1) return { firstName: parts[0], lastName: '' };
+  return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+}
+
+async function saveUserProfile(uid, profile){
+  if(!db || !uid) return;
+  try{
+    await userProfileDocRef(uid).set({
+      ...profile,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  }catch(e){
+    console.error('Saving profile failed', e);
+  }
+}
+
+async function getUserProfile(uid){
+  if(!db || !uid) return null;
+  try{
+    const snap = await userProfileDocRef(uid).get();
+    return snap.exists ? snap.data() : null;
+  }catch(e){
+    console.error('Loading profile failed', e);
+    return null;
+  }
+}
+
+function openCompleteProfileModal(firstName, lastName){
+  const overlay = document.getElementById('completeProfileOverlay');
+  if(!overlay) return;
+  const fn = document.getElementById('cpFirstName');
+  const ln = document.getElementById('cpLastName');
+  if(fn) fn.value = firstName || '';
+  if(ln) ln.value = lastName || '';
+  const err = document.getElementById('completeProfileError');
+  if(err){ err.textContent = ''; err.classList.remove('show'); }
+  overlay.style.display = 'flex';
+  void overlay.offsetWidth;
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeCompleteProfileModal(){
+  const overlay = document.getElementById('completeProfileOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  setTimeout(() => { overlay.style.display = 'none'; }, 260);
+}
+
+async function handleCompleteProfileSubmit(e){
+  e.preventDefault();
+  if(!currentUser) return;
+  const err = document.getElementById('completeProfileError');
+  const submit = document.getElementById('completeProfileSubmitBtn');
+  const username = (document.getElementById('cpUsername')?.value || '').trim();
+  if(!username){
+    if(err){ err.textContent = 'Choose a username.'; err.classList.add('show'); }
+    return;
+  }
+  if(submit) submit.disabled = true;
+  const profile = {
+    firstName: (document.getElementById('cpFirstName')?.value || '').trim(),
+    lastName: (document.getElementById('cpLastName')?.value || '').trim(),
+    username,
+    phone: (document.getElementById('cpPhone')?.value || '').trim(),
+    dob: document.getElementById('cpDob')?.value || '',
+    gender: document.getElementById('cpGender')?.value || '',
+    country: document.getElementById('cpCountry')?.value || ''
+  };
+  await saveUserProfile(currentUser.uid, profile);
+  if(submit) submit.disabled = false;
+  closeCompleteProfileModal();
+  showToast('Profile saved');
+}
+
+function setupCompleteProfileUi(){
+  populateCountrySelect();
+  const closeBtn = document.getElementById('completeProfileCloseBtn');
+  const skipBtn = document.getElementById('completeProfileSkipBtn');
+  const form = document.getElementById('completeProfileForm');
+  if(closeBtn) closeBtn.addEventListener('click', closeCompleteProfileModal);
+  if(skipBtn) skipBtn.addEventListener('click', closeCompleteProfileModal);
+  if(form) form.addEventListener('submit', handleCompleteProfileSubmit);
+}
+
 function normalizeTitleKey(title){
   return String(title || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
@@ -2166,6 +2412,7 @@ async function mergeLocalAndCloudOnLogin(user){
 let authMode = 'sign_in'; // sign_in | sign_up | reset
 let authBusy = false;
 let lastSignInMethod = 'unknown';
+let pendingProfileData = null;
 
 function updateAuthMenu(){
   const signInBtn = document.getElementById('signInMenuItem');
@@ -2243,6 +2490,15 @@ function setAuthMode(mode){
   const goSignIn = document.getElementById('authGoSignIn');
   const passInput = document.getElementById('authPassword');
   const pass2Input = document.getElementById('authPassword2');
+  const nameRow = document.getElementById('authNameRow');
+  const usernameField = document.getElementById('authUsernameField');
+  const phoneField = document.getElementById('authPhoneField');
+  const dobGenderRow = document.getElementById('authDobGenderRow');
+  const countryField = document.getElementById('authCountryField');
+  const firstNameInput = document.getElementById('authFirstName');
+  const lastNameInput = document.getElementById('authLastName');
+  const usernameInput = document.getElementById('authUsername');
+  const profileFieldEls = [nameRow, usernameField, phoneField, dobGenderRow, countryField];
 
   if(mode === 'sign_in'){
     if(title) title.textContent = 'Sign in';
@@ -2258,6 +2514,10 @@ function setAuthMode(mode){
     if(goSignIn) goSignIn.style.display = 'none';
     if(passInput){ passInput.required = true; passInput.autocomplete = 'current-password'; }
     if(pass2Input) pass2Input.required = false;
+    profileFieldEls.forEach(el => { if(el) el.style.display = 'none'; });
+    if(firstNameInput) firstNameInput.required = false;
+    if(lastNameInput) lastNameInput.required = false;
+    if(usernameInput) usernameInput.required = false;
   } else if(mode === 'sign_up'){
     if(title) title.textContent = 'Create account';
     if(sub) sub.textContent = 'Save your watchlist to the cloud and use it on any device.';
@@ -2272,6 +2532,10 @@ function setAuthMode(mode){
     if(goSignIn) goSignIn.style.display = '';
     if(passInput){ passInput.required = true; passInput.autocomplete = 'new-password'; }
     if(pass2Input) pass2Input.required = true;
+    profileFieldEls.forEach(el => { if(el) el.style.display = ''; });
+    if(firstNameInput) firstNameInput.required = true;
+    if(lastNameInput) lastNameInput.required = true;
+    if(usernameInput) usernameInput.required = true;
   } else {
     if(title) title.textContent = 'Reset password';
     if(sub) sub.textContent = 'We’ll email you a link to set a new password.';
@@ -2286,6 +2550,10 @@ function setAuthMode(mode){
     if(goSignIn) goSignIn.style.display = '';
     if(passInput) passInput.required = false;
     if(pass2Input) pass2Input.required = false;
+    profileFieldEls.forEach(el => { if(el) el.style.display = 'none'; });
+    if(firstNameInput) firstNameInput.required = false;
+    if(lastNameInput) lastNameInput.required = false;
+    if(usernameInput) usernameInput.required = false;
   }
 }
 
@@ -2630,8 +2898,26 @@ async function handleAuthSubmit(e){
         setAuthBusy(false);
         return;
       }
+      const firstName = (document.getElementById('authFirstName')?.value || '').trim();
+      const lastName = (document.getElementById('authLastName')?.value || '').trim();
+      const username = (document.getElementById('authUsername')?.value || '').trim();
+      if(!firstName || !lastName){
+        setAuthError('Enter your first and last name.');
+        setAuthBusy(false);
+        return;
+      }
+      if(!username){
+        setAuthError('Choose a username.');
+        setAuthBusy(false);
+        return;
+      }
+      const phone = (document.getElementById('authPhone')?.value || '').trim();
+      const dob = document.getElementById('authDob')?.value || '';
+      const gender = document.getElementById('authGender')?.value || '';
+      const country = document.getElementById('authCountry')?.value || '';
+      pendingProfileData = { firstName, lastName, username, email, phone, dob, gender, country };
       await registerWithEmail(email, password);
-      // onAuthStateChanged handles the rest
+      // onAuthStateChanged handles the rest, including saving pendingProfileData
       return;
     }
     // sign_in
@@ -2657,7 +2943,8 @@ function bindAuthListeners(){
     const firstResolution = !authStateResolved;
     if(!authStateResolved) authStateResolved = true;
     if(user){
-      if(!wasLoggedIn){
+      const isNewSignIn = !wasLoggedIn;
+      if(isNewSignIn){
         track('sign_in', { method: lastSignInMethod || 'unknown' });
       }
       closeAuthModal();
@@ -2669,6 +2956,28 @@ function bindAuthListeners(){
       await mergeLocalAndCloudOnLogin(user);
       setAuthBusy(false);
       setGateBusy(false);
+
+      if(isNewSignIn){
+        if(pendingProfileData){
+          // Email sign-up: profile fields were already collected in the form.
+          await saveUserProfile(user.uid, pendingProfileData);
+          pendingProfileData = null;
+        } else if(lastSignInMethod === 'google' || lastSignInMethod === 'apple'){
+          // Google/Apple only give us a name + email — grab those, then ask
+          // for the rest (username, phone, DOB, gender, country) if we
+          // don't have them yet.
+          const { firstName, lastName } = splitDisplayName(user.displayName);
+          await saveUserProfile(user.uid, {
+            firstName, lastName,
+            email: user.email || '',
+            photoURL: user.photoURL || ''
+          });
+          const profile = await getUserProfile(user.uid);
+          if(!profile || !profile.username){
+            openCompleteProfileModal(firstName, lastName);
+          }
+        }
+      }
     }
     if(firstResolution){
       attemptReveal();
@@ -4353,6 +4662,7 @@ window.addEventListener('resize', updateTabPill);
 
 // Firebase: local storage always works; cloud sync only after config + sign-in
 setupGateUi();
+setupCompleteProfileUi();
 if(initFirebase()){
   setupAuthUi();
   bindAuthListeners();
