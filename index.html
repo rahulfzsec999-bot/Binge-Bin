@@ -173,41 +173,357 @@
     will-change:transform;
     transition:transform 0.18s cubic-bezier(.2,.8,.2,1);
   }
-  .brand-mark{
-    touch-action:none; /* vertical pull owned by JS — blocks browser refresh/scroll on logo */
-    -webkit-user-select:none;
-    user-select:none;
-    cursor:grab;
-    min-height:44px;
+  /* --- Full-screen pull-to-pick --- */
+  #pullUnderlay{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    display:flex;
+    flex-direction:column;
     align-items:center;
-    padding:4px 0;
+    justify-content:flex-start;
+    padding-top:calc(12px + env(safe-area-inset-top, 0px));
+    background:
+      radial-gradient(ellipse 130% 95% at 50% 0%, #e8241c 0%, #e8241c 42%, #c41f18 72%, #4d1310 100%);
+    opacity:0;
+    visibility:hidden;
   }
-  #brandHeader.pull-zone-active{
-    touch-action:none;
+  #pullUnderlay.pull-visible,
+  #pullUnderlay.hint-visible{
+    visibility:visible !important;
+    opacity:1 !important;
   }
-  .brand-mark.pull-armed .brand-w{
-    transition:none;
+  #pullUnderlay .pull-bucket-wrap{
+    margin-top:12px;
+    width:min(140px, 38vw);
+    height:min(140px, 38vw);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    will-change:transform, opacity;
+    opacity:0;
+    transform:translate3d(0, -4px, 0) scale(0.62);
+    transform-origin:50% 40%;
   }
-  .brand-mark.pull-armed{
-    cursor:grabbing;
+  #pullUnderlay.pull-visible .pull-bucket-wrap,
+  #pullUnderlay.hint-visible .pull-bucket-wrap{
+    opacity:1;
   }
-  .pull-spin-hint{
+  #pullUnderlay .pull-bucket-wrap img{
+    width:100%;
+    height:auto;
+    display:block;
+    filter:drop-shadow(0 10px 22px rgba(0,0,0,0.4));
+  }
+  /* bucket-hero size defined with animations below */
+  /* Tear-edge lip above the red underlay, under floating chrome */
+  #pullLip{
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:48px;
+    z-index:3;
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    transform:translate3d(0, 0, 0);
+    transform-origin:50% 0%;
+    margin-top:-1px;
+  }
+  #pullLip.hint-visible,
+  #pullLip.pulling{
+    opacity:1 !important;
+    visibility:visible !important;
+  }
+  #pullLip .pull-lip-svg{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:48px;
+    display:block;
+    transform-origin:50% 0%;
+    will-change:transform;
+  }
+  #pullLip .pull-lip-svg path{
+    fill:var(--accent, #e8241c);
+  }
+  #pullLip.armed .pull-lip-svg path{
+    fill:var(--accent, #e8241c);
+  }
+  #pullLip .pull-lip-text{
     position:absolute;
     left:50%;
-    top:calc(100% - 2px);
-    transform:translateX(-50%);
-    font-size:11px;
-    font-weight:600;
-    color:var(--muted);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.15s ease;
+    top:18px;
+    transform:translate(-50%, -50%);
+    width:90%;
+    text-align:center;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    color:#fff;
+    text-shadow:none;
     white-space:nowrap;
-    letter-spacing:0.02em;
+    pointer-events:none;
+    line-height:1.2;
+    transition:opacity 0.35s ease;
   }
-  .brand-mark.pull-armed .pull-spin-hint{
-    opacity:0.85;
+  /* Hero bucket lives full-screen above the app during release */
+  #pullUnderlay.bucket-hero{
+    z-index:250 !important;
+    opacity:1 !important;
+    visibility:visible !important;
   }
+  #pullUnderlay.bucket-hero .pull-bucket-wrap{
+    position:fixed !important;
+    left:0 !important;
+    top:0 !important;
+    margin:0 !important;
+    width:100vw !important;
+    height:100vh !important;
+    height:100dvh !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    opacity:1 !important;
+    transform:none !important;
+    z-index:260;
+    pointer-events:none;
+  }
+  #pullUnderlay.bucket-hero .pull-bucket-wrap img{
+    width:min(200px, 52vw);
+    height:auto;
+    display:block;
+    transform-origin:50% 70%;
+    will-change:transform;
+    filter:drop-shadow(0 16px 28px rgba(0,0,0,0.45));
+  }
+  #pullUnderlay .pull-fx-stage{
+    position:fixed;
+    left:50%;
+    top:50%;
+    width:min(260px, 70vw);
+    height:min(260px, 70vw);
+    margin-left:calc(min(260px, 70vw) / -2);
+    margin-top:calc(min(260px, 70vw) / -2);
+    pointer-events:none;
+    z-index:255;
+  }
+    #scrollArea{
+    background:var(--bg);
+    position:relative;
+    z-index:2;
+    will-change:transform;
+  }
+  #scrollArea.pull-dragging{
+    overflow-y:hidden !important;
+    touch-action:none;
+  }
+  #scrollArea.pull-animating{
+    transition:transform 0.42s cubic-bezier(.2,.9,.2,1);
+  }
+  /* Cinematic reveal title */
+  .tonight-pick-title{
+    font-family:'Bebas Neue','Arial Narrow',sans-serif;
+    font-size:clamp(26px, 8vw, 34px);
+    font-weight:400;
+    letter-spacing:0.16em;
+    text-align:center;
+    color:#fff !important;
+    text-transform:uppercase;
+    margin:0 0 10px;
+    padding:10px 12px;
+    text-shadow:0 2px 14px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.8);
+    background:linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.45) 20%, rgba(0,0,0,0.45) 80%, transparent 100%);
+    border-radius:4px;
+  }
+
+
+
+  /* --- Full-screen red pick result (continuous with pull underlay) --- */
+  .modal-overlay.pick-result{
+    background:
+      radial-gradient(ellipse 130% 95% at 50% 0%, #e8241c 0%, #e8241c 42%, #c41f18 72%, #4d1310 100%);
+    padding:0;
+    align-items:stretch;
+    justify-content:stretch;
+  }
+  .modal-overlay.pick-result .modal-box{
+    background:transparent;
+    border:none;
+    border-radius:0;
+    max-width:none;
+    width:100%;
+    max-height:none;
+    height:100%;
+    padding:0;
+    overflow:hidden;
+    transform:none;
+    opacity:1;
+    display:flex;
+    flex-direction:column;
+  }
+  .modal-overlay.pick-result.open .modal-box{
+    transform:none;
+    opacity:1;
+  }
+  .pick-result-screen{
+    position:relative;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100%;
+    padding:calc(12px + env(safe-area-inset-top, 0px)) 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    box-sizing:border-box;
+  }
+  .pick-result-close{
+    position:absolute;
+    top:calc(10px + env(safe-area-inset-top, 0px));
+    left:14px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.18);
+    color:#fff;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    touch-action:manipulation;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2;
+  }
+  .pick-result-close:active{background:rgba(255,255,255,0.14);}
+  .pick-result-title{
+    font-family:'Bebas Neue','Arial Narrow',sans-serif;
+    font-size:clamp(28px, 8vw, 36px);
+    font-weight:400;
+    letter-spacing:0.16em;
+    text-align:center;
+    color:#fff;
+    text-transform:uppercase;
+    margin:48px 0 0;
+    padding:0 48px;
+    text-shadow:none;
+  }
+  .pick-result-stage{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-height:180px;
+    margin:12px 0;
+  }
+  .pick-result-poster{
+    width:min(220px, 58vw);
+    height:auto;
+    max-height:min(320px, 42vh);
+    object-fit:cover;
+    border-radius:14px;
+    border:2px solid rgba(255,255,255,0.2);
+    box-shadow:0 18px 40px rgba(0,0,0,0.35);
+    transform-origin:50% 80%;
+    animation:pickPosterRise 0.75s cubic-bezier(.15,.85,.25,1.1) both;
+  }
+  .pick-result-namecard{
+    width:min(260px, 78vw);
+    padding:28px 18px;
+    border-radius:14px;
+    background:rgba(0,0,0,0.22);
+    border:1px solid rgba(255,255,255,0.15);
+    color:#fff;
+    font-size:20px;
+    font-weight:800;
+    text-align:center;
+    line-height:1.3;
+    animation:pickPosterRise 0.75s cubic-bezier(.15,.85,.25,1.1) both;
+  }
+  @keyframes pickPosterRise{
+    0%{
+      transform:translate3d(0, 28px, 0) scale(0.28);
+      opacity:0.35;
+    }
+    60%{
+      transform:translate3d(0, -6px, 0) scale(1.06);
+      opacity:1;
+    }
+    100%{
+      transform:translate3d(0, 0, 0) scale(1);
+      opacity:1;
+    }
+  }
+  .pick-result-name{
+    text-align:center;
+    font-size:18px;
+    font-weight:800;
+    color:#fff;
+    margin:0 0 18px;
+    padding:0 12px;
+    line-height:1.3;
+    max-width:100%;
+  }
+  .pick-result-actions{
+    width:100%;
+    max-width:360px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:auto;
+  }
+  .pick-result-actions .modal-actions-row{
+    display:flex;
+    gap:10px;
+  }
+  .pick-result-actions .modal-btn{
+    border-color:rgba(255,255,255,0.28);
+    color:#fff;
+    background:rgba(0,0,0,0.18);
+  }
+  .pick-result-actions .modal-btn.secondary{
+    color:#fff;
+    font-weight:700;
+  }
+  .pick-result-actions .modal-btn.primary{
+    background:#fff;
+    border-color:#fff;
+    color:#e8241c;
+  }
+  .pick-result-actions .modal-btn:active{
+    opacity:0.88;
+  }
+  .pick-retry-bucket{
+    width:min(160px, 42vw);
+    height:auto;
+    display:block;
+    transform-origin:50% 80%;
+    filter:drop-shadow(0 12px 24px rgba(0,0,0,0.35));
+  }
+  .pick-retry-bucket.shaking{
+    animation:pickRetryShake 0.45s ease-in-out;
+  }
+  .pick-retry-bucket.shaking-big{
+    animation:pickRetryShakeBig 0.55s cubic-bezier(.3,.2,.3,1) both;
+  }
+  @keyframes pickRetryShake{
+    0%,100%{ transform:rotate(0deg) scale(1); }
+    25%{ transform:rotate(-8deg) scale(1.04); }
+    50%{ transform:rotate(8deg) scale(1.02); }
+    75%{ transform:rotate(-5deg) scale(1.03); }
+  }
+  @keyframes pickRetryShakeBig{
+    0%{ transform:rotate(0deg) scale(1); }
+    30%{ transform:rotate(-10deg) scale(1.08); }
+    60%{ transform:rotate(10deg) scale(1.05); }
+    100%{ transform:rotate(0deg) scale(1.02); }
+  }
+
+
   .brand-title{
     font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
     font-size:clamp(17px, 5.8vw, 25px);
@@ -508,19 +824,46 @@
     position:relative;
     width:40px; height:40px;
     border:none; background:transparent;
-    color:var(--text); font-size:20px;
+    color:#fff;
     cursor:pointer; touch-action:manipulation;
     flex-shrink:0; display:flex; align-items:center; justify-content:center;
     border-radius:50%;
+    padding:0;
   }
-  .notif-bell:active{background:rgba(255,255,255,0.06);}
+  .notif-bell:active{background:rgba(255,255,255,0.08);}
+  .notif-bell .notif-bell-icon{
+    display:block;
+    width:22px;
+    height:22px;
+    color:#fff;
+    fill:#fff;
+    stroke:none;
+  }
+  /* Light mode: keep icon readable */
+  body.light .notif-bell,
+  body.light .notif-bell .notif-bell-icon{
+    color:#1a1a1a;
+    fill:#1a1a1a;
+  }
   .notif-badge{
-    position:absolute; top:4px; right:4px;
-    min-width:16px; height:16px; padding:0 4px;
-    background:var(--accent); color:#fff;
-    font-size:10px; font-weight:700; border-radius:8px;
-    display:none; align-items:center; justify-content:center;
+    position:absolute;
+    top:0;
+    right:0;
+    min-width:16px;
+    height:16px;
+    padding:0 4px;
+    background:#e8241c;
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    border-radius:8px;
+    display:none;
+    align-items:center;
+    justify-content:center;
     line-height:1;
+    border:1.5px solid var(--bg, #0a0a0a);
+    box-sizing:border-box;
+    z-index:2;
   }
   .notif-badge.show{display:flex;}
   .notif-overlay{
@@ -2182,7 +2525,9 @@
   </div>
   <div class="header-actions" style="display:flex;align-items:center;gap:4px;margin-left:auto;">
     <button type="button" class="notif-bell" id="notifBellBtn" aria-label="Notifications" title="Notifications">
-      🔔
+      <svg class="notif-bell-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+      </svg>
       <span class="notif-badge" id="notifBadge">0</span>
     </button>
     <button type="button" class="avatar-btn" id="headerAvatarBtn" aria-label="Account menu" title="Menu">
@@ -5392,10 +5737,13 @@ function showModal(html, opts){
   const overlay = document.getElementById('modalOverlay');
   const box = document.getElementById('modalBox');
   const isBig = !!(opts && opts.big);
+  const isPick = !!(opts && opts.pickResult);
   const wasOpen = overlay.classList.contains('open');
 
   box.innerHTML = html;
   box.classList.toggle('detail-modal', isBig);
+  box.classList.toggle('pick-result-box', isPick);
+  overlay.classList.toggle('pick-result', isPick);
   // Clear any inline styles left over from swipe-to-dismiss
   box.style.transform = '';
   box.style.transition = '';
@@ -5423,6 +5771,7 @@ function showModal(html, opts){
 function hideModal(){
   const overlay = document.getElementById('modalOverlay');
   const box = document.getElementById('modalBox');
+  const wasPickResult = overlay.classList.contains('pick-result');
   if(modalReturnCallback){
     const cb = modalReturnCallback;
     modalReturnCallback = null;
@@ -5441,6 +5790,8 @@ function hideModal(){
     const done = () => {
       box.style.transform = '';
       box.style.transition = '';
+      overlay.classList.remove('pick-result');
+      box.classList.remove('pick-result-box');
       box.removeEventListener('transitionend', done);
     };
     box.addEventListener('transitionend', done);
@@ -5449,6 +5800,11 @@ function hideModal(){
     overlay.classList.remove('open');
     box.style.transform = '';
     box.style.transition = '';
+  }
+  // Clear pick-result chrome so next modal is normal
+  if(wasPickResult || overlay.classList.contains('pick-result')){
+    overlay.classList.remove('pick-result');
+    box.classList.remove('pick-result-box');
   }
   expandedId = null;
 }
@@ -5763,7 +6119,7 @@ function pickSurprise(strength){
   const bucketSrc = document.getElementById('headerW').src;
 
   showModal(`
-    <div class="modal-title" id="shakeTitle">Spinning the bin...</div>
+    <div class="modal-title" id="shakeTitle">Picking…</div>
     <div class="shake-stage" id="shakeStage">
       <img class="shake-bucket" id="shakeBucket" src="${bucketSrc}" alt="">
     </div>
@@ -5820,23 +6176,26 @@ function spawnKernels(container, count){
 
 function renderRevealModal(pick){
   const stageHtml = pick.poster
-    ? `<img class="reveal-poster" src="${pick.poster}" alt="">`
-    : `<div class="reveal-namecard">${escapeHtml(pick.title)}</div>`;
+    ? `<img class="pick-result-poster" src="${pick.poster}" alt="">`
+    : `<div class="pick-result-namecard">${escapeHtml(pick.title)}</div>`;
   const nameHtml = pick.poster ? escapeHtml(pick.title) : '';
   const { url: watchUrl, scheme } = getWatchLinkInfo(pick);
 
   return `
-    <div class="modal-title">Tonight's pick</div>
-    <div class="shake-stage">${stageHtml}</div>
-    <div class="shake-pick-name">${nameHtml}</div>
-    <div class="modal-actions-stacked">
-      <div class="modal-actions-row">
-        <button class="modal-btn secondary" onclick="pickSurprise()">Spin again</button>
-        <button class="modal-btn secondary" onclick="openInfoFromReveal('${pick.id}')">More info</button>
+    <div class="pick-result-screen">
+      <button type="button" class="pick-result-close" onclick="hideModal()" aria-label="Close">✕</button>
+      <div class="pick-result-title">TONIGHT'S PICK</div>
+      <div class="pick-result-stage">${stageHtml}</div>
+      ${nameHtml ? `<div class="pick-result-name">${nameHtml}</div>` : ''}
+      <div class="pick-result-actions">
+        <div class="modal-actions-row">
+          <button class="modal-btn secondary" onclick="retryPickOnResultScreen()">Try Again</button>
+          <button class="modal-btn secondary" onclick="openInfoFromReveal('${pick.id}')">More info</button>
+        </div>
+        ${watchUrl
+          ? `<button class="modal-btn primary watch-now-btn" data-app-scheme="${escapeHtml(scheme)}" data-web-url="${escapeHtml(watchUrl)}">▶ Watch Now</button>`
+          : `<button class="modal-btn primary" onclick="toggleWatched('${pick.id}'); hideModal();">Mark watched</button>`}
       </div>
-      ${watchUrl
-        ? `<button class="modal-btn primary watch-now-btn" data-app-scheme="${escapeHtml(scheme)}" data-web-url="${escapeHtml(watchUrl)}">▶ Watch Now</button>`
-        : `<button class="modal-btn primary" onclick="toggleWatched('${pick.id}'); hideModal();">Mark watched</button>`}
     </div>
   `;
 }
@@ -5844,161 +6203,728 @@ function renderRevealModal(pick){
 function openInfoFromReveal(id){
   const pick = items.find(i => i.id === id);
   if(!pick) return;
-  modalReturnCallback = () => { showModal(renderRevealModal(pick)); };
+  modalReturnCallback = () => { showModal(renderRevealModal(pick), { pickResult: true }); };
   toggleExpand(id);
 }
 
+function retryPickOnResultScreen(){
+  // Stay on the red result screen — no grey "Picking…" modal
+  const pool = items.filter(i => !i.deleted && !i.watched);
+  if(pool.length === 0){
+    showModal(`
+      <div class="modal-title">Surprise me</div>
+      <div class="modal-pick-title">Nothing left to watch!</div>
+      <div class="modal-actions">
+        <button class="modal-btn primary" onclick="hideModal()">Close</button>
+      </div>
+    `);
+    return;
+  }
+
+  const overlay = document.getElementById('modalOverlay');
+  const onResult = overlay && overlay.classList.contains('pick-result') && overlay.classList.contains('open');
+  if(!onResult){
+    // Not on result screen (e.g. other entry points) — use classic flow
+    pickSurprise(0.65);
+    return;
+  }
+
+  const screen = overlay.querySelector('.pick-result-screen');
+  const stage = screen && screen.querySelector('.pick-result-stage');
+  const nameEl = screen && screen.querySelector('.pick-result-name');
+  const actions = screen && screen.querySelector('.pick-result-actions');
+  if(!stage){
+    revealPick(pool);
+    return;
+  }
+
+  if(actions) actions.style.pointerEvents = 'none';
+  if(nameEl) nameEl.textContent = '';
+
+  const bucketSrc = (document.getElementById('headerW') || {}).src || '';
+  stage.innerHTML = `<img class="pick-retry-bucket" src="${bucketSrc}" alt="">`;
+  const bucket = stage.querySelector('.pick-retry-bucket');
+
+  const pulse = (big) => {
+    if(!bucket) return;
+    bucket.classList.remove('shaking', 'shaking-big');
+    void bucket.offsetWidth;
+    bucket.classList.add(big ? 'shaking-big' : 'shaking');
+    if(navigator.vibrate) navigator.vibrate(big ? [18, 24, 18] : 14);
+  };
+
+  pulse(false);
+  setTimeout(() => pulse(false), 480);
+  setTimeout(() => {
+    pulse(true);
+    setTimeout(() => {
+      // Same selection rules as pickSurprise / revealPick
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      track('surprise_pick', {
+        pool_size: pool.length,
+        item_type: pick.type || 'unspecified',
+        platform: pick.platform || 'unspecified'
+      });
+      // Re-render result on the same red screen
+      showModal(renderRevealModal(pick), { pickResult: true });
+      if(navigator.vibrate) navigator.vibrate([15, 30, 15]);
+    }, 520);
+  }, 960);
+}
+
 function revealPick(pool){
-  if(!document.getElementById('modalOverlay').classList.contains('open')) return;
+  if(!pool || !pool.length) return;
   const pick = pool[Math.floor(Math.random() * pool.length)];
   track('surprise_pick', {
     pool_size: pool.length,
     item_type: pick.type || 'unspecified',
     platform: pick.platform || 'unspecified'
   });
-  showModal(renderRevealModal(pick));
+  showModal(renderRevealModal(pick), { pickResult: true });
   if(navigator.vibrate) navigator.vibrate([15, 30, 15]);
 }
 
-// --- Pull-down-to-spin (replaces shake-to-spin; no motion sensors) ---
-// Scoped to the header brand area so the watchlist still scrolls normally.
+// --- Full-screen pull-to-pick (no device motion) ---
 const PULL_MIN_PX = 40;
-const PULL_MAX_PX = 140;
-const PULL_AXIS_RATIO = 1.05;
+const PULL_MAX_PX = 150;
+const PULL_AXIS_RATIO = 1.08;
 const PULL_COOLDOWN_MS = 1600;
+const PULL_IDLE_MS = 60000;       // ~1 min on home → one-shot discovery hint
+const PULL_HINT_HOLD_MS = 3400;   // brief notice only
 let lastPullSpinAt = 0;
 let pullState = null;
+let pullThresholdHapticFired = false;
+let pullUi = { underlay: null, instruction: null, bucketWrap: null, lip: null };
+let pullHintTimer = null;
+let pullHintHideTimer = null;
+let pullHintPhaseTimer = null;
+let pullHintActive = false;
+let pullHintProgress = 0;
+let pullHintShownOnce = false; // session: discovery hint only once
+let pullCommitInFlight = false;
 
 function elasticPull(px){
   const t = Math.max(0, Math.min(1, px / PULL_MAX_PX));
-  return PULL_MAX_PX * (1 - Math.pow(1 - t, 1.65));
+  return PULL_MAX_PX * (1 - Math.pow(1 - t, 1.55));
 }
 
-function resetPullVisual(logo){
-  if(!logo) return;
-  logo.style.transform = '';
-  logo.style.transition = '';
+function pullHaptic(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(_){}
+}
+
+function ensurePullUi(){
+  if(pullUi.underlay && pullUi.lip) return pullUi;
+  const logo = document.getElementById('headerW');
+  const bucketSrc = logo ? logo.src : '';
+  const scrollArea = document.getElementById('scrollArea');
+
+  if(!pullUi.underlay){
+    const underlay = document.createElement('div');
+    underlay.id = 'pullUnderlay';
+    underlay.setAttribute('aria-hidden', 'true');
+    underlay.innerHTML = '<div class="pull-bucket-wrap"><img alt="" draggable="false"></div>';
+    const img = underlay.querySelector('img');
+    if(img && bucketSrc) img.src = bucketSrc;
+    document.body.insertBefore(underlay, document.body.firstChild);
+    pullUi.underlay = underlay;
+    pullUi.bucketWrap = underlay.querySelector('.pull-bucket-wrap');
+  }
+
+  if(!pullUi.lip){
+    // Soft wide lip: thin edges, smooth rounded U centre — pure red, blends into underlay
+    const lip = document.createElement('div');
+    lip.id = 'pullLip';
+    lip.setAttribute('aria-hidden', 'true');
+    lip.innerHTML =
+      '<svg class="pull-lip-svg" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true">' +
+        /* Top edge is solid full-width red so no black seam against the surface */
+        '<path d="M0,0 L400,0 L400,14 C340,14 300,16 270,24 C240,32 220,40 200,42 C180,40 160,32 130,24 C100,16 60,14 0,14 Z"/>' +
+      '</svg>' +
+      '<div class="pull-lip-text" id="pullLipText">Pull down to pick</div>';
+    // Fixed at tear edge (z-index 1 with surface) — never a floating high-z tab
+    document.body.appendChild(lip);
+    pullUi.lip = lip;
+    pullUi.instruction = lip.querySelector('.pull-lip-text');
+  }
+
+  return pullUi;
+}
+
+function setPullInstruction(msg){
+  const el = pullUi.instruction;
+  if(!el) return;
+  if(el.textContent === msg) return;
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.textContent = msg || '';
+    el.style.opacity = msg ? '1' : '0';
+  }, 220);
+}
+
+function applyPullVisuals(rawDy, opts){
+  opts = opts || {};
+  const ui = ensurePullUi();
+  const visual = elasticPull(Math.max(0, rawDy));
+  const progress = Math.max(0, Math.min(1, visual / PULL_MAX_PX));
+  const armed = visual >= PULL_MIN_PX;
+  const scrollArea = document.getElementById('scrollArea');
+  const surfaceDy = visual;
+
+  if(scrollArea){
+    scrollArea.classList.remove('pull-animating');
+    scrollArea.style.transition = opts.smooth
+      ? 'transform 0.9s cubic-bezier(.22,.61,.36,1)'
+      : 'none';
+    scrollArea.style.transform = `translate3d(0, ${surfaceDy}px, 0)`;
+  }
+
+  // Underlay must read as solid Binge Bin red (not black body bg)
+  if(ui.underlay){
+    ui.underlay.classList.add(opts.hintOnly ? 'hint-visible' : 'pull-visible');
+    if(!opts.hintOnly){
+      ui.underlay.classList.remove('hint-visible');
+      ui.underlay.classList.add('pull-visible');
+    }
+    ui.underlay.style.visibility = 'visible';
+    ui.underlay.style.opacity = '1';
+  }
+
+  // Bucket peeks under the curved lip
+  const bScale = 0.62 + progress * 0.45;
+  const bY = 2 + progress * 20;
+  const bOp = Math.min(1, 0.45 + progress * 0.9);
+  if(ui.bucketWrap && ui.underlay && !ui.underlay.classList.contains('bucket-hero')){
+    ui.bucketWrap.style.transition = opts.smooth
+      ? 'transform 0.9s cubic-bezier(.22,.61,.36,1), opacity 0.9s ease'
+      : 'none';
+    ui.bucketWrap.style.transform = `translate3d(0, ${bY}px, 0) scale(${bScale})`;
+    ui.bucketWrap.style.opacity = String(bOp);
+  }
+
+  // Lip rides the top edge of the moving Home surface (same Y as surfaceDy)
+  if(ui.lip){
+    if(opts.hintOnly){
+      ui.lip.classList.add('hint-visible');
+      ui.lip.classList.remove('pulling');
+    } else {
+      ui.lip.classList.add('pulling');
+      ui.lip.classList.remove('hint-visible');
+    }
+    ui.lip.classList.toggle('armed', !opts.hintOnly && armed);
+    ui.lip.style.transition = opts.smooth
+      ? 'opacity 0.75s ease, transform 0.9s cubic-bezier(.22,.61,.36,1)'
+      : 'none';
+    // Sit on the tear edge; -1px overlap removes black hairline
+    ui.lip.style.transform = `translate3d(0, ${Math.max(0, surfaceDy - 1)}px, 0)`;
+    const svg = ui.lip.querySelector('.pull-lip-svg');
+    // Rubber stretch — elastic, stronger in the middle of the pull
+    // progress 0→1 maps to a soft rubber curve (ease-out resistance)
+    const rubber = progress * progress * (3 - 2 * progress); // smoothstep
+    const stretchY = 1 + rubber * 0.75; // half the previous stretch (~1.75× max)
+    if(svg){
+      // Live pull: no CSS transition (follows finger). Hint: soft ease.
+      svg.style.transition = opts.smooth
+        ? 'transform 0.9s cubic-bezier(.22,.61,.36,1)'
+        : 'none';
+      svg.style.transform = `scaleY(${stretchY})`;
+    }
+    if(ui.instruction){
+      ui.instruction.style.color = '#fff';
+      ui.instruction.style.textShadow = 'none';
+      ui.instruction.style.transform = 'translate(-50%, -50%)';
+    }
+  }
+
+  if(!opts.skipCopy && !opts.hintOnly){
+    if(armed) setPullInstruction('Release to pick');
+    else if(progress > 0.12) setPullInstruction('Pull a little more');
+    else setPullInstruction('Pull down to pick');
+  }
+
+  return { visual, progress, armed, surfaceDy };
+}
+
+function updatePullVisuals(rawDy){
+  return applyPullVisuals(rawDy, { hintOnly: false });
+}
+
+function hidePullChrome(animate){
+  const ui = pullUi;
+  if(!ui) return;
+  if(ui.lip){
+    ui.lip.classList.remove('hint-visible', 'pulling', 'armed');
+    ui.lip.style.transition = animate ? 'opacity 0.45s ease' : 'none';
+    ui.lip.style.opacity = '0';
+    const svg = ui.lip.querySelector('.pull-lip-svg');
+    if(svg){
+      svg.style.transition = animate ? 'transform 0.45s ease' : 'none';
+      svg.style.transform = 'scaleY(1)';
+    }
+    setTimeout(() => {
+      if(ui.lip && !ui.lip.classList.contains('pulling') && !ui.lip.classList.contains('hint-visible')){
+        ui.lip.style.visibility = 'hidden';
+        ui.lip.style.opacity = '';
+        ui.lip.style.transition = '';
+      }
+    }, animate ? 480 : 0);
+  }
+  if(ui.underlay && !ui.underlay.classList.contains('bucket-hero')){
+    ui.underlay.classList.remove('pull-visible', 'hint-visible');
+    ui.underlay.style.transition = animate ? 'opacity 0.45s ease' : 'none';
+    ui.underlay.style.opacity = '0';
+    ui.underlay.style.visibility = animate ? 'visible' : 'hidden';
+    setTimeout(() => {
+      if(ui.underlay && !ui.underlay.classList.contains('pull-visible') && !ui.underlay.classList.contains('hint-visible') && !ui.underlay.classList.contains('bucket-hero')){
+        ui.underlay.style.visibility = 'hidden';
+        ui.underlay.style.opacity = '';
+        ui.underlay.style.transition = '';
+      }
+    }, animate ? 480 : 0);
+  }
+  if(ui.bucketWrap && ui.underlay && !ui.underlay.classList.contains('bucket-hero')){
+    ui.bucketWrap.style.transition = animate ? 'opacity 0.4s ease, transform 0.4s ease' : 'none';
+    ui.bucketWrap.style.opacity = '0';
+    ui.bucketWrap.style.transform = 'translate3d(0, -6px, 0) scale(0.58)';
+  }
+  if(ui.instruction){
+    ui.instruction.textContent = 'Pull down to pick';
+    ui.instruction.style.color = '#fff';
+    ui.instruction.style.opacity = '1';
+  }
+  pullHintProgress = 0;
+}
+
+function resetPullSurface(animate){
+  const scrollArea = document.getElementById('scrollArea');
+  if(scrollArea){
+    scrollArea.classList.remove('pull-dragging');
+    if(animate){
+      scrollArea.classList.add('pull-animating');
+      scrollArea.style.transition = '';
+      scrollArea.style.transform = 'translate3d(0,0,0)';
+      setTimeout(() => {
+        scrollArea.classList.remove('pull-animating');
+        scrollArea.style.transform = '';
+        scrollArea.style.transition = '';
+      }, 450);
+    } else {
+      scrollArea.style.transform = '';
+      scrollArea.style.transition = '';
+    }
+  }
+  hidePullChrome(animate);
+  pullThresholdHapticFired = false;
+}
+
+function playPullCommitSequence(strength){
+  if(pullCommitInFlight) return;
+  pullCommitInFlight = true;
+  const ui = ensurePullUi();
+  const scrollArea = document.getElementById('scrollArea');
+  const energy = Math.max(0, Math.min(1, strength));
+  const pool = items.filter(i => !i.deleted && !i.watched);
+
+  if(!pool.length){
+    pullCommitInFlight = false;
+    resetPullSurface(true);
+    pickSurprise(energy);
+    return;
+  }
+
+  const wrap = ui.bucketWrap;
+  const img = wrap ? wrap.querySelector('img') : null;
+  const logo = document.getElementById('headerW');
+  if(img && logo && logo.src) img.src = logo.src;
+
+  // FX layer for kernels
+  let fx = ui.underlay && ui.underlay.querySelector('.pull-fx-stage');
+  if(ui.underlay && !fx){
+    fx = document.createElement('div');
+    fx.className = 'pull-fx-stage';
+    ui.underlay.appendChild(fx);
+  }
+  if(fx) fx.innerHTML = '';
+
+  // Lift red under the still-pulled surface so there is never a black frame
+  if(ui.underlay){
+    ui.underlay.classList.add('pull-visible', 'bucket-hero');
+    ui.underlay.style.visibility = 'visible';
+    ui.underlay.style.opacity = '1';
+    ui.underlay.style.zIndex = '250';
+  }
+  if(ui.lip){
+    ui.lip.classList.remove('pulling', 'armed', 'hint-visible');
+    ui.lip.style.opacity = '0';
+    ui.lip.style.visibility = 'hidden';
+  }
+
+  // Ease the Home surface closed on top of the red
+  if(scrollArea){
+    scrollArea.classList.remove('pull-dragging');
+    scrollArea.classList.add('pull-animating');
+    scrollArea.style.transition = 'transform 0.42s cubic-bezier(.2,.85,.25,1)';
+    scrollArea.style.transform = 'translate3d(0,0,0)';
+  }
+
+  // Drive bucket image with explicit transforms (no CSS class fights)
+  const setBucket = (scale, rotDeg, yPx) => {
+    if(!img) return;
+    img.style.transition = 'none';
+    img.style.transform = `translate3d(0, ${yPx||0}px, 0) scale(${scale}) rotate(${rotDeg||0}deg)`;
+  };
+
+  // Start small (as if still under the lip)
+  setBucket(0.55, 0, -36);
+  if(wrap) wrap.style.opacity = '1';
+  pullHaptic([10, 28, 16]);
+
+  const easeOutBack = (t) => {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  };
+  const easeInOut = (t) => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+
+  const animStart = performance.now();
+  const RISE_MS = 620;
+  const SHAKE_MS = 900;
+  const SETTLE_MS = 200;
+  const TOTAL = RISE_MS + SHAKE_MS + SETTLE_MS;
+
+  let shook1 = false, shook2 = false;
+
+  const tick = (now) => {
+    if(!pullCommitInFlight) return;
+    const elapsed = now - animStart;
+
+    if(elapsed < RISE_MS){
+      // Rise + overshoot pop into centre
+      const t = easeOutBack(Math.min(1, elapsed / RISE_MS));
+      const scale = 0.55 + t * 0.55; // 0.55 → 1.10
+      const y = -36 + t * 36;        // -36 → 0
+      setBucket(scale, 0, y);
+    } else if(elapsed < RISE_MS + SHAKE_MS){
+      const local = elapsed - RISE_MS;
+      // Two shake bursts
+      const phase = local / SHAKE_MS; // 0..1
+      const burst = phase < 0.5 ? phase * 2 : (phase - 0.5) * 2;
+      const amp = (phase < 0.5 ? 1 : 0.75) * (1 - burst) * 11;
+      const rot = Math.sin(burst * Math.PI * 4) * amp;
+      const scale = 1.06 + Math.sin(burst * Math.PI * 2) * 0.03;
+      setBucket(scale, rot, 0);
+
+      if(!shook1 && local > 40){
+        shook1 = true;
+        if(fx) spawnKernels(fx, Math.round(3 + energy * 3));
+        pullHaptic(18);
+      }
+      if(!shook2 && local > SHAKE_MS * 0.52){
+        shook2 = true;
+        if(fx) spawnKernels(fx, Math.round(5 + energy * 4));
+        pullHaptic([14, 22, 14]);
+      }
+    } else if(elapsed < TOTAL){
+      const t = (elapsed - RISE_MS - SHAKE_MS) / SETTLE_MS;
+      const scale = 1.06 - easeInOut(Math.min(1,t)) * 0.06;
+      setBucket(scale, 0, 0);
+    } else {
+      // Done — open Tonight's Pick while red is still showing
+      pullHaptic([12, 36, 24]);
+      revealPick(pool);
+
+      // Clear pull chrome after modal is on screen
+      setTimeout(() => {
+        if(img){ img.style.transform = ''; img.style.transition = ''; }
+        if(wrap){
+          wrap.style.opacity = '';
+          wrap.style.transform = '';
+          wrap.style.transition = '';
+        }
+        if(fx) fx.innerHTML = '';
+        if(ui.underlay){
+          ui.underlay.classList.remove('bucket-hero', 'pull-visible', 'hint-visible');
+          ui.underlay.style.opacity = '0';
+          ui.underlay.style.visibility = 'hidden';
+          ui.underlay.style.zIndex = '';
+        }
+        if(scrollArea){
+          scrollArea.classList.remove('pull-animating', 'pull-dragging');
+          scrollArea.style.transform = '';
+          scrollArea.style.transition = '';
+        }
+        if(ui.lip){
+          ui.lip.style.opacity = '';
+          ui.lip.style.visibility = 'hidden';
+        }
+        pullHintProgress = 0;
+        pullCommitInFlight = false;
+      }, 300);
+      return;
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
 function endPullGesture(commit){
   if(!pullState) return;
-  const { logo, dy, mark, header } = pullState;
-  const pulled = Math.max(0, dy || 0);
+  const pulled = Math.max(0, pullState.dy || 0);
+  const wasArmed = pullState.armed;
   pullState = null;
-  if(mark) mark.classList.remove('pull-armed');
-  if(header) header.classList.remove('pull-zone-active');
-  if(logo){
-    logo.style.transition = 'transform 0.28s cubic-bezier(.2,.9,.2,1)';
-    logo.style.transform = '';
-    setTimeout(() => resetPullVisual(logo), 320);
+  pullThresholdHapticFired = false;
+
+  if(commit && wasArmed && pulled >= PULL_MIN_PX){
+    if(Date.now() - lastPullSpinAt < PULL_COOLDOWN_MS){
+      resetPullSurface(true);
+      // do not reschedule hint if already shown once
+      if(!pullHintShownOnce) schedulePullIdleHint();
+      return;
+    }
+    lastPullSpinAt = Date.now();
+    const strength = Math.max(0, Math.min(1, (pulled - PULL_MIN_PX) / (PULL_MAX_PX - PULL_MIN_PX)));
+    playPullCommitSequence(strength);
+    return;
   }
-  if(!commit) return;
-  if(pulled < PULL_MIN_PX) return;
-  if(Date.now() - lastPullSpinAt < PULL_COOLDOWN_MS) return;
-  lastPullSpinAt = Date.now();
-  const strength = Math.max(0, Math.min(1, (pulled - PULL_MIN_PX) / (PULL_MAX_PX - PULL_MIN_PX)));
-  pickSurprise(0.35 + strength * 0.65);
+
+  resetPullSurface(true);
+  if(!pullHintShownOnce) schedulePullIdleHint();
+}
+
+function isAtScrollTop(){
+  const sa = document.getElementById('scrollArea');
+  if(sa) return sa.scrollTop <= 1;
+  return (window.scrollY || document.documentElement.scrollTop || 0) <= 1;
+}
+
+function cancelPullHintTimers(){
+  if(pullHintTimer){ clearTimeout(pullHintTimer); pullHintTimer = null; }
+  if(pullHintHideTimer){ clearTimeout(pullHintHideTimer); pullHintHideTimer = null; }
+  if(pullHintPhaseTimer){ clearTimeout(pullHintPhaseTimer); pullHintPhaseTimer = null; }
+}
+
+function isOnHomeScreenForTease(){
+  // Home feed only — no gate, modals, menu, notifications, auth
+  const gate = document.getElementById('gateOverlay');
+  if(gate && (gate.classList.contains('open') || gate.style.display === 'flex')) return false;
+  const modal = document.getElementById('modalOverlay');
+  if(modal && modal.classList.contains('open')) return false;
+  const menu = document.getElementById('fullMenuOverlay');
+  if(menu && menu.classList.contains('open')) return false;
+  for(const id of ['notifOverlay', 'notifInboxOverlay', 'notifSettingsOverlay', 'notifOnboardOverlay', 'authOverlay']){
+    const el = document.getElementById(id);
+    if(el && (el.classList.contains('open') || el.style.display === 'flex')) return false;
+  }
+  return !!document.getElementById('scrollArea');
+}
+
+function schedulePullIdleHint(){
+  cancelPullHintTimers();
+  // Exactly once per session/installation visit
+  if(pullHintShownOnce) return;
+  pullHintTimer = setTimeout(() => {
+    showPullDiscoveryHint();
+  }, PULL_IDLE_MS);
+}
+
+function showPullDiscoveryHint(){
+  if(pullHintShownOnce) return;
+  if(pullState && pullState.active) return;
+  if(pullCommitInFlight) return;
+  if(!isOnHomeScreenForTease()){
+    // Still waiting — try again later only if never shown
+    schedulePullIdleHint();
+    return;
+  }
+
+  cancelPullHintTimers();
+  pullHintShownOnce = true; // never again this session
+  pullHintActive = true;
+  ensurePullUi();
+  setPullInstruction('');
+
+  const targetDy = PULL_MIN_PX * 0.5;
+  pullHintProgress = 0;
+  applyPullVisuals(0.01, { hintOnly: true, skipCopy: true, smooth: true });
+  requestAnimationFrame(() => {
+    if(!pullHintActive) return;
+    pullHintProgress = targetDy;
+    applyPullVisuals(targetDy, { hintOnly: true, skipCopy: true, smooth: true });
+  });
+
+  pullHintPhaseTimer = setTimeout(() => {
+    if(!pullHintActive) return;
+    setPullInstruction('Having trouble deciding?');
+  }, 700);
+
+  setTimeout(() => {
+    if(!pullHintActive) return;
+    setPullInstruction('Pull down to pick');
+  }, 1600);
+
+  pullHintHideTimer = setTimeout(() => {
+    if(!pullHintActive) return;
+    pullHintProgress = 0;
+    applyPullVisuals(0, { hintOnly: true, skipCopy: true, smooth: true });
+    setTimeout(() => {
+      if(pullState && pullState.active) return;
+      pullHintActive = false;
+      hidePullChrome(false);
+      // Do NOT reschedule — once only
+    }, 850);
+  }, PULL_HINT_HOLD_MS);
+}
+
+function noteUserActivity(){
+  // Intentionally does NOT reset the 1-minute home timer.
+  // Scrolling/tapping the list means they are still deciding — tease can still fire.
 }
 
 function setupPullToSpin(){
-  const header = document.getElementById('brandHeader');
-  const mark = document.querySelector('.brand-mark');
+  const scrollArea = document.getElementById('scrollArea');
   const logo = document.getElementById('headerW');
-  if(!mark || !logo) return;
+  if(!scrollArea) return;
+  ensurePullUi();
+  // Start idle discovery clock (lip stays hidden until then)
+  schedulePullIdleHint();
 
-  if(!mark.querySelector('.pull-spin-hint')){
-    const hint = document.createElement('span');
-    hint.className = 'pull-spin-hint';
-    hint.textContent = 'Pull down to spin';
-    hint.setAttribute('aria-hidden', 'true');
-    if(getComputedStyle(mark).position === 'static') mark.style.position = 'relative';
-    mark.appendChild(hint);
+  if(logo){
+    logo.setAttribute('role', 'button');
+    logo.setAttribute('tabindex', '0');
+    logo.setAttribute('aria-label', 'Pull down to pick something to watch');
+    logo.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        if(Date.now() - lastPullSpinAt < PULL_COOLDOWN_MS) return;
+        lastPullSpinAt = Date.now();
+        pickSurprise(0.65);
+      }
+    });
   }
 
-  logo.setAttribute('role', 'button');
-  logo.setAttribute('tabindex', '0');
-  logo.setAttribute('aria-label', 'Pull down to spin a random pick');
-  logo.style.cursor = 'grab';
+  // No activity-reset: timer measures time still on home without a pick, not idle silence.
 
   function isBlockedTarget(target){
     if(!target || !target.closest) return true;
+    // Only block real controls / overlays — allow pull on list chrome & empty space
     return !!(target.closest('.avatar-btn')
       || target.closest('.notif-bell')
       || target.closest('#notifBellBtn')
       || target.closest('#headerAvatarBtn')
       || target.closest('input')
-      || target.closest('button:not(.brand-mark button)'));
+      || target.closest('textarea')
+      || target.closest('select')
+      || target.closest('.add-box input')
+      || target.closest('.add-box button')
+      || target.closest('.item button')
+      || target.closest('.item .item-actions')
+      || target.closest('.modal-overlay')
+      || target.closest('#modalOverlay')
+      || target.closest('#fullMenuOverlay')
+      || target.closest('#gateOverlay')
+      || target.closest('#notifOverlay')
+      || target.closest('#notifSettingsOverlay')
+      || target.closest('#notifOnboardOverlay')
+      || target.closest('#authOverlay')
+      || target.closest('#splash')
+      || target.closest('.full-menu-row'));
   }
 
-  function inPullZone(target){
-    if(!target || !target.closest) return false;
+  function canStartPull(target){
+    if(pullCommitInFlight) return false;
+    if(!isOnHomeScreenForTease()) return false;
+    if(!isAtScrollTop()) return false;
     if(isBlockedTarget(target)) return false;
-    // Logo, title, or brand-mark — the spin control surface
-    return !!(target.closest('.brand-mark') || target.id === 'headerW' || target.id === 'headerTitle');
+    return true;
   }
 
   function onDown(clientX, clientY, target){
-    if(!inPullZone(target)) return false;
-    // Don't start while a modal/gate is up
-    const modal = document.getElementById('modalOverlay');
-    if(modal && modal.classList.contains('open')) return false;
-    const gate = document.getElementById('gateOverlay');
-    if(gate && gate.classList.contains('open')) return false;
+    // Hint handoff may start even if target is a list item; otherwise home-only guards
+    if(pullHintActive){
+      if(!isAtScrollTop() || !isOnHomeScreenForTease() || pullCommitInFlight) return false;
+    } else if(!canStartPull(target)){
+      return false;
+    }
+
+    // Seamless handoff from discovery hint — same depth, same transforms
+    const seedDy = (pullHintActive && pullHintProgress > 0) ? pullHintProgress : 0;
+    if(pullHintActive){
+      cancelPullHintTimers();
+      pullHintActive = false;
+      const ui = ensurePullUi();
+      // Freeze CSS transitions so JS owns the frame immediately
+      if(ui.lip){
+        const svg = ui.lip.querySelector('.pull-lip-svg');
+        if(svg){ svg.style.transition = 'none'; }
+        ui.lip.style.transition = 'none';
+        ui.lip.classList.remove('hint-visible');
+        ui.lip.classList.add('pulling');
+      }
+      if(ui.underlay){
+        ui.underlay.style.transition = 'none';
+        ui.underlay.classList.remove('hint-visible');
+        ui.underlay.classList.add('pull-visible');
+      }
+      const sa = document.getElementById('scrollArea');
+      if(sa) sa.style.transition = 'none';
+      // Re-apply current depth with live-pull flags (identical math → zero jump)
+      applyPullVisuals(seedDy, { hintOnly: false, skipCopy: true });
+    }
+
     pullState = {
       startX: clientX,
       startY: clientY,
-      dy: 0,
-      active: false,
-      logo,
-      mark,
-      header
+      dy: seedDy,
+      active: seedDy > 2, // already in the gesture if hint was showing
+      armed: false,
+      baseDy: seedDy
     };
+    pullThresholdHapticFired = false;
     return true;
   }
 
   function onMove(clientX, clientY, event){
     if(!pullState) return;
     const dx = clientX - pullState.startX;
-    const dy = clientY - pullState.startY;
+    const dy = (clientY - pullState.startY) + (pullState.baseDy || 0);
+
     if(!pullState.active){
-      if(Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-      if(dy > 0 && Math.abs(dy) >= Math.abs(dx) * PULL_AXIS_RATIO){
+      if(Math.abs(dx) < 6 && Math.abs(clientY - pullState.startY) < 6) return;
+      if(dy > 0 && Math.abs(clientY - pullState.startY) >= Math.abs(dx) * PULL_AXIS_RATIO){
         pullState.active = true;
-        pullState.mark.classList.add('pull-armed');
-        if(pullState.header) pullState.header.classList.add('pull-zone-active');
-      } else if(Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)){
-        pullState = null; // horizontal — abandon
-        return;
-      } else if(dy < -8){
-        pullState = null; // upward — abandon
+        scrollArea.classList.add('pull-dragging');
+        pullHaptic(8);
+      } else if((clientY - pullState.startY) < -6 || (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(clientY - pullState.startY))){
+        pullState = null;
+        hidePullChrome(true);
+        if(!pullHintShownOnce) schedulePullIdleHint();
         return;
       } else {
         return;
       }
     }
+
     if(event && event.cancelable) event.preventDefault();
     pullState.dy = dy;
-    const visual = elasticPull(Math.max(0, dy));
-    const stretch = 1 + Math.min(0.1, visual / PULL_MAX_PX * 0.1);
-    logo.style.transition = 'none';
-    logo.style.transform = `translateY(${visual}px) scale(${stretch})`;
+    const vis = updatePullVisuals(dy);
+    pullState.armed = vis.armed;
+    if(vis.armed && !pullThresholdHapticFired){
+      pullThresholdHapticFired = true;
+      pullHaptic(18);
+    }
   }
 
   function onUp(){
     if(!pullState) return;
-    const shouldSpin = pullState.active && pullState.dy >= PULL_MIN_PX;
-    endPullGesture(shouldSpin);
+    const shouldPick = pullState.active && pullState.armed;
+    endPullGesture(shouldPick);
   }
 
-  // --- Touch ---
-  mark.addEventListener('touchstart', (e) => {
+  scrollArea.addEventListener('touchstart', (e) => {
     if(e.touches.length !== 1) return;
     const t = e.touches[0];
     onDown(t.clientX, t.clientY, e.target);
   }, { passive: true });
 
-  // Listen on mark AND document while active so we don't lose the finger
-  mark.addEventListener('touchmove', (e) => {
+  scrollArea.addEventListener('touchmove', (e) => {
     if(!pullState || e.touches.length !== 1) return;
     const t = e.touches[0];
     onMove(t.clientX, t.clientY, e);
@@ -6008,21 +6934,16 @@ function setupPullToSpin(){
     if(!pullState || !pullState.active || e.touches.length !== 1) return;
     const t = e.touches[0];
     onMove(t.clientX, t.clientY, e);
-  }, { passive: false });
+  }, { passive: false }, true);
 
-  const touchEnd = () => onUp();
-  mark.addEventListener('touchend', touchEnd);
-  mark.addEventListener('touchcancel', () => endPullGesture(false));
-  document.addEventListener('touchend', touchEnd);
-  document.addEventListener('touchcancel', () => {
-    if(pullState) endPullGesture(false);
-  });
+  const endTouch = () => { if(pullState) onUp(); };
+  scrollArea.addEventListener('touchend', endTouch);
+  scrollArea.addEventListener('touchcancel', () => { if(pullState) endPullGesture(false); });
+  document.addEventListener('touchend', endTouch);
 
-  // --- Mouse (desktop preview / Android desktop mode) ---
-  mark.addEventListener('mousedown', (e) => {
+  scrollArea.addEventListener('mousedown', (e) => {
     if(e.button !== 0) return;
     if(!onDown(e.clientX, e.clientY, e.target)) return;
-    e.preventDefault();
     const move = (ev) => onMove(ev.clientX, ev.clientY, ev);
     const up = () => {
       document.removeEventListener('mousemove', move);
@@ -6031,45 +6952,6 @@ function setupPullToSpin(){
     };
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', up);
-  });
-
-  // --- Pointer Events (covers many preview shells) ---
-  if(window.PointerEvent){
-    mark.addEventListener('pointerdown', (e) => {
-      if(e.pointerType === 'touch') return; // touch handled above
-      if(e.button !== 0 && e.pointerType === 'mouse') return;
-      if(!onDown(e.clientX, e.clientY, e.target)) return;
-      try { mark.setPointerCapture(e.pointerId); } catch (_) {}
-      const move = (ev) => onMove(ev.clientX, ev.clientY, ev);
-      const up = (ev) => {
-        mark.removeEventListener('pointermove', move);
-        mark.removeEventListener('pointerup', up);
-        mark.removeEventListener('pointercancel', up);
-        onUp();
-      };
-      mark.addEventListener('pointermove', move);
-      mark.addEventListener('pointerup', up);
-      mark.addEventListener('pointercancel', up);
-    });
-  }
-
-  // Tap logo as fallback (preview / accessibility) — short click only, not after a drag
-  let tapStart = null;
-  logo.addEventListener('click', (e) => {
-    // If a pull just happened, ignore the synthetic click
-    if(Date.now() - lastPullSpinAt < 400) return;
-    if(Date.now() - lastPullSpinAt < PULL_COOLDOWN_MS) return;
-    lastPullSpinAt = Date.now();
-    pickSurprise(0.55);
-  });
-
-  logo.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' '){
-      e.preventDefault();
-      if(Date.now() - lastPullSpinAt < PULL_COOLDOWN_MS) return;
-      lastPullSpinAt = Date.now();
-      pickSurprise(0.65);
-    }
   });
 }
 
@@ -6375,27 +7257,7 @@ document.getElementById('importFile').addEventListener('change', (e) => {
 });
 
 // --- One-time "shake to pick" tip, shown once after a minute in the app ---
-function maybeShowShakeTip(){
-  // One-time tip for pull-to-spin (reuses storage key so existing users aren't re-spammed)
-  if(localStorage.getItem('shakeTipShown') || localStorage.getItem('pullSpinTipShown')) return;
-  setTimeout(() => {
-    if(localStorage.getItem('shakeTipShown') || localStorage.getItem('pullSpinTipShown')) return;
-    localStorage.setItem('shakeTipShown', '1');
-    localStorage.setItem('pullSpinTipShown', '1');
-    const bucketSrc = document.getElementById('headerW').src;
-    showModal(`
-      <div class="modal-title">Surprise me</div>
-      <div class="shake-stage">
-        <img class="shake-bucket shaking-loop" src="${bucketSrc}" alt="">
-      </div>
-      <div class="shake-tip-text">Pull down on the Binge Bin logo, then release to spin a random pick from your To Watch list</div>
-      <div class="modal-actions">
-        <button class="modal-btn primary" onclick="hideModal()">Got it</button>
-      </div>
-    `);
-  }, 60000);
-}
-maybeShowShakeTip();
+
 
 loadItems();
 updateTabPill();
