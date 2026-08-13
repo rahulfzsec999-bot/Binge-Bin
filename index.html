@@ -2239,6 +2239,69 @@
   .modal-overlay.sheet-mode.open .modal-box.detail-modal{
     transform:translate3d(0, 0, 0) !important;
   }
+  /* Only the info card is red — backdrop stays dimmed */
+  .modal-overlay.sheet-mode{
+    background:rgba(0,0,0,0.55) !important;
+  }
+  .modal-overlay.sheet-mode .modal-box.detail-modal{
+    background:
+      radial-gradient(ellipse 120% 90% at 50% 0%, #e8241c 0%, #e8241c 45%, #c41f18 75%, #9a1812 100%);
+    border:none;
+    color:#fff;
+    box-shadow:0 -12px 40px rgba(0,0,0,0.4);
+  }
+  .modal-overlay.sheet-mode .sheet-grab::after{
+    background:rgba(255,255,255,0.35);
+  }
+  .modal-overlay.sheet-mode .detail-close{
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.22);
+    color:#fff;
+  }
+  .modal-overlay.sheet-mode .detail-hero{
+    border-bottom-color:rgba(255,255,255,0.18);
+  }
+  .modal-overlay.sheet-mode .detail-poster{
+    border-color:rgba(255,255,255,0.25);
+    background:rgba(0,0,0,0.2);
+  }
+  .modal-overlay.sheet-mode .detail-title{
+    color:#fff;
+  }
+  .modal-overlay.sheet-mode .detail-meta{
+    color:rgba(255,255,255,0.78);
+  }
+  .modal-overlay.sheet-mode .detail-overview{
+    color:#fff;
+  }
+  .modal-overlay.sheet-mode .detail-overview.muted{
+    color:rgba(255,255,255,0.65);
+  }
+  .modal-overlay.sheet-mode .detail-cast{
+    color:rgba(255,255,255,0.78);
+  }
+  .modal-overlay.sheet-mode .detail-cast-label{
+    color:#fff;
+  }
+  .modal-overlay.sheet-mode .detail-footer{
+    border-top-color:rgba(255,255,255,0.18);
+  }
+  .modal-overlay.sheet-mode .detail-footer-empty{
+    color:rgba(255,255,255,0.65);
+  }
+  .modal-overlay.sheet-mode .watch-now-btn{
+    background:#fff;
+    color:#e8241c;
+    border:none;
+  }
+  .modal-overlay.sheet-mode .watch-now-btn:active{
+    opacity:0.9;
+  }
+  .modal-overlay.sheet-mode .platform-badge,
+  .modal-overlay.sheet-mode .badge{
+    border-color:rgba(255,255,255,0.3);
+  }
+
   .sheet-grab{
     display:flex;
     justify-content:center;
@@ -6216,6 +6279,11 @@ function getWatchLinkInfo(it){
   if(!url && it.platform && PLATFORM_URLS[it.platform]){
     url = PLATFORM_URLS[it.platform] + encodeURIComponent(it.title);
   }
+  // No platform / link — open the TMDB page for this movie or show
+  if(!url && it.tmdbId){
+    const kind = (it.tmdbKind === 'tv' || it.tmdbKind === 'movie') ? it.tmdbKind : 'movie';
+    url = `https://www.themoviedb.org/${kind}/${it.tmdbId}`;
+  }
   const scheme = it.platform ? (APP_SCHEMES[it.platform] || '') : '';
   return { url, scheme };
 }
@@ -6263,7 +6331,7 @@ function renderDetailModal(it){
     <div class="detail-footer">
       ${watchUrl
         ? `<button class="watch-now-btn" data-app-scheme="${escapeHtml(scheme)}" data-web-url="${escapeHtml(watchUrl)}">▶ Watch Now</button>`
-        : `<div class="detail-footer-empty">No platform set for this title</div>`}
+        : `<div class="detail-footer-empty">No link available for this title</div>`}
     </div>
   `;
 }
