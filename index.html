@@ -2141,7 +2141,7 @@
   .gate-error.show{display:block;}
 
   .modal-overlay{
-    position:fixed;
+    position:fixed !important;
     inset:0;
     background:rgba(0,0,0,0.62);
     /* no backdrop-filter — blur is a major source of jank during sheet animation */
@@ -2150,7 +2150,7 @@
     justify-content:center;
     padding:24px;
     padding:calc(24px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) calc(24px + env(safe-area-inset-left, 0px));
-    z-index:600;
+    z-index:800;
     opacity:0;
     pointer-events:none;
     transition:opacity 0.3s ease;
@@ -2158,6 +2158,18 @@
   .modal-overlay.open{
     opacity:1;
     pointer-events:auto;
+  }
+  /* Keep page where user was; block background scroll while any modal is open */
+  html.modal-open,
+  body.modal-open{
+    overflow:hidden !important;
+    overscroll-behavior:none;
+    touch-action:none;
+  }
+  #scrollArea.modal-open{
+    overflow:hidden !important;
+    overscroll-behavior:none;
+    touch-action:none;
   }
   .modal-box{
     background:var(--panel);
@@ -2179,16 +2191,23 @@
   }
 
   /* --- Item detail: clean bottom sheet --- */
+  /* Info sheet: sits in front of the list, slides up from the bottom only */
+  .modal-overlay.sheet-mode{
+    align-items:flex-end !important;
+    justify-content:center !important;
+    padding:0 !important;
+    background:rgba(0,0,0,0.55);
+  }
   .modal-box.detail-modal{
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:0;
+    position:relative;
+    left:auto;
+    right:auto;
+    bottom:auto;
     top:auto;
     width:100%;
     max-width:100%;
     height:auto;
-    max-height:calc(100dvh - env(safe-area-inset-top, 0px) - 64px);
+    max-height:min(92dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 24px));
     padding:0;
     padding-bottom:env(safe-area-inset-bottom, 0px);
     margin:0;
@@ -2205,10 +2224,20 @@
     will-change:transform;
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
+    z-index:801;
   }
-  .modal-overlay.open .modal-box.detail-modal{
-    transform:translate3d(0, 0, 0);
+  .modal-overlay.open .modal-box.detail-modal,
+  .modal-overlay.sheet-mode.open .modal-box.detail-modal{
+    transform:translate3d(0, 0, 0) !important;
     opacity:1;
+  }
+  /* Kill the generic centered scale transform so the sheet never jumps to mid/top */
+  .modal-overlay.sheet-mode .modal-box.detail-modal{
+    transform:translate3d(0, 100%, 0);
+    opacity:1;
+  }
+  .modal-overlay.sheet-mode.open .modal-box.detail-modal{
+    transform:translate3d(0, 0, 0) !important;
   }
   .sheet-grab{
     display:flex;
@@ -3806,9 +3835,11 @@ function setupAvatarUi(){
     });
   }
   if(signOutBtn){
-    signOutBtn.addEventListener('click', () => {
+    signOutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       closeAccountSheet();
-      signOutUser();
+      setTimeout(() => { signOutUser(); }, 50);
     });
   }
   if(pickerOverlay){
@@ -4601,25 +4632,55 @@ async function sendPasswordReset(email){
 }
 
 async function signOutUser(){
-  if(!auth) return;
-  try{
-    // Stop cloud writes first so logout cannot push the account list
-    // into guest storage or the network as a side-effect.
-    clearTimeout(cloudSyncTimer);
-    // Explicit device/account isolation BEFORE signOut so Account A never
-    // keeps receiving pushes after logout (or after Account B signs in).
-    const uidToClean = currentUser && currentUser.uid;
-    if(uidToClean){
-      await disassociateDeviceFromUser(uidToClean);
-    } else {
-      await clearLocalNotifState();
+  // Always attempt sign-out — never fail silently
+  if(!auth){
+    try{ if(typeof showToast === 'function') showToast('Sign out unavailable — reload and try again'); }catch(_){}
+    console.error('signOutUser: auth not ready');
+    return;
+  }
+
+  // Prevent double-taps while in flight
+  if(window.__bbSigningOut) return;
+  window.__bbSigningOut = true;
+
+  // Stop cloud writes so logout cannot push account data into guest storage
+  try{ clearTimeout(cloudSyncTimer); }catch(_){}
+
+  const uidToClean = currentUser && currentUser.uid;
+
+  // Cleanup can hang on network — never block Firebase signOut on it
+  const cleanupPromise = (async () => {
+    try{
+      if(uidToClean){
+        await disassociateDeviceFromUser(uidToClean);
+      } else if(typeof clearLocalNotifState === 'function'){
+        clearLocalNotifState();
+      }
+    }catch(e){
+      console.warn('sign-out cleanup', e);
     }
+  })();
+
+  const withTimeout = (p, ms) => Promise.race([
+    p,
+    new Promise(resolve => setTimeout(resolve, ms))
+  ]);
+
+  try{
+    // Best-effort cleanup (max ~2.5s), then always sign out
+    await withTimeout(cleanupPromise, 2500);
+  }catch(_){}
+
+  try{
     await auth.signOut();
-    // onAuthStateChanged restores the guest library + clears remaining local state
-    track('sign_out');
+    // onAuthStateChanged restores guest library + clears remaining local state
+    try{ track('sign_out'); }catch(_){}
+    try{ if(typeof showToast === 'function') showToast('Signed out'); }catch(_){}
   }catch(e){
     console.error('Sign-out failed', e);
-    showToast('Couldn’t sign out — try again');
+    try{ if(typeof showToast === 'function') showToast('Couldn’t sign out — try again'); }catch(_){}
+  }finally{
+    window.__bbSigningOut = false;
   }
 }
 
@@ -5357,6 +5418,9 @@ list.addEventListener('click', e => {
     return;
   }
 
+  // Capture list position NOW — before modal open can reset it
+  const saTap = document.getElementById('scrollArea');
+  window.__bbItemTapScrollY = saTap ? saTap.scrollTop : 0;
   toggleExpand(itemEl.dataset.id);
 });
 
@@ -5733,6 +5797,90 @@ window.addEventListener('load', hideSafariToolbar);
 window.addEventListener('orientationchange', () => setTimeout(hideSafariToolbar, 200));
 
 // --- Modal (Surprise me / Stats) ---
+function lockPageScroll(){
+  if(window.__bbScrollLocked) return;
+  const sa = document.getElementById('scrollArea');
+
+  // Prefer scroll captured on item tap; else live value
+  let y = (typeof window.__bbItemTapScrollY === 'number')
+    ? window.__bbItemTapScrollY
+    : (sa ? sa.scrollTop : 0);
+  window.__bbItemTapScrollY = null;
+
+  window.__bbScrollLock = { sa: y, win: window.scrollY || document.documentElement.scrollTop || 0 };
+  window.__bbScrollLocked = true;
+
+  document.documentElement.classList.add('modal-open');
+  document.body.classList.add('modal-open');
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+
+  if(sa){
+    sa.classList.add('modal-open');
+    // Keep list in normal layout at the same scroll offset (sheet sits in front via z-index)
+    sa.style.overflow = 'hidden';
+    sa.style.touchAction = 'none';
+    sa.style.overscrollBehavior = 'none';
+    sa.scrollTop = y;
+    sa.dataset.lockY = String(y);
+
+    // If anything tries to move the list, snap it back
+    if(!window.__bbScrollGuard){
+      window.__bbScrollGuard = function(e){
+        if(!window.__bbScrollLocked) return;
+        const el = e.target;
+        if(!el || el.id !== 'scrollArea') return;
+        const lockY = parseFloat(el.dataset.lockY || '0') || 0;
+        if(el.scrollTop !== lockY) el.scrollTop = lockY;
+      };
+      // capture so we run even if others stopPropagation
+      document.addEventListener('scroll', window.__bbScrollGuard, true);
+    }
+  }
+
+  // Block background touch-scroll; allow gestures on the info sheet itself
+  if(!window.__bbTouchBlocker){
+    window.__bbTouchBlocker = function(e){
+      if(!window.__bbScrollLocked) return;
+      const t = e.target;
+      if(t && t.closest && (
+        t.closest('#modalBox') ||
+        t.closest('.modal-box') ||
+        t.closest('.pick-result-screen')
+      )) return;
+      e.preventDefault();
+    };
+    document.addEventListener('touchmove', window.__bbTouchBlocker, { passive: false, capture: true });
+  }
+}
+
+function unlockPageScroll(){
+  if(!window.__bbScrollLocked) return;
+  const sa = document.getElementById('scrollArea');
+  const lock = window.__bbScrollLock || { sa: 0, win: 0 };
+  const y = lock.sa || 0;
+
+  document.documentElement.classList.remove('modal-open');
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+
+  if(sa){
+    sa.classList.remove('modal-open');
+    sa.style.overflow = '';
+    sa.style.touchAction = '';
+    sa.style.overscrollBehavior = '';
+    delete sa.dataset.lockY;
+    // Return to the exact place the user was
+    sa.scrollTop = y;
+    requestAnimationFrame(() => { sa.scrollTop = y; });
+    setTimeout(() => { sa.scrollTop = y; }, 50);
+  }
+  window.scrollTo(0, lock.win || 0);
+  window.__bbScrollLock = null;
+  window.__bbScrollLocked = false;
+}
+
 function showModal(html, opts){
   const overlay = document.getElementById('modalOverlay');
   const box = document.getElementById('modalBox');
@@ -5740,27 +5888,54 @@ function showModal(html, opts){
   const isPick = !!(opts && opts.pickResult);
   const wasOpen = overlay.classList.contains('open');
 
+  // Freeze list scroll before the sheet paints
+  if(!wasOpen) lockPageScroll();
+
   box.innerHTML = html;
   box.classList.toggle('detail-modal', isBig);
   box.classList.toggle('pick-result-box', isPick);
   overlay.classList.toggle('pick-result', isPick);
-  // Clear any inline styles left over from swipe-to-dismiss
-  box.style.transform = '';
-  box.style.transition = '';
+  overlay.classList.toggle('sheet-mode', isBig && !isPick);
+  // Clear swipe leftovers — but set starting transform for sheet so it slides from bottom
+  box.style.transition = 'none';
   box.style.maxHeight = '';
+  if(isBig && !isPick){
+    box.style.transform = 'translate3d(0, 100%, 0)';
+  } else {
+    box.style.transform = '';
+  }
 
-  if(isBig){
+  // Never leave focus on a list control (browser scroll-into-view causes the jump)
+  try{
+    const ae = document.activeElement;
+    if(ae && ae !== document.body && typeof ae.blur === 'function') ae.blur();
+  }catch(_){}
+
+  if(isBig && !isPick){
+    // Always start the sheet at its top (poster/title), never mid-scroll
+    const bodyEl = box.querySelector('.detail-body');
+    if(bodyEl) bodyEl.scrollTop = 0;
+    box.scrollTop = 0;
+
     if(wasOpen){
+      box.style.transition = '';
+      box.style.transform = '';
       overlay.classList.add('open');
       attachSheetSwipeToClose(box);
     } else {
-      // CSS starts the sheet off-screen. Wait one paint, then open so the
-      // slide-up transition always runs (no forced synchronous reflow).
       overlay.classList.remove('open');
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          box.style.transition = '';
           overlay.classList.add('open');
+          box.style.transform = '';
           attachSheetSwipeToClose(box);
+          const bodyEl2 = box.querySelector('.detail-body');
+          if(bodyEl2) bodyEl2.scrollTop = 0;
+          try{
+            const ae = document.activeElement;
+            if(ae && ae !== document.body && typeof ae.blur === 'function') ae.blur();
+          }catch(_){}
         });
       });
     }
@@ -5778,6 +5953,7 @@ function hideModal(){
     box.style.transition = 'none';
     box.style.transform = '';
     expandedId = null;
+    // Stay locked — returning to another modal (e.g. pick result)
     cb();
     return;
   }
@@ -5791,8 +5967,11 @@ function hideModal(){
       box.style.transform = '';
       box.style.transition = '';
       overlay.classList.remove('pick-result');
+      overlay.classList.remove('sheet-mode');
       box.classList.remove('pick-result-box');
+      box.classList.remove('detail-modal');
       box.removeEventListener('transitionend', done);
+      unlockPageScroll();
     };
     box.addEventListener('transitionend', done);
     setTimeout(done, 380); // fallback if transitionend doesn't fire
@@ -5800,6 +5979,11 @@ function hideModal(){
     overlay.classList.remove('open');
     box.style.transform = '';
     box.style.transition = '';
+    overlay.classList.remove('pick-result');
+    overlay.classList.remove('sheet-mode');
+    box.classList.remove('pick-result-box');
+    box.classList.remove('detail-modal');
+    unlockPageScroll();
   }
   // Clear pick-result chrome so next modal is normal
   if(wasPickResult || overlay.classList.contains('pick-result')){
@@ -5979,6 +6163,13 @@ function toggleExpand(id, source){
     hideModal();
     return;
   }
+  // Freeze scroll before any DOM work for the sheet
+  const saNow = document.getElementById('scrollArea');
+  if(typeof window.__bbItemTapScrollY !== 'number' && saNow){
+    window.__bbItemTapScrollY = saNow.scrollTop;
+  }
+  lockPageScroll();
+
   expandedId = id;
   const it = items.find(i => i.id === id);
   if(!it) return;
@@ -6955,6 +7146,30 @@ function setupPullToSpin(){
   });
 }
 
+
+function ensureOverlaysOnBody(){
+  // Modals/sheets must NOT live inside #scrollArea or they scroll/jump with the list
+  const ids = [
+    'modalOverlay',
+    'fullMenuOverlay',
+    'notifOverlay',
+    'notifSettingsOverlay',
+    'notifOnboardOverlay',
+    'accountOverlay',
+    'avatarPickerOverlay',
+    'gateOverlay',
+    'authOverlay',
+    'toast'
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && el.parentElement !== document.body){
+      document.body.appendChild(el);
+    }
+  });
+}
+ensureOverlaysOnBody();
+
 setupPullToSpin();
 
 // --- Stats ---
@@ -7151,9 +7366,12 @@ function setupFullMenuUi(){
   });
 
   const fmSignOut = document.getElementById('fmSignOut');
-  if(fmSignOut) fmSignOut.addEventListener('click', () => {
+  if(fmSignOut) fmSignOut.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     closeFullMenu();
-    signOutUser();
+    // Next tick so menu close paint does not cancel the async sign-out
+    setTimeout(() => { signOutUser(); }, 50);
   });
 
   const fmAccount = document.getElementById('fmAccount');
