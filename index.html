@@ -765,8 +765,9 @@
     border-color:#fff; box-shadow:0 0 0 2px rgba(255,255,255,0.15);
   }
   .full-menu-profile-name{
-    font-size:13px; font-weight:600; color:#e8e8e8;
-    max-width:88px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-size:14px; font-weight:700; color:#fff;
+    max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    text-align:center;
   }
   .full-menu-profile.guest .full-menu-profile-name{color:var(--muted);}
   .full-menu-manage-wrap{
@@ -881,28 +882,75 @@
     padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;
     border-bottom:1px solid var(--line); flex-shrink:0;
   }
-  .notif-header h2{flex:1; font-size:18px; font-weight:700; margin:0;}
+  .notif-header h2{flex:1; font-size:18px; font-weight:700; margin:0; color:var(--text);}
   .notif-header button{
     background:none; border:none; color:var(--muted);
-    font-size:14px; font-weight:600; cursor:pointer; padding:8px;
+    font-size:22px; font-weight:600; cursor:pointer; padding:8px;
+    line-height:1;
+  }
+  .notif-header #notifMarkAllBtn{
+    font-size:13px; font-weight:600; padding:8px;
   }
   .notif-list{
     flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
-    padding:8px 12px calc(20px + env(safe-area-inset-bottom,0px));
+    padding:10px 16px calc(20px + env(safe-area-inset-bottom,0px));
   }
   .notif-empty{
     text-align:center; color:var(--muted); padding:48px 20px; font-size:14px; line-height:1.5;
   }
-  .notif-card{
-    background:var(--panel); border:1px solid var(--line);
-    border-radius:12px; padding:14px; margin-bottom:8px;
-    cursor:pointer; touch-action:manipulation; text-align:left; width:100%;
-    color:var(--text);
+  .notif-swipe-wrap{
+    position:relative;
+    margin-bottom:10px;
+    border-radius:12px;
+    overflow:hidden;
   }
-  .notif-card.unread{border-color:rgba(232,36,28,0.45); background:#1a1212;}
-  .notif-card-head{font-size:13px; font-weight:700; margin-bottom:4px;}
-  .notif-card-body{font-size:13px; color:var(--muted); line-height:1.4;}
-  .notif-card-time{font-size:11px; color:#666; margin-top:8px;}
+  .notif-swipe-bg{
+    position:absolute; inset:0;
+    background:#5a1510;
+    display:flex; align-items:center; justify-content:flex-end;
+    padding-right:18px;
+    color:rgba(255,255,255,0.85);
+    font-size:13px; font-weight:700;
+  }
+  /* Red notification cards — item-sized */
+  .notif-card{
+    position:relative;
+    display:flex; align-items:flex-start; gap:12px;
+    background:
+      radial-gradient(ellipse 120% 100% at 0% 0%, #e8241c 0%, #c41f18 55%, #9a1812 100%);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:12px;
+    padding:12px;
+    margin:0;
+    cursor:pointer; touch-action:pan-y; text-align:left; width:100%;
+    color:#fff;
+    min-height:72px;
+    box-sizing:border-box;
+    z-index:1;
+    transition:transform 0.15s ease, opacity 0.15s ease;
+  }
+  .notif-card.unread{
+    box-shadow:0 0 0 1px rgba(255,255,255,0.2);
+  }
+  .notif-card-poster{
+    width:44px; height:66px; border-radius:8px; object-fit:cover;
+    background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.2);
+    flex-shrink:0;
+  }
+  .notif-card-poster.placeholder{
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:rgba(255,255,255,0.5);
+  }
+  .notif-card-main{ min-width:0; flex:1; display:flex; flex-direction:column; gap:4px; justify-content:center; }
+  .notif-card-head{
+    font-size:15px; font-weight:700; color:#fff;
+    line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .notif-card-body{
+    font-size:13px; color:rgba(255,255,255,0.85); line-height:1.35;
+  }
+  .notif-card-time{ display:none; }
   .notif-settings-overlay{
     position:fixed; inset:0; z-index:730;
     background:#0a0a0a;
@@ -3000,6 +3048,24 @@
           <option value="">Select…</option>
         </select>
       </div>
+      <div id="cpPasswordSection" style="display:none">
+        <div class="auth-field" style="margin-top:8px">
+          <label style="color:var(--muted);font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase">Password</label>
+        </div>
+        <div class="auth-field">
+          <label for="cpCurrentPassword">Current password</label>
+          <input type="password" id="cpCurrentPassword" name="currentPassword" autocomplete="current-password" placeholder="Current password">
+        </div>
+        <div class="auth-field">
+          <label for="cpNewPassword">New password</label>
+          <input type="password" id="cpNewPassword" name="newPassword" autocomplete="new-password" placeholder="At least 6 characters" minlength="6">
+        </div>
+        <div class="auth-field">
+          <label for="cpConfirmPassword">Confirm new password</label>
+          <input type="password" id="cpConfirmPassword" name="confirmPassword" autocomplete="new-password" placeholder="Repeat new password" minlength="6">
+        </div>
+      </div>
+      <p class="auth-muted" id="cpPasswordHint" style="display:none;font-size:12px;color:var(--muted);margin:8px 0 0;line-height:1.4">Password is managed by your Google or Apple sign-in.</p>
       <p class="auth-error" id="completeProfileError"></p>
       <button type="submit" class="auth-primary" id="completeProfileSubmitBtn">Save profile</button>
     </form>
@@ -3091,7 +3157,7 @@
     <div class="full-menu-section">Account</div>
     <div class="full-menu-list">
       <button type="button" class="full-menu-row" id="fmAccount" style="display:none"><span>Account</span><span class="chev">›</span></button>
-      <button type="button" class="full-menu-row" id="fmSignIn"><span>Sign in to sync</span><span class="chev">›</span></button>
+      <button type="button" class="full-menu-row" id="fmSignIn"><span>Sign in</span><span class="chev">›</span></button>
       <button type="button" class="full-menu-row danger" id="fmSignOut" style="display:none"><span>Sign Out</span></button>
     </div>
 
@@ -3103,7 +3169,7 @@
 <!-- Notifications inbox -->
 <div class="notif-overlay" id="notifOverlay" aria-hidden="true">
   <div class="notif-header">
-    <button type="button" id="notifBackBtn" aria-label="Back">‹ Back</button>
+    <button type="button" id="notifBackBtn" aria-label="Close">‹</button>
     <h2>Notifications</h2>
     <button type="button" id="notifMarkAllBtn">Mark all read</button>
   </div>
@@ -3206,6 +3272,7 @@
       </div>
     </div>
     <div class="account-actions">
+      <button type="button" class="account-action-btn" id="accountPersonalInfoBtn">Personal info</button>
       <button type="button" class="account-action-btn" id="accountChangeAvatarBtn">Change avatar</button>
       <button type="button" class="account-action-btn danger" id="accountSignOutBtn">Sign out</button>
     </div>
@@ -3353,6 +3420,7 @@ let modalReturnCallback = null;
 const STORE_KEY = 'queue-items'; // legacy key — migrated into guest store on first load
 const GUEST_STORE_KEY = 'bingebin-guest-library';
 const ACCOUNT_CACHE_PREFIX = 'bingebin-account-library:';
+const LAST_UID_KEY = 'bingebin-last-uid'; // last signed-in account — used for instant boot list
 const GA_ID = 'G-6EEBKL2QX4';
 
 /** GA4 event helper — never send free-text titles or search queries. */
@@ -3854,9 +3922,10 @@ function updateFullMenuProfileUi(){
   const profileBtn = document.getElementById('fullMenuProfileBtn');
   if(currentUser){
     const profile = cachedUserProfile || {};
-    const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
+    // Prefer username under the avatar (bold label)
+    const displayName = (profile.username && String(profile.username).trim())
+      || [profile.firstName, profile.lastName].filter(Boolean).join(' ')
       || currentUser.displayName
-      || profile.username
       || (currentUser.email ? currentUser.email.split('@')[0] : 'You');
     if(nameEl) nameEl.textContent = displayName;
     if(manageBtn) manageBtn.textContent = 'Change avatar';
@@ -4025,6 +4094,7 @@ function setupAvatarUi(){
   const headerBtn = document.getElementById('headerAvatarBtn');
   const overlay = document.getElementById('accountOverlay');
   const changeBtn = document.getElementById('accountChangeAvatarBtn');
+  const personalBtn = document.getElementById('accountPersonalInfoBtn');
   const signOutBtn = document.getElementById('accountSignOutBtn');
   const pickerOverlay = document.getElementById('avatarPickerOverlay');
   const pickerDone = document.getElementById('avatarPickerDoneBtn');
@@ -4044,6 +4114,19 @@ function setupAvatarUi(){
     changeBtn.addEventListener('click', () => {
       closeAccountSheet();
       setTimeout(openAvatarPicker, 200);
+    });
+  }
+  if(personalBtn){
+    personalBtn.addEventListener('click', async () => {
+      closeAccountSheet();
+      let profile = cachedUserProfile || {};
+      try{
+        if(currentUser){
+          const fresh = await loadAndCacheProfile(currentUser.uid);
+          if(fresh) profile = fresh;
+        }
+      }catch(e){}
+      setTimeout(() => openCompleteProfileModal(profile, { editAll: true }), 200);
     });
   }
   if(signOutBtn){
@@ -4070,7 +4153,9 @@ function setupAvatarUi(){
  * Google/Apple already provide name + email — we never re-ask for those
  * unless the provider returned nothing.
  */
-function openCompleteProfileModal(existingProfile){
+function openCompleteProfileModal(existingProfile, opts){
+  opts = opts || {};
+  const editAll = !!opts.editAll;
   const overlay = document.getElementById('completeProfileOverlay');
   if(!overlay) return;
   const profile = existingProfile || {};
@@ -4090,10 +4175,26 @@ function openCompleteProfileModal(existingProfile){
   if(gender) gender.value = profile.gender || '';
   if(country) country.value = profile.country || '';
 
-  const needsUsername = !profile.username;
-  const needsDob = !profile.dob;
-  const needsGender = !profile.gender;
-  const needsName = !(profile.firstName || profile.lastName);
+  const titleEl = overlay.querySelector('.auth-title');
+  const subEl = overlay.querySelector('.auth-sub');
+  const skipBtn = document.getElementById('completeProfileSkipBtn');
+  const submitBtn = document.getElementById('completeProfileSubmitBtn');
+  if(editAll){
+    if(titleEl) titleEl.textContent = 'Personal info';
+    if(subEl) subEl.textContent = 'Update the details you shared when you signed up.';
+    if(skipBtn) skipBtn.style.display = 'none';
+    if(submitBtn) submitBtn.textContent = 'Save changes';
+  } else {
+    if(titleEl) titleEl.textContent = 'Finish setting up your account';
+    if(subEl) subEl.textContent = 'Just a couple more details — you can always edit these later.';
+    if(skipBtn) skipBtn.style.display = '';
+    if(submitBtn) submitBtn.textContent = 'Save profile';
+  }
+
+  const needsUsername = editAll || !profile.username;
+  const needsDob = editAll || !profile.dob;
+  const needsGender = editAll || !profile.gender;
+  const needsName = editAll || !(profile.firstName || profile.lastName);
 
   const nameRow = fn && fn.closest('.auth-field-row');
   if(nameRow) nameRow.style.display = needsName ? '' : 'none';
@@ -4104,14 +4205,38 @@ function openCompleteProfileModal(existingProfile){
   }
   const dobGenderRow = document.getElementById('cpDobGenderRow');
   if(dobGenderRow) dobGenderRow.style.display = (needsDob || needsGender) ? '' : 'none';
-  if(gender) gender.value = profile.gender || '';
   if(phone){
     const wrap = phone.closest('.auth-field');
-    if(wrap) wrap.style.display = 'none';
+    if(wrap) wrap.style.display = editAll ? '' : 'none';
   }
   if(country){
     const wrap = country.closest('.auth-field');
-    if(wrap) wrap.style.display = 'none';
+    if(wrap) wrap.style.display = editAll ? '' : 'none';
+  }
+
+  // Username always editable in Personal info
+  if(editAll && un){
+    const wrap = un.closest('.auth-field');
+    if(wrap) wrap.style.display = '';
+    un.required = true;
+  }
+
+  const pwSection = document.getElementById('cpPasswordSection');
+  const pwHint = document.getElementById('cpPasswordHint');
+  const curPw = document.getElementById('cpCurrentPassword');
+  const newPw = document.getElementById('cpNewPassword');
+  const confPw = document.getElementById('cpConfirmPassword');
+  if(curPw) curPw.value = '';
+  if(newPw) newPw.value = '';
+  if(confPw) confPw.value = '';
+  if(editAll && currentUser){
+    const providers = (currentUser.providerData || []).map(p => p && p.providerId);
+    const hasPassword = providers.indexOf('password') !== -1;
+    if(pwSection) pwSection.style.display = hasPassword ? '' : 'none';
+    if(pwHint) pwHint.style.display = hasPassword ? 'none' : '';
+  } else {
+    if(pwSection) pwSection.style.display = 'none';
+    if(pwHint) pwHint.style.display = 'none';
   }
 
   const err = document.getElementById('completeProfileError');
@@ -4148,21 +4273,63 @@ async function handleCompleteProfileSubmit(e){
     if(!free){ setErr('That username is already taken.'); return; }
   }
 
+  const currentPassword = (document.getElementById('cpCurrentPassword')?.value || '');
+  const newPassword = (document.getElementById('cpNewPassword')?.value || '');
+  const confirmPassword = (document.getElementById('cpConfirmPassword')?.value || '');
+  const pwSection = document.getElementById('cpPasswordSection');
+  const wantPwChange = pwSection && pwSection.style.display !== 'none' && (newPassword || confirmPassword || currentPassword);
+  if(wantPwChange){
+    if(!currentPassword){ setErr('Enter your current password to change it.'); return; }
+    if(newPassword.length < 6){ setErr('New password should be at least 6 characters.'); return; }
+    if(newPassword !== confirmPassword){ setErr('New passwords do not match.'); return; }
+  }
+
   if(submit) submit.disabled = true;
   const profile = {
     firstName: (document.getElementById('cpFirstName')?.value || '').trim(),
     lastName: (document.getElementById('cpLastName')?.value || '').trim(),
     dob: document.getElementById('cpDob')?.value || '',
-    gender: document.getElementById('cpGender')?.value || ''
+    gender: document.getElementById('cpGender')?.value || '',
+    phone: (document.getElementById('cpPhone')?.value || '').trim(),
+    country: (document.getElementById('cpCountry')?.value || '').trim()
   };
   if(username) profile.username = username;
   try{
+    if(wantPwChange){
+      try{
+        const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPassword);
+        await currentUser.reauthenticateWithCredential(cred);
+        await currentUser.updatePassword(newPassword);
+      }catch(pwErr){
+        const code = pwErr && pwErr.code ? pwErr.code : '';
+        if(code === 'auth/wrong-password' || code === 'auth/invalid-credential'){
+          setErr('Current password is incorrect.');
+        } else if(code === 'auth/weak-password'){
+          setErr('New password is too weak.');
+        } else if(code === 'auth/requires-recent-login'){
+          setErr('For security, sign out and sign in again, then change your password.');
+        } else {
+          setErr((pwErr && pwErr.message) || 'Could not change password.');
+        }
+        if(submit) submit.disabled = false;
+        return;
+      }
+    }
     await saveUserProfile(currentUser.uid, profile);
     cachedUserProfile = Object.assign({}, cachedUserProfile || {}, profile);
     writeAvatarCache(currentUser.uid, cachedUserProfile);
     applyAvatarToUi(cachedUserProfile, currentUser);
+    try{ updateFullMenuProfileUi(); }catch(e){}
+    try{
+      const nameEl = document.getElementById('accountSheetName');
+      if(nameEl){
+        nameEl.textContent = (profile.username && String(profile.username).trim())
+          || [profile.firstName, profile.lastName].filter(Boolean).join(' ')
+          || nameEl.textContent;
+      }
+    }catch(e){}
     closeCompleteProfileModal();
-    showToast('Profile saved');
+    showToast(wantPwChange ? 'Profile & password saved' : 'Profile saved');
   }catch(e2){
     console.error(e2);
     setErr('Couldn’t save profile — try again.');
@@ -4287,7 +4454,18 @@ function saveGuestLibrary(list){
 }
 
 async function loadItems(){
-  // Boot as guest; auth listener will swap in the account library after sign-in
+  // Prefer last login's cached library so the list appears instantly on open
+  let lastUid = null;
+  try{ lastUid = localStorage.getItem(LAST_UID_KEY); }catch(e){}
+  if(lastUid){
+    const cached = readJsonArray(accountCacheKey(lastUid));
+    if(cached.length){
+      items = cached;
+      render();
+      return;
+    }
+  }
+  // No account cache — show guest list
   items = loadGuestLibrary();
   render();
 }
@@ -4297,6 +4475,7 @@ function saveItems(){
   if(currentUser){
     // Account session: cache on device + push to cloud. Do NOT touch guest list.
     writeJsonArray(accountCacheKey(currentUser.uid), items);
+    try{ localStorage.setItem(LAST_UID_KEY, currentUser.uid); }catch(e){}
     scheduleCloudSave();
   } else {
     // Guest session: local-only. Never upload.
@@ -4314,6 +4493,11 @@ function scheduleCloudSave(){
 
 async function saveToCloud(){
   if(!firebaseReady || !currentUser || !db) return;
+  // Always keep latest list on device for this account
+  try{
+    writeJsonArray(accountCacheKey(currentUser.uid), items);
+    localStorage.setItem(LAST_UID_KEY, currentUser.uid);
+  }catch(e){}
   try{
     touchUpdatedAtOnAll();
     await libraryDocRef(currentUser.uid).set({
@@ -4352,39 +4536,55 @@ async function loadFromCloud(uid){
  */
 async function mergeLocalAndCloudOnLogin(user){
   const guestCopy = loadGuestLibrary();
+  const cached = readJsonArray(accountCacheKey(user.uid));
+
+  // Instant UI: show device cache (or current/guest) without waiting for network
+  const instant = cached.length
+    ? cached
+    : (Array.isArray(items) && items.length ? items.slice() : guestCopy.slice());
+  applyingRemote = true;
+  items = instant;
+  applyingRemote = false;
+  render();
+
+  // Background: fetch cloud, merge, then refresh UI if needed
   const remote = await loadFromCloud(user.uid);
   if(remote === undefined){
-    // Network error — fall back to device cache for this account if any
-    const cached = readJsonArray(accountCacheKey(user.uid));
-    applyingRemote = true;
-    items = cached.length ? cached : guestCopy.slice();
-    applyingRemote = false;
-    render();
+    // Network error — keep instant list (already on screen)
+    if(!cached.length && guestCopy.length){
+      applyingRemote = true;
+      items = guestCopy.slice();
+      applyingRemote = false;
+      render();
+    }
     return;
   }
+
   const remoteList = remote || [];
   const isFirstAccountLibrary = remoteList.length === 0;
   const merged = mergeItemLists(guestCopy, remoteList);
 
+  // Skip re-render/toast if nothing meaningful changed vs what we already show
+  const beforeIds = new Set((items || []).map(i => i.id + ':' + (i.updatedAt || i.watched || '') + ':' + (i.rating || '')));
+  const afterIds = new Set(merged.map(i => i.id + ':' + (i.updatedAt || i.watched || '') + ':' + (i.rating || '')));
+  let same = beforeIds.size === afterIds.size;
+  if(same){
+    for(const k of afterIds){ if(!beforeIds.has(k)){ same = false; break; } }
+  }
+
   applyingRemote = true;
   items = merged;
   writeJsonArray(accountCacheKey(user.uid), items);
+  try{ localStorage.setItem(LAST_UID_KEY, user.uid); }catch(e){}
   applyingRemote = false;
-  render();
+  if(!same) render();
+
   await saveToCloud();
 
   const guestN = guestCopy.filter(i => !i.deleted).length;
   const remoteN = remoteList.filter(i => !i.deleted).length;
   const mergedN = merged.filter(i => !i.deleted).length;
-  if(isFirstAccountLibrary && guestN > 0){
-    showToast(`Synced ${guestN} title${guestN === 1 ? '' : 's'} to your account`);
-  } else if(remoteN === 0 && guestN === 0){
-    // brand-new empty account — stay quiet
-  } else if(guestN === 0 && remoteN > 0){
-    showToast(`Restored ${remoteN} title${remoteN === 1 ? '' : 's'} from your account`);
-  } else if(guestN > 0 || remoteN > 0){
-    showToast(`Library synced · ${mergedN} title${mergedN === 1 ? '' : 's'}`);
-  }
+  // Silent sync — no status toasts on open/login
   track('cloud_sync', {
     local_count: guestN,
     remote_count: remoteN,
@@ -4396,6 +4596,7 @@ async function mergeLocalAndCloudOnLogin(user){
 /** Switch UI back to the guest library. Does not upload anything. */
 function restoreGuestLibraryOnLogout(){
   clearTimeout(cloudSyncTimer);
+  try{ localStorage.removeItem(LAST_UID_KEY); }catch(e){}
   applyingRemote = true;
   items = loadGuestLibrary();
   applyingRemote = false;
@@ -5038,6 +5239,16 @@ function bindAuthListeners(){
         // items currently holds the guest library from loadItems / prior session
         saveGuestLibrary(Array.isArray(items) ? items : []);
       }
+      // Paint account cache immediately (merge still refreshes from cloud after)
+      try{
+        const early = readJsonArray(accountCacheKey(user.uid));
+        if(early.length){
+          applyingRemote = true;
+          items = early;
+          applyingRemote = false;
+          render();
+        }
+      }catch(_){}
       await mergeLocalAndCloudOnLogin(user);
       setAuthBusy(false);
       setGateBusy(false);
@@ -6919,7 +7130,7 @@ function ensurePullUi(){
     lip.innerHTML =
       '<svg class="pull-lip-svg" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true">' +
         /* Top edge is solid full-width red so no black seam against the surface */
-        '<path d="M0,0 L400,0 L400,14 C340,14 300,16 270,24 C240,32 220,40 200,42 C180,40 160,32 130,24 C100,16 60,14 0,14 Z"/>' +
+        '<path d="M0,0 L400,0 L400,10 C330,10 300,11 275,18 C245,28 228,40 212,44 L188,44 C172,40 155,28 125,18 C100,11 70,10 0,10 Z"/>' +
       '</svg>' +
       '<div class="pull-lip-text" id="pullLipText">Pull down to pick</div>';
     // Fixed at tear edge (z-index 1 with surface) — never a floating high-z tab
@@ -6999,11 +7210,9 @@ function applyPullVisuals(rawDy, opts){
     ui.lip.style.transform = `translate3d(0, ${Math.max(0, surfaceDy - 1)}px, 0)`;
     const svg = ui.lip.querySelector('.pull-lip-svg');
     // Rubber stretch — elastic, stronger in the middle of the pull
-    // progress 0→1 maps to a soft rubber curve (ease-out resistance)
     const rubber = progress * progress * (3 - 2 * progress); // smoothstep
-    const stretchY = 1 + rubber * 0.75; // half the previous stretch (~1.75× max)
+    const stretchY = 1 + rubber * 0.75;
     if(svg){
-      // Live pull: no CSS transition (follows finger). Hint: soft ease.
       svg.style.transition = opts.smooth
         ? 'transform 0.9s cubic-bezier(.22,.61,.36,1)'
         : 'none';
@@ -7041,6 +7250,7 @@ function hidePullChrome(animate){
       svg.style.transition = animate ? 'transform 0.45s ease' : 'none';
       svg.style.transform = 'scaleY(1)';
     }
+    
     setTimeout(() => {
       if(ui.lip && !ui.lip.classList.contains('pulling') && !ui.lip.classList.contains('hint-visible')){
         ui.lip.style.visibility = 'hidden';
@@ -8050,37 +8260,168 @@ function formatNotifTime(ts){
   }catch(e){ return ''; }
 }
 
+function pushAddItemNotif(item){
+  if(!item) return;
+  const id = 'add-' + (item.id || Date.now()) + '-' + Date.now();
+  const payload = {
+    headline: item.title || 'Title',
+    title: item.title || 'Title',
+    body: 'Just added to your list',
+    poster: item.poster || null,
+    itemId: item.id || null,
+    tmdbId: item.tmdbId || null,
+    tmdbKind: item.tmdbKind || null,
+    read: false,
+    type: 'item_added',
+    createdAt: new Date().toISOString()
+  };
+  // Instant local inbox (works for guest + signed-in while cloud catches up)
+  cachedNotifs = [Object.assign({ id }, payload)].concat(
+    (cachedNotifs || []).filter(n => n.id !== id)
+  );
+  updateNotifBadge();
+  try{ renderNotifList(); }catch(e){}
+  // Persist to Firestore when signed in so it survives refresh
+  if(currentUser && db){
+    notifCol(currentUser.uid).doc(id).set(payload).catch(e => console.warn('notif write', e));
+  }
+}
+
 function renderNotifList(){
   const list = document.getElementById('notifList');
   if(!list) return;
-  if(!currentUser){
-    list.innerHTML = `<div class="notif-empty">Sign in to see availability alerts for your watchlist.</div>`;
-    return;
-  }
   if(!cachedNotifs.length){
-    list.innerHTML = `<div class="notif-empty">No notifications yet.<br>When something on your list becomes available, it’ll show up here.</div>`;
+    list.innerHTML = currentUser
+      ? `<div class="notif-empty">No notifications yet.<br>When something on your list becomes available, it’ll show up here.</div>`
+      : `<div class="notif-empty">No notifications</div>`;
     return;
   }
-  list.innerHTML = cachedNotifs.map(n => `
-    <button type="button" class="notif-card ${n.read ? '' : 'unread'}" data-id="${escapeHtml(n.id)}">
-      <div class="notif-card-head">${escapeHtml(n.headline || 'Binge Bin')}</div>
-      <div class="notif-card-body">${escapeHtml(n.body || '')}</div>
-      <div class="notif-card-time">${escapeHtml(formatNotifTime(n.createdAt))}</div>
-    </button>
-  `).join('');
-  list.querySelectorAll('.notif-card').forEach(card => {
-    card.addEventListener('click', () => onNotifCardClick(card.dataset.id));
-  });
+  list.innerHTML = cachedNotifs.map(n => {
+    const title = escapeHtml(n.headline || n.title || 'Binge Bin');
+    const detail = escapeHtml(n.body || '');
+    const poster = n.poster
+      ? `<img class="notif-card-poster" src="${escapeHtml(n.poster)}" alt="">`
+      : `<div class="notif-card-poster placeholder">BB</div>`;
+    return `
+    <div class="notif-swipe-wrap" data-id="${escapeHtml(n.id)}">
+      <div class="notif-swipe-bg">Dismiss</div>
+      <button type="button" class="notif-card ${n.read ? '' : 'unread'}" data-id="${escapeHtml(n.id)}">
+        ${poster}
+        <div class="notif-card-main">
+          <div class="notif-card-head">${title}</div>
+          <div class="notif-card-body">${detail}</div>
+        </div>
+      </button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.notif-swipe-wrap').forEach(wrap => bindNotifSwipe(wrap));
 }
 
 async function onNotifCardClick(id){
   const n = cachedNotifs.find(x => x.id === id);
   if(!n) return;
-  if(!n.read && currentUser && db){
-    try{ await notifCol(currentUser.uid).doc(id).update({ read: true }); }catch(e){}
+  if(!n.read){
+    n.read = true;
+    updateNotifBadge();
+    if(currentUser && db){
+      try{ await notifCol(currentUser.uid).doc(id).update({ read: true }); }catch(e){}
+    }
   }
+  // Close inbox first so list is behind; info sheet opens over watchlist
   closeNotifInbox();
-  openTitleFromNotif(n);
+  const openInfo = () => {
+    let it = null;
+    if(n.itemId) it = items.find(x => x.id === n.itemId && !x.deleted);
+    if(!it && n.tmdbId && n.tmdbKind){
+      it = items.find(x => !x.deleted && String(x.tmdbId) === String(n.tmdbId) && x.tmdbKind === n.tmdbKind);
+    }
+    if(it){
+      toggleExpand(it.id, 'notif');
+      return;
+    }
+    openTitleFromNotif(n);
+  };
+  // Let inbox close paint before sheet opens
+  setTimeout(openInfo, 200);
+}
+
+function bindNotifSwipe(wrap){
+  const card = wrap.querySelector('.notif-card');
+  if(!card) return;
+  const id = wrap.dataset.id;
+  let startX = 0, startY = 0, dx = 0, active = false, locked = null;
+
+  const onStart = (e) => {
+    const t = e.touches ? e.touches[0] : e;
+    startX = t.clientX; startY = t.clientY;
+    dx = 0; active = true; locked = null;
+    card.style.transition = 'none';
+  };
+  const onMove = (e) => {
+    if(!active) return;
+    const t = e.touches ? e.touches[0] : e;
+    const x = t.clientX - startX;
+    const y = t.clientY - startY;
+    if(locked === null && (Math.abs(x) > 8 || Math.abs(y) > 8)){
+      locked = Math.abs(x) > Math.abs(y) ? 'x' : 'y';
+    }
+    if(locked !== 'x') return;
+    e.preventDefault();
+    dx = Math.min(0, x); // swipe left to dismiss
+    card.style.transform = `translate3d(${dx}px,0,0)`;
+  };
+  const onEnd = () => {
+    if(!active) return;
+    active = false;
+    card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+    if(locked === 'x' && dx < -80){
+      card.style.transform = 'translate3d(-120%,0,0)';
+      card.style.opacity = '0';
+      setTimeout(() => dismissNotif(id), 180);
+    } else {
+      card.style.transform = '';
+      // tap (no meaningful swipe)
+      if(locked !== 'x' && Math.abs(dx) < 8){
+        onNotifCardClick(id);
+      }
+    }
+    locked = null; dx = 0;
+  };
+
+  card.addEventListener('click', (e) => {
+    // handled in onEnd for touch; mouse click fallback
+    if(e.detail === 0) return;
+  });
+  wrap.addEventListener('touchstart', onStart, { passive: true });
+  wrap.addEventListener('touchmove', onMove, { passive: false });
+  wrap.addEventListener('touchend', onEnd);
+  wrap.addEventListener('touchcancel', onEnd);
+  // Mouse support
+  wrap.addEventListener('pointerdown', (e) => {
+    if(e.pointerType === 'touch') return;
+    onStart(e);
+    const move = (ev) => onMove(ev);
+    const up = () => {
+      onEnd();
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  });
+  card.addEventListener('click', (e) => {
+    if(Math.abs(dx) > 10) { e.preventDefault(); return; }
+    onNotifCardClick(id);
+  });
+}
+
+async function dismissNotif(id){
+  cachedNotifs = (cachedNotifs || []).filter(n => n.id !== id);
+  updateNotifBadge();
+  renderNotifList();
+  if(currentUser && db){
+    try{ await notifCol(currentUser.uid).doc(id).delete(); }catch(e){}
+  }
 }
 
 function openTitleFromNotif(n){
