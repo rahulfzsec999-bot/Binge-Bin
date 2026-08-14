@@ -1328,6 +1328,11 @@
   .item.watched{opacity:0.45;}
 
   /* --- AdSense cards (match item card chrome) --- */
+  /* Hidden until AdSense is approved (ADSENSE_ENABLED) */
+  body.ads-disabled .ad-card,
+  body.ads-disabled .bottom-ad{
+    display:none !important;
+  }
   .ad-card{
     position:relative;
     border-radius:12px;
@@ -2301,6 +2306,29 @@
   .modal-overlay.sheet-mode .badge{
     border-color:rgba(255,255,255,0.3);
   }
+  /* Soften greys on the red info card — use white / translucent chrome */
+  .modal-overlay.sheet-mode .modal-btn.secondary{
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.28);
+    color:#fff;
+  }
+  .modal-overlay.sheet-mode .modal-btn.secondary:active{
+    background:rgba(255,255,255,0.22);
+  }
+  .modal-overlay.sheet-mode .tag,
+  .modal-overlay.sheet-mode .platform-tag{
+    background:rgba(255,255,255,0.16) !important;
+    color:#fff !important;
+    border:1px solid rgba(255,255,255,0.28) !important;
+  }
+  .modal-overlay.sheet-mode .detail-poster-fallback{
+    background:rgba(0,0,0,0.22);
+    color:rgba(255,255,255,0.75);
+    border-color:rgba(255,255,255,0.25);
+  }
+  .modal-overlay.sheet-mode .detail-footer-empty{
+    color:rgba(255,255,255,0.8);
+  }
 
   .sheet-grab{
     display:flex;
@@ -2573,14 +2601,133 @@
     border:1px solid var(--line);
   }
 
-  /* --- Rating (thumbs) --- */
+  /* --- Rating --- */
   .rating-tag{
     font-size:13px;
   }
+  .rate-prompt{
+    text-align:center;
+    padding:6px 4px 2px;
+  }
+  .rate-prompt-title{
+    font-size:18px;
+    font-weight:700;
+    color:var(--text);
+    margin:4px 0 16px;
+  }
+  .rate-stars{
+    display:flex;
+    justify-content:center;
+    gap:2px;
+    margin:0 0 10px;
+    padding:8px 4px;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:none;
+    cursor:pointer;
+  }
+  .rate-star{
+    position:relative;
+    width:48px;
+    height:48px;
+    border:none;
+    background:none;
+    padding:0;
+    pointer-events:none;
+    color:#3a3a3a;
+    font-size:42px;
+    line-height:48px;
+    flex-shrink:0;
+  }
+  .rate-star .star-glyph{
+    pointer-events:none;
+    display:block;
+  }
+  .rate-star .star-fill{
+    position:absolute;
+    left:0; top:0;
+    height:100%;
+    overflow:hidden;
+    color:var(--accent);
+    pointer-events:none;
+  }
+  .rate-hint{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:16px;
+  }
+  .rate-value-live{
+    font-size:15px;
+    font-weight:700;
+    color:var(--accent);
+    min-height:1.2em;
+    margin-bottom:6px;
+  }
+  .rate-skip{
+    width:100%;
+    margin-top:4px;
+  }
+  .rate-inline{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+    color:var(--accent);
+    font-weight:700;
+    font-size:13px;
+  }
+  .detail-rate-stars{
+    display:flex;
+    justify-content:center;
+    gap:2px;
+    width:100%;
+    margin-bottom:12px;
+    padding:10px 8px;
+    border:none;
+    background:rgba(255,255,255,0.12);
+    border-radius:12px;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .detail-rate-stars:active{
+    background:rgba(255,255,255,0.2);
+  }
+  .detail-rate-stars .drs-star{
+    position:relative;
+    width:36px;
+    height:36px;
+    font-size:32px;
+    line-height:36px;
+    color:rgba(255,255,255,0.35);
+    pointer-events:none;
+  }
+  .detail-rate-stars .drs-fill{
+    position:absolute;
+    left:0; top:0;
+    height:100%;
+    overflow:hidden;
+    color:#fff;
+  }
+  .modal-overlay.sheet-mode .detail-rate-stars .drs-star{
+    color:rgba(255,255,255,0.35);
+  }
+  .modal-overlay.sheet-mode .detail-rate-stars .drs-fill{
+    color:#fff;
+  }
+
 </style>
-<!-- Google AdSense -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4716433342416575"
-     crossorigin="anonymous"></script>
+<!-- Google AdSense — loaded only when ADSENSE_ENABLED is true (see script below) -->
+<script>
+(function(){
+  // Must match const ADSENSE_ENABLED in main app script (kept false until AdSense approval)
+  var ADSENSE_ENABLED = false;
+  if(!ADSENSE_ENABLED) return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4716433342416575';
+  s.crossOrigin = 'anonymous';
+  document.head.appendChild(s);
+})();
+</script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6EEBKL2QX4"></script>
 <script>
@@ -3094,6 +3241,8 @@
 const TMDB_API_KEY = '9bf48a005959ad4e4c5aba043f5c1099';
 
 // --- AdSense (replace placeholders with your real IDs from adsense.google.com) ---
+// Flip to true after AdSense approval
+const ADSENSE_ENABLED = false;
 const ADSENSE_CLIENT = 'ca-pub-4716433342416575';
 const ADSENSE_SLOT_INFEED = '3169217647';  // official fluid unit
 const ADSENSE_SLOT_BOTTOM = '3169217647';  // same official unit for bottom slot
@@ -5034,29 +5183,196 @@ function addItem(){
   addItemForce(title);
 }
 
+function normalizeStarRating(value){
+  const n = Math.round(Number(value) * 2) / 2;
+  if(!Number.isFinite(n) || n < 0.5 || n > 5) return null;
+  return n;
+}
+
+function isStarRating(value){
+  return typeof value === 'number' && value >= 0.5 && value <= 5;
+}
+
+function formatRatingLabel(rating){
+  if(isStarRating(rating)) return `${rating}★`;
+  if(rating === 'up') return '👍';
+  if(rating === 'down') return '👎';
+  return '';
+}
+
+/** Display-only star row (no numbers). Click opens the slider prompt. */
+function buildDetailRateStarsHtml(id, rating){
+  const cur = isStarRating(rating) ? rating : 0;
+  let inner = '';
+  for(let s = 1; s <= 5; s++){
+    const fill = Math.max(0, Math.min(1, cur - (s - 1)));
+    const pct = Math.round(fill * 100);
+    inner += `<span class="drs-star" aria-hidden="true">★<span class="drs-fill" style="width:${pct}%">★</span></span>`;
+  }
+  return `<button type="button" class="detail-rate-stars" onclick="showRatingPrompt('${id}')" aria-label="Change rating">${inner}</button>`;
+}
+
 function toggleWatched(id){
   const it = items.find(i => i.id === id);
-  if(it){
-    it.watched = !it.watched;
-    it.watchedAt = it.watched ? new Date().toISOString() : null;
-    track(it.watched ? 'mark_watched' : 'mark_unwatched', {
-      item_type: it.type || 'unspecified',
-      platform: it.platform || 'unspecified'
-    });
-  }
+  if(!it) return;
+  const becomingWatched = !it.watched;
+  it.watched = !it.watched;
+  it.watchedAt = it.watched ? new Date().toISOString() : null;
+  track(it.watched ? 'mark_watched' : 'mark_unwatched', {
+    item_type: it.type || 'unspecified',
+    platform: it.platform || 'unspecified'
+  });
   if(navigator.vibrate) navigator.vibrate(10);
+  saveItems();
+  render();
+  // Rating prompt only when newly marked watched (not on load/sync/unwatch)
+  if(becomingWatched){
+    setTimeout(() => showRatingPrompt(id), 200);
+  }
+}
+
+function setRating(id, rating){
+  // Legacy thumbs or numeric stars
+  const it = items.find(i => i.id === id);
+  if(!it) return;
+  if(rating === 'up' || rating === 'down'){
+    it.rating = it.rating === rating ? null : rating;
+  } else {
+    const n = normalizeStarRating(rating);
+    if(n == null) return;
+    it.rating = n;
+  }
+  track('rate_item', { rating: it.rating || 'cleared' });
   saveItems();
   render();
 }
 
-function setRating(id, rating){
+function setStarRating(id, value){
   const it = items.find(i => i.id === id);
-  if(it){
-    it.rating = it.rating === rating ? null : rating;
-    track('rate_item', { rating: it.rating || 'cleared' });
-  }
+  if(!it) return;
+  const n = normalizeStarRating(value);
+  if(n == null) return;
+  // Never changes watched state — only rating on the existing item
+  it.rating = n;
+  track('rate_item', { rating: n });
   saveItems();
   render();
+  try{ hideModal(); }catch(_){}
+  showToast(`Rated ${n} ★`);
+  if(navigator.vibrate) navigator.vibrate(10);
+}
+
+function buildStarRowHtml(id, current){
+  const cur = isStarRating(current) ? current : 0;
+  let html = `<div class="rate-stars" id="rateStarsRow" data-item-id="${escapeHtml(id)}" role="slider" aria-valuemin="0.5" aria-valuemax="5" aria-valuenow="${cur || 0}" aria-label="Rate from 0.5 to 5 stars">`;
+  for(let s = 1; s <= 5; s++){
+    const fill = Math.max(0, Math.min(1, cur - (s - 1)));
+    const pct = Math.round(fill * 100);
+    html += `<span class="rate-star" data-star="${s}" aria-hidden="true">
+      <span class="star-glyph">★</span>
+      <span class="star-fill" style="width:${pct}%"><span class="star-glyph">★</span></span>
+    </span>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function ratingFromPointer(row, clientX){
+  const rect = row.getBoundingClientRect();
+  if(rect.width <= 0) return 0.5;
+  // Map x across the full star row into 10 half-steps (0.5 … 5)
+  let t = (clientX - rect.left) / rect.width;
+  t = Math.max(0, Math.min(1, t));
+  // 10 slots: index 0 → 0.5, index 9 → 5.0
+  const slot = Math.min(9, Math.floor(t * 10));
+  return (slot + 1) * 0.5;
+}
+
+function paintStarRow(row, value){
+  if(!row) return;
+  const n = normalizeStarRating(value) || 0;
+  row.querySelectorAll('.rate-star').forEach((star, i) => {
+    const fill = Math.max(0, Math.min(1, n - i));
+    const el = star.querySelector('.star-fill');
+    if(el) el.style.width = Math.round(fill * 100) + '%';
+  });
+  row.setAttribute('aria-valuenow', String(n || 0));
+  const live = document.getElementById('rateValueLive');
+  if(live) live.textContent = n ? (n + ' ★') : '';
+  const hint = document.getElementById('rateHint');
+  if(hint && n) hint.textContent = 'Release to save · slide for half stars';
+}
+
+function bindStarSlider(itemId){
+  const row = document.getElementById('rateStarsRow');
+  if(!row) return;
+  let dragging = false;
+  let lastVal = null;
+
+  const applyFromEvent = (e) => {
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX
+      : (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX
+      : e.clientX;
+    if(typeof clientX !== 'number') return;
+    lastVal = ratingFromPointer(row, clientX);
+    paintStarRow(row, lastVal);
+  };
+
+  const onDown = (e) => {
+    dragging = true;
+    lastVal = null;
+    applyFromEvent(e);
+    e.preventDefault();
+  };
+  const onMove = (e) => {
+    if(!dragging) return;
+    applyFromEvent(e);
+    e.preventDefault();
+  };
+  const onUp = (e) => {
+    if(!dragging) return;
+    dragging = false;
+    applyFromEvent(e);
+    if(lastVal != null){
+      setStarRating(itemId, lastVal);
+    }
+  };
+
+  row.addEventListener('pointerdown', onDown);
+  row.addEventListener('pointermove', onMove);
+  row.addEventListener('pointerup', onUp);
+  row.addEventListener('pointercancel', onUp);
+  row.addEventListener('pointerleave', (e) => {
+    // keep dragging if pointer captured; otherwise end
+    if(dragging && e.pointerId != null){
+      try{ row.releasePointerCapture(e.pointerId); }catch(_){}
+    }
+  });
+  row.addEventListener('pointerdown', (e) => {
+    try{ row.setPointerCapture(e.pointerId); }catch(_){}
+  });
+  // iOS fallback
+  row.addEventListener('touchstart', onDown, { passive: false });
+  row.addEventListener('touchmove', onMove, { passive: false });
+  row.addEventListener('touchend', onUp, { passive: false });
+}
+
+function showRatingPrompt(id){
+  const it = items.find(i => i.id === id);
+  if(!it || !it.watched) return;
+  const current = isStarRating(it.rating) ? it.rating : null;
+  const stars = buildStarRowHtml(id, current || 0);
+  showModal(`
+    <div class="rate-prompt">
+      <div class="rate-prompt-title">How did you like it?</div>
+      <div class="rate-value-live" id="rateValueLive">${current ? current + ' ★' : ''}</div>
+      ${stars}
+      <div class="rate-hint" id="rateHint">${current ? `Current: ${current}★ · slide or tap to change` : 'Slide or tap to rate'}</div>
+      <button type="button" class="modal-btn secondary rate-skip" onclick="hideModal()">Skip for now</button>
+    </div>
+  `);
+  // Bind after modal paints
+  requestAnimationFrame(() => bindStarSlider(id));
 }
 
 function deleteItem(id){
@@ -5200,6 +5516,7 @@ function render(){
 }
 
 function renderAdCard(key){
+  if(!ADSENSE_ENABLED) return '';
   // Card chrome matches list items; labelled so it's clearly an ad
   return `
     <div class="ad-card" data-ad-key="${escapeHtml(String(key))}">
@@ -5217,6 +5534,7 @@ function renderAdCard(key){
 }
 
 function pushPendingAds(){
+  if(!ADSENSE_ENABLED) return;
   // Fill any AdSense units that haven't been initialized yet
   const nodes = document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status])');
   if(!nodes.length) return;
@@ -5233,8 +5551,10 @@ function renderItem(it){
   const watchedDate = it.watched && it.watchedAt
     ? new Date(it.watchedAt).toLocaleDateString(undefined, { month:'short', day:'numeric' })
     : '';
-  const ratingTag = it.rating === 'up' ? '<span class="tag rating-tag">👍</span>'
-    : it.rating === 'down' ? '<span class="tag rating-tag">👎</span>' : '';
+  const ratingLabel = formatRatingLabel(it.rating);
+  const ratingTag = ratingLabel
+    ? `<span class="tag rating-tag">${ratingLabel}</span>`
+    : '';
   return `
     <div class="swipe-wrapper editable">
       <div class="swipe-bg">
@@ -5302,8 +5622,7 @@ function renderEditForm(it){
           <select id="edit-genre-${it.id}">${buildOptions(GENRES, it.genre, 'Genre?')}</select>
         </div>
         <div class="meta-row">
-          <button class="cancel-btn" onclick="setRating('${it.id}','up')" style="${it.rating === 'up' ? 'border-color:var(--accent);color:var(--accent);' : ''}">👍 Liked</button>
-          <button class="cancel-btn" onclick="setRating('${it.id}','down')" style="${it.rating === 'down' ? 'border-color:var(--accent);color:var(--accent);' : ''}">👎 Not for me</button>
+          <button class="cancel-btn" onclick="showRatingPrompt('${it.id}')" style="${isStarRating(it.rating) || it.rating === 'up' || it.rating === 'down' ? 'border-color:var(--accent);color:var(--accent);' : ''}">${isStarRating(it.rating) ? formatRatingLabel(it.rating) + ' · Change rating' : (it.rating === 'up' || it.rating === 'down' ? formatRatingLabel(it.rating) + ' · Change rating' : '★ Rate')}</button>
         </div>
         <div class="edit-actions">
           <button class="save-btn" onclick="saveEdit('${it.id}')">Save</button>
@@ -6329,6 +6648,9 @@ function renderDetailModal(it){
       ${castHtml}
     </div>
     <div class="detail-footer">
+      ${it.watched
+        ? buildDetailRateStarsHtml(it.id, it.rating)
+        : ''}
       ${watchUrl
         ? `<button class="watch-now-btn" data-app-scheme="${escapeHtml(scheme)}" data-web-url="${escapeHtml(watchUrl)}">▶ Watch Now</button>`
         : `<div class="detail-footer-empty">No link available for this title</div>`}
@@ -7237,6 +7559,17 @@ function ensureOverlaysOnBody(){
   });
 }
 ensureOverlaysOnBody();
+
+(function applyAdsVisibility(){
+  if(typeof ADSENSE_ENABLED !== 'undefined' && !ADSENSE_ENABLED){
+    document.body.classList.add('ads-disabled');
+    const bottom = document.getElementById('bottomAd');
+    if(bottom) bottom.style.display = 'none';
+  } else {
+    document.body.classList.remove('ads-disabled');
+  }
+})();
+
 
 setupPullToSpin();
 
