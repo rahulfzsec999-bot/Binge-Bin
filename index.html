@@ -878,22 +878,43 @@
   }
   .notif-overlay.open{display:flex; opacity:1; pointer-events:auto;}
   .notif-header{
-    display:flex; align-items:center; gap:10px;
-    padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;
-    border-bottom:1px solid var(--line); flex-shrink:0;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    gap:10px;
+    padding:calc(12px + env(safe-area-inset-top,0px)) 16px 8px;
+    border-bottom:none; flex-shrink:0;
+    min-height:calc(56px + env(safe-area-inset-top,0px));
   }
-  .notif-header h2{flex:1; font-size:18px; font-weight:700; margin:0; color:var(--text);}
+  .notif-header h2{
+    flex:1;
+    font-family:'Bebas Neue','Arial Narrow',sans-serif;
+    font-size:clamp(28px, 8vw, 36px);
+    font-weight:400;
+    letter-spacing:0.16em;
+    text-align:center;
+    color:#fff;
+    text-transform:uppercase;
+    margin:32px 0 8px;
+    padding:0 48px;
+  }
   .notif-header button{
+    position:absolute;
+    top:calc(8px + env(safe-area-inset-top,0px));
     background:none; border:none; color:var(--muted);
     font-size:22px; font-weight:600; cursor:pointer; padding:8px;
     line-height:1;
+    z-index:2;
   }
+  .notif-header #notifBackBtn{ left:8px; }
   .notif-header #notifMarkAllBtn{
+    right:8px; left:auto;
     font-size:13px; font-weight:600; padding:8px;
   }
   .notif-list{
     flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
-    padding:10px 16px calc(20px + env(safe-area-inset-bottom,0px));
+    padding:0 16px calc(20px + env(safe-area-inset-bottom,0px));
+    /* List starts around 1/3 down the screen */
+    margin-top:max(12px, calc(33vh - 140px));
   }
   .notif-empty{
     text-align:center; color:var(--muted); padding:48px 20px; font-size:14px; line-height:1.5;
@@ -1808,7 +1829,34 @@
     border:none;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
-    padding:calc(16px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    padding:calc(12px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    position:relative;
+  }
+  /* Same treatment as TONIGHT'S PICK */
+  .auth-overlay.profile-edit-full .auth-title{
+    font-family:'Bebas Neue','Arial Narrow',sans-serif;
+    font-size:clamp(28px, 8vw, 36px);
+    font-weight:400;
+    letter-spacing:0.16em;
+    text-align:center;
+    color:#fff;
+    text-transform:uppercase;
+    margin:32px 0 8px;
+    padding:0 48px;
+  }
+  .auth-overlay.profile-edit-full .auth-sub{
+    text-align:center;
+    margin-bottom:0;
+  }
+  /* Form starts around 1/3 down the screen */
+  .auth-overlay.profile-edit-full #completeProfileForm,
+  .auth-overlay.profile-edit-full #changePasswordForm{
+    margin-top:max(24px, calc(33vh - 120px));
+  }
+  .auth-overlay.profile-edit-full .auth-close{
+    top:calc(8px + env(safe-area-inset-top, 0px));
+    right:12px;
+    z-index:2;
   }
 
   .auth-sheet{
@@ -7618,14 +7666,18 @@ function cancelPullHintTimers(){
 }
 
 function isOnHomeScreenForTease(){
-  // Home feed only — no gate, modals, menu, notifications, auth
+  // Home feed only — no gate, modals, menu, notifications, auth, account sheets
   const gate = document.getElementById('gateOverlay');
   if(gate && (gate.classList.contains('open') || gate.style.display === 'flex')) return false;
   const modal = document.getElementById('modalOverlay');
   if(modal && modal.classList.contains('open')) return false;
   const menu = document.getElementById('fullMenuOverlay');
   if(menu && menu.classList.contains('open')) return false;
-  for(const id of ['notifOverlay', 'notifInboxOverlay', 'notifSettingsOverlay', 'notifOnboardOverlay', 'authOverlay']){
+  for(const id of [
+    'notifOverlay', 'notifInboxOverlay', 'notifSettingsOverlay', 'notifOnboardOverlay',
+    'authOverlay', 'accountOverlay', 'completeProfileOverlay', 'changePasswordOverlay',
+    'avatarPickerOverlay', 'gateOverlay'
+  ]){
     const el = document.getElementById(id);
     if(el && (el.classList.contains('open') || el.style.display === 'flex')) return false;
   }
@@ -7744,19 +7796,38 @@ function setupPullToSpin(){
       || target.closest('.full-menu-row'));
   }
 
-  function canStartPull(target){
+  /** Pull-to-pick only from the header band (on or above brand header). */
+  function isPullFromHeaderZone(clientY, target){
+    if(target && target.closest){
+      if(target.closest('#brandHeader') || target.closest('.brand-header') || target.closest('#headerW')){
+        return true;
+      }
+    }
+    const header = document.getElementById('brandHeader');
+    if(header){
+      const r = header.getBoundingClientRect();
+      // Touch must begin on or above the bottom edge of the header
+      return typeof clientY === 'number' && clientY <= r.bottom + 4;
+    }
+    // No header measured — refuse (avoids accidental full-screen pulls)
+    return false;
+  }
+
+  function canStartPull(target, clientY){
     if(pullCommitInFlight) return false;
     if(!isOnHomeScreenForTease()) return false;
     if(!isAtScrollTop()) return false;
     if(isBlockedTarget(target)) return false;
+    if(!isPullFromHeaderZone(clientY, target)) return false;
     return true;
   }
 
   function onDown(clientX, clientY, target){
-    // Hint handoff may start even if target is a list item; otherwise home-only guards
+    // Hint handoff may start even if target is a list item; still header-zone + home only
     if(pullHintActive){
       if(!isAtScrollTop() || !isOnHomeScreenForTease() || pullCommitInFlight) return false;
-    } else if(!canStartPull(target)){
+      if(!isPullFromHeaderZone(clientY, target)) return false;
+    } else if(!canStartPull(target, clientY)){
       return false;
     }
 
