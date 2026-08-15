@@ -916,22 +916,29 @@
   .notif-card{
     position:relative;
     display:flex; align-items:flex-start; gap:12px;
-    background:
-      radial-gradient(ellipse 120% 100% at 0% 0%, #e8241c 0%, #c41f18 55%, #9a1812 100%);
-    border:1px solid rgba(255,255,255,0.14);
+    background:#2a2a2a;
+    border:1px solid var(--line);
     border-radius:12px;
     padding:12px;
     margin:0;
     cursor:pointer; touch-action:pan-y; text-align:left; width:100%;
-    color:#fff;
+    color:rgba(255,255,255,0.55);
     min-height:72px;
     box-sizing:border-box;
     z-index:1;
-    transition:transform 0.15s ease, opacity 0.15s ease;
+    transition:transform 0.15s ease, opacity 0.15s ease, background 0.2s ease, color 0.2s ease;
   }
+  .notif-card .notif-card-head{ color:rgba(255,255,255,0.55); }
+  .notif-card .notif-card-body{ color:rgba(255,255,255,0.4); }
   .notif-card.unread{
-    box-shadow:0 0 0 1px rgba(255,255,255,0.2);
+    background:
+      radial-gradient(ellipse 120% 100% at 0% 0%, #e8241c 0%, #c41f18 55%, #9a1812 100%);
+    border:1px solid rgba(255,255,255,0.14);
+    color:#fff;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.12);
   }
+  .notif-card.unread .notif-card-head{ color:#fff; }
+  .notif-card.unread .notif-card-body{ color:rgba(255,255,255,0.85); }
   .notif-card-poster{
     width:44px; height:66px; border-radius:8px; object-fit:cover;
     background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.2);
@@ -1786,6 +1793,24 @@
     opacity:1;
     pointer-events:auto;
   }
+  .auth-overlay.profile-edit-full{
+    align-items:stretch;
+    justify-content:stretch;
+    padding:0;
+    background:#0a0a0a;
+  }
+  .auth-overlay.profile-edit-full .auth-sheet{
+    max-width:none;
+    width:100%;
+    height:100%;
+    max-height:100%;
+    border-radius:0;
+    border:none;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:calc(16px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
   .auth-sheet{
     background:var(--panel);
     border:1px solid var(--line);
@@ -3273,9 +3298,36 @@
     </div>
     <div class="account-actions">
       <button type="button" class="account-action-btn" id="accountPersonalInfoBtn">Personal info</button>
+      <button type="button" class="account-action-btn" id="accountChangePasswordBtn">Change password</button>
       <button type="button" class="account-action-btn" id="accountChangeAvatarBtn">Change avatar</button>
       <button type="button" class="account-action-btn danger" id="accountSignOutBtn">Sign out</button>
     </div>
+  </div>
+</div>
+
+
+<!-- Change password -->
+<div class="auth-overlay profile-edit-full" id="changePasswordOverlay" aria-hidden="true">
+  <div class="auth-sheet" role="dialog" aria-modal="true">
+    <button type="button" class="auth-close" id="changePasswordCloseBtn" aria-label="Close">✕</button>
+    <div class="auth-title">Change password</div>
+    <div class="auth-sub">Enter your current password, then choose a new one.</div>
+    <form id="changePasswordForm" autocomplete="on">
+      <div class="auth-field">
+        <label for="chPwCurrent">Current password</label>
+        <input type="password" id="chPwCurrent" autocomplete="current-password" required placeholder="Current password">
+      </div>
+      <div class="auth-field">
+        <label for="chPwNew">New password</label>
+        <input type="password" id="chPwNew" autocomplete="new-password" required minlength="6" placeholder="At least 6 characters">
+      </div>
+      <div class="auth-field">
+        <label for="chPwConfirm">Confirm new password</label>
+        <input type="password" id="chPwConfirm" autocomplete="new-password" required minlength="6" placeholder="Repeat new password">
+      </div>
+      <p class="auth-error" id="changePasswordError"></p>
+      <button type="submit" class="auth-primary" id="changePasswordSubmitBtn">Update password</button>
+    </form>
   </div>
 </div>
 
@@ -4090,11 +4142,71 @@ async function selectAvatar(choice){
   }
 }
 
+
+function openChangePasswordSheet(){
+  if(!currentUser) return;
+  const providers = (currentUser.providerData || []).map(p => p && p.providerId);
+  if(providers.indexOf('password') === -1){
+    showToast('Password is managed by Google or Apple');
+    return;
+  }
+  const overlay = document.getElementById('changePasswordOverlay');
+  if(!overlay) return;
+  const err = document.getElementById('changePasswordError');
+  if(err){ err.textContent = ''; err.classList.remove('show'); }
+  ['chPwCurrent','chPwNew','chPwConfirm'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  try{ lockPageScroll(); }catch(e){}
+  overlay.style.display = 'flex';
+  void overlay.offsetWidth;
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+function closeChangePasswordSheet(){
+  const overlay = document.getElementById('changePasswordOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  setTimeout(() => { if(overlay && !overlay.classList.contains('open')) overlay.style.display = 'none'; }, 280);
+  try{ unlockPageScroll(); }catch(e){}
+}
+async function handleChangePasswordSubmit(e){
+  e.preventDefault();
+  if(!currentUser) return;
+  const err = document.getElementById('changePasswordError');
+  const setErr = (msg) => { if(err){ err.textContent = msg; err.classList.add('show'); } };
+  const currentPassword = (document.getElementById('chPwCurrent')?.value || '');
+  const newPassword = (document.getElementById('chPwNew')?.value || '');
+  const confirmPassword = (document.getElementById('chPwConfirm')?.value || '');
+  if(!currentPassword){ setErr('Enter your current password.'); return; }
+  if(newPassword.length < 6){ setErr('New password should be at least 6 characters.'); return; }
+  if(newPassword !== confirmPassword){ setErr('New passwords do not match.'); return; }
+  const submit = document.getElementById('changePasswordSubmitBtn');
+  if(submit) submit.disabled = true;
+  try{
+    const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPassword);
+    await currentUser.reauthenticateWithCredential(cred);
+    await currentUser.updatePassword(newPassword);
+    closeChangePasswordSheet();
+    showToast('Password updated');
+  }catch(pwErr){
+    const code = pwErr && pwErr.code ? pwErr.code : '';
+    if(code === 'auth/wrong-password' || code === 'auth/invalid-credential') setErr('Current password is incorrect.');
+    else if(code === 'auth/weak-password') setErr('New password is too weak.');
+    else if(code === 'auth/requires-recent-login') setErr('Sign out and sign in again, then try changing your password.');
+    else setErr((pwErr && pwErr.message) || 'Could not change password.');
+  }
+  if(submit) submit.disabled = false;
+}
+
 function setupAvatarUi(){
   const headerBtn = document.getElementById('headerAvatarBtn');
   const overlay = document.getElementById('accountOverlay');
   const changeBtn = document.getElementById('accountChangeAvatarBtn');
   const personalBtn = document.getElementById('accountPersonalInfoBtn');
+  const changePwBtn = document.getElementById('accountChangePasswordBtn');
   const signOutBtn = document.getElementById('accountSignOutBtn');
   const pickerOverlay = document.getElementById('avatarPickerOverlay');
   const pickerDone = document.getElementById('avatarPickerDoneBtn');
@@ -4129,6 +4241,16 @@ function setupAvatarUi(){
       setTimeout(() => openCompleteProfileModal(profile, { editAll: true }), 200);
     });
   }
+  if(changePwBtn){
+    changePwBtn.addEventListener('click', () => {
+      closeAccountSheet();
+      setTimeout(openChangePasswordSheet, 200);
+    });
+  }
+  const chPwClose = document.getElementById('changePasswordCloseBtn');
+  const chPwForm = document.getElementById('changePasswordForm');
+  if(chPwClose) chPwClose.addEventListener('click', closeChangePasswordSheet);
+  if(chPwForm) chPwForm.addEventListener('submit', handleChangePasswordSubmit);
   if(signOutBtn){
     signOutBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -4221,26 +4343,24 @@ function openCompleteProfileModal(existingProfile, opts){
     un.required = true;
   }
 
+  // Password lives on its own Account screen — never here
   const pwSection = document.getElementById('cpPasswordSection');
   const pwHint = document.getElementById('cpPasswordHint');
+  if(pwSection) pwSection.style.display = 'none';
+  if(pwHint) pwHint.style.display = 'none';
   const curPw = document.getElementById('cpCurrentPassword');
   const newPw = document.getElementById('cpNewPassword');
   const confPw = document.getElementById('cpConfirmPassword');
   if(curPw) curPw.value = '';
   if(newPw) newPw.value = '';
   if(confPw) confPw.value = '';
-  if(editAll && currentUser){
-    const providers = (currentUser.providerData || []).map(p => p && p.providerId);
-    const hasPassword = providers.indexOf('password') !== -1;
-    if(pwSection) pwSection.style.display = hasPassword ? '' : 'none';
-    if(pwHint) pwHint.style.display = hasPassword ? 'none' : '';
-  } else {
-    if(pwSection) pwSection.style.display = 'none';
-    if(pwHint) pwHint.style.display = 'none';
-  }
 
   const err = document.getElementById('completeProfileError');
   if(err){ err.textContent = ''; err.classList.remove('show'); }
+  overlay.classList.toggle('profile-edit-full', !!editAll);
+  if(editAll){
+    try{ lockPageScroll(); }catch(e){}
+  }
   overlay.style.display = 'flex';
   void overlay.offsetWidth;
   overlay.classList.add('open');
@@ -4250,7 +4370,12 @@ function openCompleteProfileModal(existingProfile, opts){
 function closeCompleteProfileModal(){
   const overlay = document.getElementById('completeProfileOverlay');
   if(!overlay) return;
+  const wasFull = overlay.classList.contains('profile-edit-full');
   overlay.classList.remove('open');
+  overlay.classList.remove('profile-edit-full');
+  if(wasFull){
+    try{ unlockPageScroll(); }catch(e){}
+  }
   overlay.setAttribute('aria-hidden', 'true');
   setTimeout(() => { overlay.style.display = 'none'; }, 260);
 }
@@ -7769,6 +7894,19 @@ function ensureOverlaysOnBody(){
   });
 }
 ensureOverlaysOnBody();
+try{ document.body.classList.add('bb-portrait-only'); }catch(e){}
+try{
+  const lockPortrait = () => {
+    if(screen.orientation && screen.orientation.lock){
+      screen.orientation.lock('portrait').catch(() => {});
+    } else if(screen.lockOrientation){
+      try{ screen.lockOrientation('portrait'); }catch(e){}
+    }
+  };
+  lockPortrait();
+  window.addEventListener('orientationchange', () => setTimeout(lockPortrait, 250));
+}catch(e){}
+
 
 (function applyAdsVisibility(){
   if(typeof ADSENSE_ENABLED !== 'undefined' && !ADSENSE_ENABLED){
@@ -8349,69 +8487,62 @@ function bindNotifSwipe(wrap){
   const card = wrap.querySelector('.notif-card');
   if(!card) return;
   const id = wrap.dataset.id;
-  let startX = 0, startY = 0, dx = 0, active = false, locked = null;
+  let startX = 0, startY = 0, dx = 0, dy = 0, active = false, locked = null, moved = false;
 
   const onStart = (e) => {
-    const t = e.touches ? e.touches[0] : e;
-    startX = t.clientX; startY = t.clientY;
-    dx = 0; active = true; locked = null;
+    const pt = e.touches ? e.touches[0] : e;
+    startX = pt.clientX; startY = pt.clientY;
+    dx = 0; dy = 0; active = true; locked = null; moved = false;
     card.style.transition = 'none';
   };
   const onMove = (e) => {
     if(!active) return;
-    const t = e.touches ? e.touches[0] : e;
-    const x = t.clientX - startX;
-    const y = t.clientY - startY;
-    if(locked === null && (Math.abs(x) > 8 || Math.abs(y) > 8)){
-      locked = Math.abs(x) > Math.abs(y) ? 'x' : 'y';
+    const pt = e.touches ? e.touches[0] : e;
+    dx = pt.clientX - startX;
+    dy = pt.clientY - startY;
+    if(Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+    if(locked === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)){
+      locked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+    if(locked === 'y'){
+      // scrolling the list — do not treat as swipe or click
+      return;
     }
     if(locked !== 'x') return;
     e.preventDefault();
-    dx = Math.min(0, x); // swipe left to dismiss
-    card.style.transform = `translate3d(${dx}px,0,0)`;
+    const slide = Math.min(0, dx);
+    card.style.transform = `translate3d(${slide}px,0,0)`;
   };
   const onEnd = () => {
     if(!active) return;
     active = false;
     card.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-    if(locked === 'x' && dx < -80){
+    const wasScroll = locked === 'y' || (moved && Math.abs(dy) > Math.abs(dx));
+    const wasSwipe = locked === 'x' && dx < -80;
+    if(wasSwipe){
       card.style.transform = 'translate3d(-120%,0,0)';
       card.style.opacity = '0';
       setTimeout(() => dismissNotif(id), 180);
     } else {
       card.style.transform = '';
-      // tap (no meaningful swipe)
-      if(locked !== 'x' && Math.abs(dx) < 8){
+      // Only open on a true tap (almost no movement)
+      if(!wasScroll && !moved && Math.abs(dx) < 8 && Math.abs(dy) < 8){
         onNotifCardClick(id);
       }
     }
-    locked = null; dx = 0;
+    locked = null; dx = 0; dy = 0; moved = false;
   };
 
-  card.addEventListener('click', (e) => {
-    // handled in onEnd for touch; mouse click fallback
-    if(e.detail === 0) return;
-  });
   wrap.addEventListener('touchstart', onStart, { passive: true });
   wrap.addEventListener('touchmove', onMove, { passive: false });
   wrap.addEventListener('touchend', onEnd);
   wrap.addEventListener('touchcancel', onEnd);
-  // Mouse support
-  wrap.addEventListener('pointerdown', (e) => {
-    if(e.pointerType === 'touch') return;
-    onStart(e);
-    const move = (ev) => onMove(ev);
-    const up = () => {
-      onEnd();
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  });
   card.addEventListener('click', (e) => {
-    if(Math.abs(dx) > 10) { e.preventDefault(); return; }
-    onNotifCardClick(id);
+    // Suppress synthetic click after scroll/swipe
+    if(moved || locked === 'y' || Math.abs(dx) > 8){
+      e.preventDefault();
+      e.stopPropagation();
+    }
   });
 }
 
