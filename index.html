@@ -937,17 +937,23 @@
     overflow:hidden;
   }
   .notif-overlay.open{display:flex; flex-direction:column; opacity:1; pointer-events:auto;}
+  /* Title centered in the empty top band (same height as list padding-top) */
   .notif-header{
     position:absolute;
     left:0; right:0;
-    top:calc(36px + env(safe-area-inset-top,0px));
+    top:0;
+    height:max(80px, 32vh);
     z-index:0;
-    display:flex; align-items:center; justify-content:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top, 0px);
     pointer-events:none;
     transform-origin:50% 50%;
   }
   .notif-header h2{
-    flex:1;
+    flex:0 1 auto;
     font-family:'Bebas Neue','Arial Narrow',sans-serif;
     font-size:clamp(28px, 8vw, 36px);
     font-weight:400;
