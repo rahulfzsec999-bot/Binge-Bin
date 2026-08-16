@@ -727,25 +727,39 @@
     height:100%;
     height:100dvh;
     max-height:100dvh;
-    overflow-x:hidden;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;
-    touch-action:pan-y;
+    overflow:hidden;
   }
   .full-menu-overlay.open{
-    display:block; opacity:1; pointer-events:auto;
+    display:flex; flex-direction:column; opacity:1; pointer-events:auto;
   }
   .full-menu-inner{
-    min-height:100%;
-    padding:calc(12px + env(safe-area-inset-top, 0px)) 0 calc(28px + env(safe-area-inset-bottom, 0px));
+    flex:1;
+    min-height:0;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    padding:calc(12px + env(safe-area-inset-top, 0px)) 0 0;
     box-sizing:border-box;
+    position:relative;
+    overflow:hidden;
   }
   .full-menu-top{
     display:flex; align-items:center; justify-content:space-between;
     padding:4px 16px 8px;
     position:relative;
     z-index:5;
+    flex-shrink:0;
+  }
+  .full-menu-scroll{
+    position:relative;
+    z-index:1;
+    flex:1;
+    min-height:0; /* required for flex child to scroll */
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    touch-action:pan-y;
+    padding:max(110px, 32vh) 0 calc(28px + env(safe-area-inset-bottom, 0px));
   }
   .full-menu-back{
     width:40px; height:40px; border:none; background:none;
@@ -760,13 +774,15 @@
     backface-visibility:hidden;
   }
   .full-menu-profiles{
-    transform-origin:50% 0%;
-    will-change:transform, opacity;
-  }
-
-  .full-menu-profiles{
+    position:absolute;
+    left:0; right:0;
+    top:calc(52px + env(safe-area-inset-top, 0px));
+    z-index:0;
     display:flex; justify-content:center; align-items:flex-start;
-    gap:18px; padding:18px 20px 8px; flex-wrap:wrap;
+    gap:18px; padding:8px 20px;
+    flex-wrap:wrap;
+    transform-origin:50% 50%;
+    will-change:transform, opacity;
   }
   .full-menu-profile{
     display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -798,9 +814,28 @@
   }
   .full-menu-manage:active{background:#333;}
   .full-menu-list{
-    margin:0 16px; background:#161616;
+    margin:0 16px 12px; background:#161616;
     border-radius:14px; overflow:hidden;
     border:1px solid rgba(255,255,255,0.06);
+    position:relative;
+    z-index:1;
+  }
+  .full-menu-sort-list{
+    margin:0 16px 12px; background:#161616;
+    border-radius:14px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.06);
+    position:relative;
+    z-index:1;
+  }
+  .full-menu-section{
+    position:relative;
+    z-index:1;
+    background:#0a0a0a;
+  }
+  .full-menu-version{
+    position:relative;
+    z-index:1;
+    background:#0a0a0a;
   }
   .full-menu-row{
     display:flex; align-items:center; justify-content:space-between;
@@ -925,8 +960,9 @@
     background:none; border:none; color:var(--muted);
     font-size:22px; font-weight:600; cursor:pointer; padding:8px;
     line-height:1;
-    z-index:5;
+    z-index:30;
     pointer-events:auto;
+    -webkit-tap-highlight-color:transparent;
   }
   .notif-header #notifBackBtn{ left:8px; }
   .notif-header #notifMarkAllBtn{
@@ -945,11 +981,14 @@
     margin:0;
     padding:max(80px, 32vh) 16px calc(40px + env(safe-area-inset-bottom,0px));
     background:transparent;
+    /* Let top padding area pass taps to fixed back / mark-all buttons */
+    pointer-events:none;
   }
   .notif-list .notif-swipe-wrap,
   .notif-list .notif-empty{
     position:relative;
     z-index:1;
+    pointer-events:auto;
   }
   /* Opaque plate behind cards so title is covered as content rises */
   .notif-list::before{
@@ -8231,7 +8270,7 @@ function openFullMenu(){
   } else {
     applyAvatarToUi(readGuestAvatar(), null);
   }
-  overlay.style.display = 'block';
+  overlay.style.display = 'flex';
   void overlay.offsetWidth;
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
