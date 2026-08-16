@@ -160,10 +160,12 @@
   }
   .brand-mark{
     display:flex;
-    align-items:baseline;
+    align-items:center;
     gap:8px;
     min-width:0;
     flex:1;
+    transform-origin:left center;
+    will-change:transform, opacity;
   }
   .brand-w{
     height:clamp(38px, 12vw, 52px);
@@ -749,6 +751,17 @@
     touch-action:manipulation; display:flex; align-items:center; justify-content:center;
   }
   .full-menu-back:active{opacity:0.6;}
+  
+  .bb-parallax-head{
+    transform-origin:50% 0%;
+    will-change:transform, opacity;
+    backface-visibility:hidden;
+  }
+  .full-menu-profiles{
+    transform-origin:50% 0%;
+    will-change:transform, opacity;
+  }
+
   .full-menu-profiles{
     display:flex; justify-content:center; align-items:flex-start;
     gap:18px; padding:18px 20px 8px; flex-wrap:wrap;
@@ -4229,6 +4242,11 @@ function openChangePasswordSheet(){
   void overlay.offsetWidth;
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
+  const sheet = overlay.querySelector('.auth-sheet');
+  const title = overlay.querySelector('.auth-title');
+  if(title) title.classList.add('bb-parallax-head');
+  resetSheetParallax(title);
+  if(sheet){ sheet.scrollTop = 0; bindSheetParallax(sheet, () => overlay.querySelector('.auth-title'), 110); }
 }
 function closeChangePasswordSheet(){
   const overlay = document.getElementById('changePasswordOverlay');
@@ -4431,6 +4449,16 @@ function openCompleteProfileModal(existingProfile, opts){
   void overlay.offsetWidth;
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
+  if(editAll){
+    const sheet = overlay.querySelector('.auth-sheet');
+    const title = overlay.querySelector('.auth-title');
+    if(title) title.classList.add('bb-parallax-head');
+    resetSheetParallax(title);
+    // Sheet itself scrolls
+    const scroller = sheet || overlay;
+    scroller.scrollTop = 0;
+    bindSheetParallax(scroller, () => overlay.querySelector('.auth-title'), 110);
+  }
 }
 
 function closeCompleteProfileModal(){
@@ -6572,12 +6600,19 @@ document.getElementById('scrollArea').addEventListener('scroll', (e) => {
 
   // Subtle header parallax (home only) — skip while pull-to-pick is active
   if(typeof pullState !== 'undefined' && pullState) return;
+  const mark = header.querySelector('.brand-mark');
   const logo = document.getElementById('headerW');
   const actions = header.querySelector('.header-actions');
   // Map first ~90px of scroll into a soft 0→1 progress
   const p = Math.max(0, Math.min(1, y / 90));
-  // Logo: shrink + drift up slower than content (parallax)
-  if(logo){
+  // Bucket + "BINGE BIN" text shrink together (same proportion)
+  if(mark){
+    const scale = 1 - p * 0.18;
+    const ty = -p * 10;
+    mark.style.transform = `translate3d(0, ${ty}px, 0) scale(${scale})`;
+    mark.style.opacity = String(1 - p * 0.12);
+    if(logo){ logo.style.transform = ''; logo.style.opacity = ''; }
+  } else if(logo){
     const scale = 1 - p * 0.18;
     const ty = -p * 10;
     logo.style.transform = `translate3d(0, ${ty}px, 0) scale(${scale})`;
@@ -8118,6 +8153,39 @@ document.getElementById('pasteMenuItem').addEventListener('click', () => {
 function closeMenu(){
   closeFullMenu();
 }
+
+/** Shared sheet heading parallax — moves up, shrinks, fades like pushed back */
+function applySheetParallax(scroller, targets, maxScroll){
+  if(!scroller) return;
+  const y = scroller.scrollTop || 0;
+  const range = maxScroll || 110;
+  const p = Math.max(0, Math.min(1, y / range));
+  const scale = 1 - p * 0.28;
+  const ty = -p * 28;
+  const op = 1 - p * 0.45;
+  const list = Array.isArray(targets) ? targets : [targets];
+  list.forEach(el => {
+    if(!el) return;
+    el.style.transform = `translate3d(0, ${ty}px, 0) scale(${scale})`;
+    el.style.opacity = String(op);
+  });
+}
+function resetSheetParallax(targets){
+  const list = Array.isArray(targets) ? targets : [targets];
+  list.forEach(el => {
+    if(!el) return;
+    el.style.transform = '';
+    el.style.opacity = '';
+  });
+}
+function bindSheetParallax(scroller, getTargets, maxScroll){
+  if(!scroller || scroller.__bbParallaxBound) return;
+  scroller.__bbParallaxBound = true;
+  scroller.addEventListener('scroll', () => {
+    applySheetParallax(scroller, getTargets(), maxScroll);
+  }, { passive: true });
+}
+
 function openFullMenu(){
   const overlay = document.getElementById('fullMenuOverlay');
   if(!overlay) return;
@@ -8137,6 +8205,9 @@ function openFullMenu(){
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
+  const profiles = overlay.querySelector('.full-menu-profiles');
+  resetSheetParallax(profiles);
+  bindSheetParallax(overlay, () => overlay.querySelector('.full-menu-profiles'), 120);
 }
 function closeFullMenu(){
   const overlay = document.getElementById('fullMenuOverlay');
@@ -8715,6 +8786,10 @@ function openNotifInbox(){
   void o.offsetWidth;
   o.classList.add('open');
   o.setAttribute('aria-hidden', 'false');
+  const title = o.querySelector('.notif-header h2');
+  if(title) title.classList.add('bb-parallax-head');
+  resetSheetParallax(title);
+  bindSheetParallax(o, () => o.querySelector('.notif-header h2'), 110);
 }
 function closeNotifInbox(){
   const o = document.getElementById('notifOverlay');
