@@ -169,9 +169,12 @@
     height:clamp(38px, 12vw, 52px);
     width:auto;
     display:block;
-    transform-origin:50% 20%;
-    will-change:transform;
-    transition:transform 0.18s cubic-bezier(.2,.8,.2,1);
+    transform-origin:left center;
+    will-change:transform, opacity;
+    transition:transform 0.12s linear, opacity 0.12s linear;
+  }
+  .brand-header .header-actions{
+    transition:transform 0.12s linear, opacity 0.12s linear;
   }
   /* --- Full-screen pull-to-pick --- */
   #pullUnderlay{
@@ -6564,7 +6567,26 @@ window.addEventListener('load', () => {
 document.getElementById('scrollArea').addEventListener('scroll', (e) => {
   const header = document.getElementById('brandHeader');
   if(!header) return;
-  header.classList.toggle('scrolled', e.target.scrollTop > 4);
+  const y = e.target.scrollTop || 0;
+  header.classList.toggle('scrolled', y > 4);
+
+  // Subtle header parallax (home only) — skip while pull-to-pick is active
+  if(typeof pullState !== 'undefined' && pullState) return;
+  const logo = document.getElementById('headerW');
+  const actions = header.querySelector('.header-actions');
+  // Map first ~90px of scroll into a soft 0→1 progress
+  const p = Math.max(0, Math.min(1, y / 90));
+  // Logo: shrink + drift up slower than content (parallax)
+  if(logo){
+    const scale = 1 - p * 0.18;
+    const ty = -p * 10;
+    logo.style.transform = `translate3d(0, ${ty}px, 0) scale(${scale})`;
+    logo.style.opacity = String(1 - p * 0.12);
+  }
+  // Actions drift slightly less (depth layer)
+  if(actions){
+    actions.style.transform = `translate3d(0, ${-p * 4}px, 0)`;
+  }
 }, { passive:true });
 
 // Nudge Safari to collapse its toolbar (best-effort — Safari decides this
